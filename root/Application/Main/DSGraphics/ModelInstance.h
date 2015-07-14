@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/18
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -44,7 +44,7 @@ namespace DSGraphics
 	{
 	public:
 		//Constructors
-		ModelInstance(DSGraphics::ModelAsset* mpAsset, DSGraphics::Camera* mpCamera);
+		ModelInstance(DSGraphics::ModelAsset* mpAsset, DSGraphics::Camera* mpCamera = nullptr);
 		//Destructor
 		~ModelInstance();
 

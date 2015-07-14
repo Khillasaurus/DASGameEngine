@@ -1,0 +1,16 @@
+//=============================================================================
+// File:		geotest.vertexshader
+// Created:		2015/02/19
+// Last Edited:	2015/02/19
+// Copyright:	Daniel Schenker
+// Description:	Vertex Shader for the background mesh
+//=============================================================================
+
+#version 400
+
+in vec2 vsInPosition;
+
+void main()
+{
+	gl_Position = vec4(post, 0.0, 1.0);
+}

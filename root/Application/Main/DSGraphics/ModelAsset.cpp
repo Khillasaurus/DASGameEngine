@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/18
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -127,12 +127,12 @@ DSGraphics::ModelAsset::ModelAsset
 	//Specify the layout of the vertex data
 	
 	// Position
-	GLint posAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "vsInPosition");
+	GLint posAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "inPosition");
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer
 	(
 		posAttrib,								//which attribute? in this case, referencing vsInPosition.
-		mkPositionDimensions,					//number of values (size) for attribute (vsInPosition). in this case, 3 for x, y, z
+		mkPositionDimensions,					//number of values (size) for attribute (vsInPosition).
 		GL_FLOAT,								//type of each component
 		GL_FALSE,								//should attribute (input) values be normalized?
 		mkDataBitsPerVertex * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
@@ -142,7 +142,7 @@ DSGraphics::ModelAsset::ModelAsset
 	//  Texture
 	if(mkHasTexture == true)
 	{
-		GLint texAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "vsInTexCoord");
+		GLint texAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "inTexCoord");
 		glEnableVertexAttribArray(texAttrib);
 		glVertexAttribPointer
 		(
@@ -158,7 +158,7 @@ DSGraphics::ModelAsset::ModelAsset
 	// Color
 	if(mkHasColors)
 	{
-		GLint colAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "vsInColor");
+		GLint colAttrib = glGetAttribLocation(mpProgram->GetProgramID(), "inColor");
 		glEnableVertexAttribArray(colAttrib);
 		glVertexAttribPointer
 		(
@@ -182,7 +182,6 @@ DSGraphics::ModelAsset::ModelAsset
 
 DSGraphics::ModelAsset::~ModelAsset()
 {
-	// Rectangle
 	if(mpVertices != nullptr)
 	{
 		delete[] mpVertices;

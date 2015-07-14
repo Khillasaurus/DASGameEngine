@@ -1,9 +1,9 @@
 //=============================================================================
-// File:		vertexShader.txt
-// Created:		2015/01/29
+// File:		ColorOnly.VertexShader
+// Created:		2015/02/19
 // Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
-// Description:	Vertex Shader
+// Description:	Vertex Shader that deals with color but not texture.
 //=============================================================================
 
 #version 400
@@ -12,17 +12,14 @@ uniform mat4 camera;
 uniform mat4 model;
 
 in vec3 inPosition;
-in vec2 inTexCoord;
 in vec4 inColor;
 
-out vec2 passTexCoord;
-out vec4 passOutColor;
+out vec4 passColor;
 
 void main()
 {
-	// Pass the tex coord straight through to the fragment shader
-	passTexCoord = inTexCoord;
-	passOutColor = inColor;
-	
+	//Pass the color to the fragment shader
+	passColor = inColor;
+
 	gl_Position = camera * model * vec4(inPosition, 1);
 }

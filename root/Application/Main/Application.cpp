@@ -13,8 +13,8 @@
 // Standard C++ Libraries
 #include <iostream>//check
 #include <stdio.h>//check
-#include <time.h>//check
-#include <vector>//check
+#include <time.h>
+#include <vector>
 
 // Daniel Schenker
 #include "Application.h"
@@ -52,25 +52,20 @@ Application::Application()
 ,	mpCamera(nullptr)
 ,	mUniformCamera(0)
 //Shader Programs
-,	mpProgramBgMesh(nullptr)
 ,	mpProgramCube(nullptr)
+,	mpProgramColorOnly(nullptr)
 //Textures
 ,	mpTextureCube(nullptr)
 //Models
-,	mpModelAssetBgMesh(nullptr)
 ,	mpModelAssetCube(nullptr)
+,	mpModelAssetWall(nullptr)
 //Instance Lists
 	//,	mListModelInstancesBackground()
 	//,	mListModelInstances()//not sure how to initialize this yet
 //Individual Objects
-,	mBgMeshSize(4.0f, 4.0f)
-,	mBgMeshDistanceBetweenVertices(0.1f, 0.0f, 0.1f)
-,	mBgMeshLengthX(0.1f)
-,	mBgMeshLengthY(0.0f)
-,	mBgMeshLengthZ(0.1f)
-,	mBgMeshInstanceCount(0)
-
-	//temp
+,	kDCPerM(0.01f)
+,	mWallThickness(0.0f)
+//temp
 ,	mRectDegreesRotated(0.0f)
 {
 	Initialize();
@@ -103,6 +98,10 @@ void Application::Initialize()
 	{
 		if(InitializeGLEW() == true)
 		{
+			//General
+			// Walls
+			mWallThickness = 0.1f * kDCPerM;
+
 			Load();
 			CreateInitialInstances();
 		}
@@ -257,8 +256,8 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera();
-		mpCamera->SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
-		mpCamera->OffsetOrientation(0.0f, 60.0f);//temp
+		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		mpCamera->OffsetOrientation(0.0f, 0.0f);//temp
 		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
 	else
@@ -272,16 +271,6 @@ void Application::LoadCamera()
 void Application::LoadShaders()
 {
 	//Shaders
-	
-	// Background Mesh
-	if(mpProgramBgMesh == nullptr)
-	{
-		mpProgramBgMesh = CreateProgram("Shaders/BackgroundMesh/bgmesh.vertexshader", "Shaders/BackgroundMesh/bgmesh.fragmentshader");
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
-	}
 
 	// Cube
 	if(mpProgramCube == nullptr)
@@ -291,6 +280,16 @@ void Application::LoadShaders()
 	else
 	{
 		fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
+	}
+
+	// Wall
+	if(mpProgramColorOnly == nullptr)
+	{
+		mpProgramColorOnly = CreateProgram("Shaders/ColorOnly.VertexShader", "Shaders/ColorOnly.FragmentShader");
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpProgramColorOnly is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
 	}
 }
 
@@ -331,97 +330,11 @@ void Application::LoadAssets()
 
 void Application::LoadModelAssets()
 {
-	//Background Mesh
-	LoadModelAssetBgMesh();
+	//Wall
+	LoadModelAssetWall();
 
 	//Cube
 	LoadModelAssetCube();
-}
-
-//-----------------------------------------------------------------------------
-
-void Application::LoadModelAssetBgMesh()
-{
-	const unsigned int kPositionDimensions = 3;
-
-	printf("Setting pVerticesVec3 initial values.\n");
-
-	glm::vec3* pVerticesVec3 = new glm::vec3[static_cast<int>(mBgMeshSize.x * mBgMeshSize.y)];
-
-	for(int row = 0; row < static_cast<int>(mBgMeshSize.y); ++row)
-	{
-		for(int col = 0; col < static_cast<int>(mBgMeshSize.x); ++col)
-		{
-			pVerticesVec3[(static_cast<int>(mBgMeshSize.x) * row) + col] = glm::vec3(col * mBgMeshLengthX, 0.0f, row * (-mBgMeshLengthZ));
-			printf("pVerticesVec3[%u] = x: %f, y: %f, z: %f\n", ((static_cast<int>(mBgMeshSize.x) * row) + col), (col * mBgMeshLengthX), 0.0f, (row * (-mBgMeshLengthZ)));
-		}
-	}
-
-	printf("\nConverting pVerticesVec3 to pVertices.\n");
-
-	//Convert pVerticesVec3 to GLfloat by creating a new array 3 times as big and deep copying (TODO: make this more efficient)
-	const unsigned int kVertexCount = static_cast<int>(3 * mBgMeshSize.x * mBgMeshSize.y);
-	GLfloat* pVertices = new GLfloat[kVertexCount];
-	
-	GLfloat* pVerticesIterator = nullptr;
-	for(int i = 0; i < static_cast<int>(mBgMeshSize.x * mBgMeshSize.y); ++i)
-	{
-		pVerticesIterator = &pVertices[i * 3];
-		*pVerticesIterator = pVerticesVec3[i].x;
-		++pVerticesIterator;
-		*pVerticesIterator = pVerticesVec3[i].y;
-		++pVerticesIterator;
-		*pVerticesIterator = pVerticesVec3[i].z;
-		//pVertices[i * 3] = pVerticesVec3[i].x;
-		printf("pVertices[%u] = x: %f\n", (i * 3), pVerticesVec3[i].x);
-	
-		//pVertices[(i * 3) + 1] = pVerticesVec3[i].y;
-		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].y);
-		
-		//pVertices[(i * 3) + 2] = pVerticesVec3[i].z;
-		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].z);
-	}
-	pVerticesIterator = nullptr;
-
-
-	if(mpModelAssetBgMesh == nullptr)
-	{
-		mpModelAssetBgMesh = new DSGraphics::ModelAsset
-		(
-			mpProgramBgMesh,	//Program
-			false,				//Has Texture?
-			nullptr,			//Texture
-			0,					//Texture Coords Offset
-			false,				//Has Colors?
-			0,					//rgba Offset
-			kVertexCount,		//Vertex Count
-			kPositionDimensions,//Position Dimensions
-			0,					//Texture Dimensions
-			0,					//Color Dimensions
-			pVertices,			//Vertices
-			true,				//Has Elements?
-			kElementCount,		//Element Count Total
-			pElements,			//Elements
-			GL_LINE_STRIP,		//Draw Type
-			mBgMeshSize.x		//Element Count Per Draw Type if variable
-		);
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpModelAssetBgMesh is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
-	}
-
-	// Clean up temp variables
-	if(pVerticesVec3 != nullptr)
-	{
-		delete[] pVerticesVec3;
-		pVerticesVec3 = nullptr;
-	}
-	if(pVertices != nullptr)
-	{
-		delete[] pVertices;
-		pVertices = nullptr;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -502,7 +415,7 @@ void Application::LoadModelAssetCube()
 			true,			//Has Elements?
 			kElementCount,	//Element Count
 			pElements,		//Elements,
-			GL_LINES,		//Draw Type
+			GL_TRIANGLES,		//Draw Type
 			0
 		);
 	}
@@ -526,12 +439,120 @@ void Application::LoadModelAssetCube()
 
 //-----------------------------------------------------------------------------
 
+void Application::LoadModelAssetWall()
+{
+	//Vertices
+
+	const unsigned int kVertexCount = 8;
+	const unsigned int kPositionDimensions = 3;
+	const unsigned int kColorDimensions = 4;
+	const unsigned int kDataBitsPerVertex = kPositionDimensions + kColorDimensions;
+
+	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
+	{
+		/*
+			2--------3
+			|6------7|
+			||      ||		1m^2 wall
+			|4------5|
+			0--------1
+		*/
+
+		//Position																Color
+		//x							y							z				r		g		b		a
+
+		//Outside
+		 0.0f,						 0.0f,						 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//0
+		 kDCPerM,					 0.0f,						 0.0f,			0.0f,	1.0f,	0.0f,	1.0f,	//1
+		 0.0f,						 kDCPerM,					 0.0f,			0.0f,	0.0f,	1.0f,	1.0f,	//2
+		 kDCPerM,					 kDCPerM,					 0.0f,			1.0f,	1.0f,	1.0f,	1.0f,	//3
+
+		//Inside
+		 mWallThickness,				 mWallThickness,				 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//4
+		 kDCPerM - mWallThickness,	 mWallThickness,				 0.0f,			0.0f,	1.0f,	0.0f,	1.0f,	//5
+		 mWallThickness,				 kDCPerM - mWallThickness,	 0.0f,			0.0f,	0.0f,	1.0f,	1.0f,	//6
+		 kDCPerM - mWallThickness,	 kDCPerM - mWallThickness,	 0.0f,			1.0f,	1.0f,	1.0f,	1.0f	//7
+	};
+
+	//Elements
+
+	const unsigned int kElementsPerDrawType = 3;//Triangle
+	const unsigned int kDrawTypeElements = 8;
+	const unsigned int kElementCount = kElementsPerDrawType * kDrawTypeElements;
+
+	GLuint* pElements = new GLuint[kElementCount]
+	{
+		//Bottom
+		0, 1, 4,
+		5, 4, 1,
+
+		//Right
+		1, 3, 5,
+		7, 5, 3,
+
+		//Top
+		3, 2, 7,
+		6, 7, 2,
+
+		//Left
+		2, 0, 6,
+		4, 6, 0
+	};
+
+	//ModelAsset Creation
+
+	if(mpModelAssetWall == nullptr)
+	{
+		mpModelAssetWall = new DSGraphics::ModelAsset
+		(
+			mpProgramColorOnly,	//Program
+			false,				//Has Texture?
+			nullptr,			//Texture
+			0,					//Texture Coords Offset
+			true,				//Has Colors?
+			3,					//rgba Offset
+			kVertexCount,		//Vertex Count
+			kPositionDimensions,//Position Dimensions
+			0,					//Texture Dimensions
+			kColorDimensions,	//Color Dimensions
+			pVertices,			//Vertices
+			true,				//Has Elements?
+			kElementCount,		//Element Count
+			pElements,			//Elements,
+			GL_TRIANGLES,		//Draw Type
+			0
+		);
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpModelAssetWall is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
+	}
+
+	// Clean up temp variables
+	if(pVertices != nullptr)
+	{
+		delete[] pVertices;
+		pVertices = nullptr;
+	}
+	if(pElements != nullptr)
+	{
+		delete[] pElements;
+		pElements = nullptr;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
 void Application::CreateInitialInstances()
 {
 	//Background
-	// Mesh
-	DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
-	mModelInstancesBackgroundList.push_back(bgMesh);
+
+	
+	//Walls
+	DSGraphics::ModelInstance wall00001(mpModelAssetWall, mpCamera);
+	wall00001.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
+	wall00001.UpdateTransform();
+	mModelInstancesListWalls.push_back(wall00001);
 
 
 	//Cube
@@ -700,10 +721,12 @@ void Application::Render()
 	//mpCamera->LookAt(glm::vec3(posToLookAt));
 
 	//Instance Lists
+	std::vector<DSGraphics::ModelInstance>::iterator it;
 	
 	// Background
-	std::vector<DSGraphics::ModelInstance>::iterator it;
-	for(it = mModelInstancesBackgroundList.begin(); it != mModelInstancesBackgroundList.end(); ++it)
+
+	// Walls
+	for(it = mModelInstancesListWalls.begin(); it != mModelInstancesListWalls.end(); ++it)
 	{
 		it->Render();
 	}
@@ -739,6 +762,12 @@ void Application::CleanUp()
 		delete mpProgramCube;
 		mpProgramCube = nullptr;
 	}
+	if(mpProgramColorOnly != nullptr)
+	{
+		delete mpProgramColorOnly;
+		mpProgramColorOnly = nullptr;
+	}
+
 	//Textures
 	if(mpTextureCube != nullptr)
 	{
@@ -757,18 +786,18 @@ void Application::CleanUp()
 
 void Application::CleanUpAssets()
 {
-	//Background Mesh
-	if(mpModelAssetBgMesh != nullptr)
-	{
-		delete mpModelAssetBgMesh;
-		mpModelAssetBgMesh = nullptr;
-	}
-
 	//Cube
 	if(mpModelAssetCube != nullptr)
 	{
 		delete mpModelAssetCube;
 		mpModelAssetCube = nullptr;
+	}
+
+	//Wall
+	if(mpModelAssetWall != nullptr)
+	{
+		delete mpModelAssetWall;
+		mpModelAssetWall = nullptr;
 	}
 }
 
@@ -776,7 +805,6 @@ void Application::CleanUpAssets()
 
 void Application::CleanUpInstances()
 {
-	mModelInstancesBackgroundList.clear();
 	mModelInstancesList.clear();
 }
 

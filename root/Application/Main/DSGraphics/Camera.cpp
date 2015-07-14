@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Camera.cpp
 // Created:		2015/02/12
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	Camera
 //=============================================================================
@@ -36,8 +36,9 @@ static const float sMaxVerticalAngle = 85.0f;
 // Constuctors
 //-----------------------------------------------------------------------------
 
-DSGraphics::Camera::Camera()
-:	mPosition(0.0f, 0.0f, 1.0f)
+DSGraphics::Camera::Camera(bool isFirstPersonStyle)
+:	mIsFirstPersonStyle(isFirstPersonStyle)
+,	mPosition(0.0f, 0.0f, 1.0f)
 ,	mPitch(0.0f)
 ,	mYaw(0.0f)
 ,	mRoll(0.0f)
@@ -101,13 +102,16 @@ void DSGraphics::Camera::NormalizeAngles()
 		mYaw += 360.0f;
 	}
 
-	if(mPitch > sMaxVerticalAngle)	
+	if(mIsFirstPersonStyle == true)
 	{
-		mPitch = sMaxVerticalAngle;
-	}
-	else if(mPitch < -sMaxVerticalAngle)
-	{
-		mPitch = -sMaxVerticalAngle;
+		if(mPitch > sMaxVerticalAngle)	
+		{
+			mPitch = sMaxVerticalAngle;
+		}
+		else if(mPitch < -sMaxVerticalAngle)
+		{
+			mPitch = -sMaxVerticalAngle;
+		}
 	}
 }
 

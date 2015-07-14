@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Camera.h
 // Created:		2015/02/12
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	Camera
 //=============================================================================
@@ -40,7 +40,7 @@ namespace DSGraphics
 	{
 	public:
 		//Constructors
-		Camera();
+		Camera(bool isFirstPersonStyle = false);
 		//Destructor
 		~Camera();
 
@@ -55,6 +55,7 @@ namespace DSGraphics
 
 	public:
 		// Getters
+		bool GetIsFirstPersonStyle() const;
 		const glm::vec3& GetPosition() const;
 		float GetFov() const;
 		float GetNearPlane() const;
@@ -77,15 +78,15 @@ namespace DSGraphics
 
 		//Member Variables
 	private:
+		bool mIsFirstPersonStyle;	//if true: anti gimbal lock measures will be taken. if false: full camera control available
 		glm::vec3 mPosition;
-		float mPitch;	//Rotation around x axis
-		float mYaw;		//Rotation around y axis
-		float mRoll;	//Rotation around z axis
+		float mPitch;				//Rotation around x axis
+		float mYaw;					//Rotation around y axis
+		float mRoll;				//Rotation around z axis
 		float mFov;
 		float mNearPlane;
 		float mFarPlane;
 		float mViewportAspectRatio;
-
 	};
 
 }//namespace DSGraphics

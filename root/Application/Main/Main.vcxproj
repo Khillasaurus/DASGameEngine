@@ -81,7 +81,6 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="DSGraphics\Camera.cpp" />
     <ClCompile Include="DSGraphics\ModelAsset.cpp" />
-    <ClCompile Include="DSGraphics\ModelAssetBgMesh.cpp" />
     <ClCompile Include="DSGraphics\ModelInstance.cpp" />
     <ClCompile Include="DSGraphics\Program.cpp" />
     <ClCompile Include="DSGraphics\Shader.cpp" />
@@ -91,14 +90,17 @@
   <ItemGroup>
     <None Include="Shaders\BackgroundMesh\bgmesh.fragmentshader" />
     <None Include="Shaders\BackgroundMesh\bgmesh.vertexshader" />
+    <None Include="Shaders\BackgroundMesh\geotest.fragmentshader" />
+    <None Include="Shaders\BackgroundMesh\geotest.vertexshader" />
     <None Include="Shaders\fragmentShader.txt" />
+    <None Include="Shaders\ColorOnly.FragmentShader" />
+    <None Include="Shaders\ColorOnly.VertexShader" />
     <None Include="Shaders\vertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="DSGraphics\Camera.h" />
     <ClInclude Include="DSGraphics\ModelAsset.h" />
-    <ClInclude Include="DSGraphics\ModelAssetBgMesh.h" />
     <ClInclude Include="DSGraphics\ModelInstance.h" />
     <ClInclude Include="DSGraphics\Program.h" />
     <ClInclude Include="DSGraphics\Shader.h" />

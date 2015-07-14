@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.h
 // Created:		2015/02/10
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -79,8 +79,8 @@ private:
 		void LoadTextures();
 		void LoadAssets();
 			void LoadModelAssets();
-				void LoadModelAssetBgMesh();
 				void LoadModelAssetCube();
+				void LoadModelAssetWall();
 	void CreateInitialInstances();
 
 	// Run Sub-Functions
@@ -117,29 +117,26 @@ private:
 	GLuint mUniformCamera;
 
 	// Shader Programs
-	DSGraphics::Program* mpProgramBgMesh;
 	DSGraphics::Program* mpProgramCube;
+	DSGraphics::Program* mpProgramColorOnly;
 
 	// Textures
 	DSGraphics::Texture* mpTextureCube;
 
 	// Assets
 	//  Models
-	DSGraphics::ModelAsset* mpModelAssetBgMesh;
 	DSGraphics::ModelAsset* mpModelAssetCube;
+	DSGraphics::ModelAsset* mpModelAssetWall;
 
 	// Instance Lists
-	std::vector<DSGraphics::ModelInstance> mModelInstancesBackgroundList;
+	std::vector<DSGraphics::ModelInstance> mModelInstancesListWalls;
 	std::vector<DSGraphics::ModelInstance> mModelInstancesList;
 
 	// Individual Objects
-	//  Background Mesh
-	glm::vec2 mBgMeshSize;
-	glm::vec3 mBgMeshDistanceBetweenVertices;
-	GLfloat mBgMeshLengthX;
-	GLfloat mBgMeshLengthY;
-	GLfloat mBgMeshLengthZ;
-	unsigned int mBgMeshInstanceCount;
+	float kDCPerM;//Device Coordinates / meter
+
+	//  Walls
+	float mWallThickness;
 
 	//temp
 	GLfloat mRectDegreesRotated;

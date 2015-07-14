@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/18
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -54,12 +54,6 @@ DSGraphics::ModelInstance::ModelInstance(DSGraphics::ModelAsset* pAsset, DSGraph
 ,	mUniformModel(0)
 ,	mUniformCamera(0)
 {
-	//TODO: Error checking stuff
-	//if(mpCamera != nullptr)
-	//{
-		//mUniformCamera = glGetUniformLocation(mpAsset->mpProgram->GetProgramID(), "camera");
-		//mUniformModel = glGetUniformLocation(mpAsset->mpProgram->GetProgramID(), "model");
-	//}
 }
 
 //-----------------------------------------------------------------------------
@@ -94,12 +88,15 @@ void DSGraphics::ModelInstance::Render()
 	glUseProgram(mpAsset->GetProgramID());
 
 	//Set the Shader Uniforms
-	//Camera
-	mUniformCamera = glGetUniformLocation(mpAsset->GetProgramID(), "camera");
-	glUniformMatrix4fv(mUniformCamera, 1, GL_FALSE, glm::value_ptr(mpCamera->GetMatrix()));
-	//Model
-	mUniformModel = glGetUniformLocation(mpAsset->GetProgramID(), "model");
-	glUniformMatrix4fv(mUniformModel, 1, GL_FALSE, glm::value_ptr(mTransform));
+	if(mpCamera != nullptr)
+	{
+		//Camera
+		mUniformCamera = glGetUniformLocation(mpAsset->GetProgramID(), "camera");
+		glUniformMatrix4fv(mUniformCamera, 1, GL_FALSE, glm::value_ptr(mpCamera->GetMatrix()));
+		//Model
+		mUniformModel = glGetUniformLocation(mpAsset->GetProgramID(), "model");
+		glUniformMatrix4fv(mUniformModel, 1, GL_FALSE, glm::value_ptr(mTransform));
+	}
 	//  Texture
 	if(mpAsset->GetHasTexture() == true)
 	{
@@ -142,7 +139,10 @@ void DSGraphics::ModelInstance::Render()
 
 	//Unbind
 	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	if(mpAsset->GetHasTexture() == true)
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glUseProgram(0);
 }
 

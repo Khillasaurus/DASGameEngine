@@ -1,0 +1,16 @@
+//=============================================================================
+// File:		geotest.fragmentshader
+// Created:		2015/02/19
+// Last Edited:	2015/02/19
+// Copyright:	Daniel Schenker
+// Description:	Fragment Shader for the background mesh
+//=============================================================================
+
+#version 400
+
+out vec4 fsOutColor;
+
+void main()
+{
+	fsOutColor = vec4(1.0, 0.0, 0.0, 1.0);
+}

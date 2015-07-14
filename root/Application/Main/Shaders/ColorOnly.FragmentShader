@@ -1,0 +1,25 @@
+//=============================================================================
+// File:		ColorOnly.FragmentShader
+// Created:		2015/02/19
+// Last Edited:	2015/02/19
+// Copyright:	Daniel Schenker
+// Description:	Fragment Shader that deals with color but not texture.
+//=============================================================================
+
+#version 400
+
+in vec4 passColor;
+
+out vec4 outColor;
+
+void main()
+{
+	//Test each texel's alpha. If the alpha is less than the threshold, discard it.
+	vec4 texel = vec4(passColor);
+	if(texel.a < 0.5)
+	{
+		discard;
+	}
+
+	outColor = texel;
+}

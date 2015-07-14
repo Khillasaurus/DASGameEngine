@@ -48,9 +48,6 @@
     <ClCompile Include="DSGraphics\Texture.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="DSGraphics\ModelAssetBgMesh.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\fragmentShader.txt">
@@ -64,6 +61,18 @@
     </None>
     <None Include="Shaders\BackgroundMesh\bgmesh.vertexshader">
       <Filter>Shaders\BackgroundMesh</Filter>
+    </None>
+    <None Include="Shaders\BackgroundMesh\geotest.fragmentshader">
+      <Filter>Shaders\BackgroundMesh</Filter>
+    </None>
+    <None Include="Shaders\BackgroundMesh\geotest.vertexshader">
+      <Filter>Shaders\BackgroundMesh</Filter>
+    </None>
+    <None Include="Shaders\ColorOnly.VertexShader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\ColorOnly.FragmentShader">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -86,9 +95,6 @@
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\Texture.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DSGraphics\ModelAssetBgMesh.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
