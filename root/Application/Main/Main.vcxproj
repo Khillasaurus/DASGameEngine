@@ -87,7 +87,9 @@
     <ClCompile Include="DSGraphics\Texture.cpp" />
     <ClCompile Include="DSMathematics\Quaternion.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Objects\Environmental.cpp" />
+    <ClCompile Include="Object\Environmental\Environmental.cpp" />
+    <ClCompile Include="Object\Environmental\Individual\Wall.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\TexAndColor.FragmentShader" />
@@ -106,7 +108,9 @@
     <ClInclude Include="DSGraphics\Shader.h" />
     <ClInclude Include="DSGraphics\Texture.h" />
     <ClInclude Include="DSMathematics\Quaternion.h" />
-    <ClInclude Include="Objects\Environmental.h" />
+    <ClInclude Include="Object\Environmental\Environmental.h" />
+    <ClInclude Include="Object\Environmental\Individual\Wall.h" />
+    <ClInclude Include="Object\Object.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

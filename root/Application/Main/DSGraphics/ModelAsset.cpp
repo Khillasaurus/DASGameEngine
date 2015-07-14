@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/19
+// Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -67,6 +67,8 @@ DSGraphics::ModelAsset::ModelAsset
 ,	mDrawStart(0)
 {
 	//Deep Copy Data
+	//Note:	Deep copying because eventually data will be retrieved from a file, and not be hard coded.
+	//		This way the original data (namely the file) will not be modified if any changes to the ModelAsset are made during runtime.
 	
 	// Vertex
 	mpVertices = new GLfloat[mkVertexCount * mkDataBitsPerVertex];

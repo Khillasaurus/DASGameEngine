@@ -16,14 +16,20 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{73fdba97-7a61-4689-9a9d-4409fa06ac16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Objects">
-      <UniqueIdentifier>{236f4672-61a3-4749-b546-c656b1d043a8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\DSMathematics">
       <UniqueIdentifier>{0e2aae01-eb45-4211-abeb-aa495cd9f2e5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\DSGraphics">
       <UniqueIdentifier>{56ddb65b-738f-412f-8383-aa16fe5f8a3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object">
+      <UniqueIdentifier>{236f4672-61a3-4749-b546-c656b1d043a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object\Environmental">
+      <UniqueIdentifier>{597589a1-60bb-4807-a98d-3504f71e7d70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object\Environmental\Individual">
+      <UniqueIdentifier>{3d92676f-185e-4821-8e11-cbdba868024a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -51,11 +57,17 @@
     <ClCompile Include="DSGraphics\Texture.cpp">
       <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Environmental.cpp">
-      <Filter>Source Files\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="DSMathematics\Quaternion.cpp">
       <Filter>Source Files\DSMathematics</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Object.cpp">
+      <Filter>Source Files\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Environmental\Environmental.cpp">
+      <Filter>Source Files\Object\Environmental</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Environmental\Individual\Wall.cpp">
+      <Filter>Source Files\Object\Environmental\Individual</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,11 +112,17 @@
     <ClInclude Include="DSGraphics\Texture.h">
       <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Environmental.h">
-      <Filter>Source Files\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="DSMathematics\Quaternion.h">
       <Filter>Source Files\DSMathematics</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Object.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Environmental\Environmental.h">
+      <Filter>Source Files\Object\Environmental</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Environmental\Individual\Wall.h">
+      <Filter>Source Files\Object\Environmental\Individual</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

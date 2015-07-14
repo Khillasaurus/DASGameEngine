@@ -1,23 +1,23 @@
 //=============================================================================
-// File:		Environmental.h
-// Created:		2015/02/23
-// Last Edited:	2015/02/23
+// File:		Object.h
+// Created:		2015/02/27
+// Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
-// Description:	Object > Solid > Environmental. Environmental is an abstract class which does not inherit from anything.
+// Description:	Object is abstract class which is a parent of all object types.
 //=============================================================================
 
-#ifndef ENVIRONMENTAL_H
-#define ENVIRONMENTAL_H
+#ifndef OBJECT_H
+#define OBJECT_H
 
 //=============================================================================
 //Includes
 //=============================================================================
 
+#include "../DSGraphics/ModelAsset.h"
+
 //=============================================================================
 //Forward Declarations
 //=============================================================================
-
-class ModelInstance;
 
 //=============================================================================
 //Namespace
@@ -31,25 +31,30 @@ class ModelInstance;
 //Class Declarations
 //=============================================================================
 
-class Environmental
+class Object
 {
-public:
+protected:
 	//Constructors
-	Environmental();
+	Object();
 	//Destructor
-	virtual ~Environmental();
+	virtual ~Object();
 
 	//Member Functions
-public:
-private:
+protected:
+	virtual void LoadAsset(DSGraphics::Program* pProgram) = 0;
 public:
 	// Getters
+	DSGraphics::ModelAsset* GetModelAsset();
+	bool GetIsModelAssetLoaded();
 	// Setters
 
 	//Member Variables
-private:
-	ModelInstance* mpInstance;
-
+	// Statics
+public:
+	static float sDCPerM;//Device Coordinates / meter
+protected:
+	DSGraphics::ModelAsset* mpModelAsset;//TODO: Change this to a smart pointer, in case misuse of ModelAsset occurs and the ModelAsset gets deleted before the ModelInstance pointing to the ModelAsset gets deleted.
+	bool mIsModelAssetLoaded;
 };
 
-#endif //#ifndef ENVIRONMENTAL_H
+#endif //#ifndef OBJECT_H

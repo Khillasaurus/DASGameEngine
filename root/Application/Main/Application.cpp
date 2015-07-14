@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/24
+// Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -57,6 +57,8 @@ Application::Application()
 ,	mpProgramTexAndColor(nullptr)
 //Textures
 ,	mpTextureSpaceship(nullptr)
+//Objects
+,	mpWall(nullptr)
 //Models
 ,	mpModelAssetWall(nullptr)
 ,	mpModelAssetSpaceship(nullptr)
@@ -236,6 +238,7 @@ void Application::Load()
 		LoadCamera();
 		LoadShaders();
 		LoadTextures();
+		LoadObjects();
 		LoadAssets();
 }
 
@@ -307,6 +310,18 @@ void Application::LoadTextures()
 	else
 	{
 		fprintf(stderr, "WARNING: mpTextureSpaceship is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect texture may appear unless this is intentional.\n");
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadObjects()
+{
+	//Wall
+	if(mpWall == nullptr)
+	{
+		mpWall = new Wall();
+		mpWall->LoadAsset(mpProgramColorOnly);
 	}
 }
 
@@ -606,6 +621,16 @@ void Application::LoadModelAssetSpaceship()
 
 void Application::CreateInitialInstances()
 {
+	//Object
+	// Wall
+	if(mpWall->GetIsModelAssetLoaded() == true)
+	{
+		DSGraphics::ModelInstance wallNew(mpWall->GetModelAsset(), mpCamera);
+		wallNew.SetSize(glm::vec3(50.0f, 50.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by kDCPerM, since the ModelAsset is already constructed using the kDCPerM scale.
+		wallNew.UpdateTransform();
+		mModelInstanceList.push_back(wallNew);
+	}
+
 	//Walls
 	DSGraphics::ModelInstance wallLeft(mpModelAssetWall, mpCamera);
 	wallLeft.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by kDCPerM, since the ModelAsset is already constructed using the kDCPerM scale.
@@ -801,6 +826,12 @@ void Application::Render()
 
 	//Instance Lists
 	std::vector<DSGraphics::ModelInstance>::iterator it;
+
+	//Objects
+	for(it = mModelInstanceList.begin(); it != mModelInstanceList.end(); ++it)
+	{
+		it->Render();
+	}
 	
 	// Background
 
@@ -864,6 +895,13 @@ void Application::CleanUp()
 
 void Application::CleanUpAssets()
 {
+	//Object
+	if(mpWall != nullptr)
+	{
+		delete mpWall;
+		mpWall = nullptr;
+	}
+
 	//Wall
 	if(mpModelAssetWall != nullptr)
 	{
@@ -883,6 +921,7 @@ void Application::CleanUpAssets()
 
 void Application::CleanUpInstances()
 {
+	mModelInstanceList.clear();
 	mModelInstancesListWalls.clear();
 	mModelInstancesList.clear();
 }

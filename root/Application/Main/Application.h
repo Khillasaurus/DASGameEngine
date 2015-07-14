@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.h
 // Created:		2015/02/10
-// Last Edited:	2015/02/19
+// Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -36,6 +36,8 @@
 #include "DSGraphics/ModelInstance.h"
 #include "DSGraphics/Program.h"
 #include "DSGraphics/Texture.h"
+//  Object
+#include "Object/Environmental/Individual/Wall.h"
 
 //=============================================================================
 // Forward Declarations
@@ -77,6 +79,7 @@ private:
 		void LoadShaders();
 			DSGraphics::Program* CreateProgram(const char* vertexShaderFile, const char* fragmentShaderFile);
 		void LoadTextures();
+		void LoadObjects();
 		void LoadAssets();
 			void LoadModelAssets();
 				void LoadModelAssetWall();
@@ -123,6 +126,9 @@ private:
 	// Textures
 	DSGraphics::Texture* mpTextureSpaceship;
 
+	// Objects
+	Wall* mpWall;
+
 	// Assets
 	//  Models
 	DSGraphics::ModelAsset* mpModelAssetWall;
@@ -131,6 +137,7 @@ private:
 	// Instance Lists
 	std::vector<DSGraphics::ModelInstance> mModelInstancesListWalls;
 	std::vector<DSGraphics::ModelInstance> mModelInstancesList;
+	std::vector<DSGraphics::ModelInstance> mModelInstanceList;//new one
 
 	// Individual Objects
 	float kDCPerM;//Device Coordinates / meter
