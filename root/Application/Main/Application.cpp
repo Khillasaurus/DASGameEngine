@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/19
+// Last Edited:	2015/02/24
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -88,7 +88,6 @@ Application::~Application()
 //   1. Game initalization
 void Application::Initialize()
 {
-
 	if(InitializeGLFW() == true)
 	{
 		if(InitializeGLEW() == true)
@@ -246,11 +245,12 @@ void Application::LoadCamera()
 	//Camera
 	if(mpCamera == nullptr)
 	{
-		mpCamera = new DSGraphics::Camera();
-		mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
-		mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
+		mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
+		//mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
+		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
 		//mpCamera->OffsetOrientation(0.0f, 45.0f);//temp
-		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
+		//mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
 	else
 	{
@@ -641,30 +641,34 @@ void Application::Input()
 	// Reset
 	if(glfwGetKey(mpWindow, '`'))
 	{
-		mpCamera->OffsetOrientation(0.0f, 0.0f);
-		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+		mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
+		//mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
+		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	//Look at origin
 	else if(glfwGetKey(mpWindow, 'O'))
 	{
-		mpCamera->LookAt(glm::vec3(0.0f));
+		//mpCamera->LookAt(glm::vec3(0.0f));
 	}
 	//Tilt Up
 	else if(glfwGetKey(mpWindow, 'R'))
 	{
-		mpCamera->OffsetOrientation(0.0f, 30.0f);
+		//mpCamera->OffsetOrientation(0.0f, 30.0f);
+		mpCamera->Rotate(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	//Tilt Down
 	else if(glfwGetKey(mpWindow, 'F'))
 	{
-		mpCamera->OffsetOrientation(0.0f, -30.0f);
+		//mpCamera->OffsetOrientation(0.0f, -30.0f);
+		mpCamera->Rotate(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
 	//Poll in counter clockwise direction, starting at 0 radians/degrees (right)
 	// East
 	else if(glfwGetKey(mpWindow, 'D'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
 
 		//Right
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionRight());
@@ -673,7 +677,8 @@ void Application::Input()
 	else if(glfwGetKey(mpWindow, 'W'))
 	{
 		//North
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
 
 		//Forward
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionForward());
@@ -681,7 +686,8 @@ void Application::Input()
 	// West
 	else if(glfwGetKey(mpWindow, 'A'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
 
 		//Left
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionRight()));
@@ -689,7 +695,8 @@ void Application::Input()
 	// South
 	else if(glfwGetKey(mpWindow, 'S'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
 
 		//Backwards
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionForward()));
@@ -698,7 +705,8 @@ void Application::Input()
 	else if(glfwGetKey(mpWindow, 'E'))
 	{
 		//Up relative to global up (like on Earth, towards the sky)
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//Up based on camera orientation (like in Space)
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionUp());
@@ -707,7 +715,8 @@ void Application::Input()
 	else if(glfwGetKey(mpWindow, 'Q'))
 	{
 		//Down relative to global Down (like on Earth, towards center of planet)
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
 
 		//Down based on camera orientation (like in Space)
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));

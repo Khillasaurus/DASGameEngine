@@ -86,6 +86,7 @@
     <ClCompile Include="DSGraphics\Shader.cpp" />
     <ClCompile Include="DSGraphics\Texture.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Objects\Environmental.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\TexAndColor.FragmentShader" />
@@ -103,6 +104,7 @@
     <ClInclude Include="DSGraphics\Program.h" />
     <ClInclude Include="DSGraphics\Shader.h" />
     <ClInclude Include="DSGraphics\Texture.h" />
+    <ClInclude Include="Objects\Environmental.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
