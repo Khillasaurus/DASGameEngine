@@ -1,7 +1,15 @@
+//=============================================================================
+// File:		fragmentShader.txt
+// Created:		2015/01/29
+// Last Edited:	2015/02/16
+// Copyright:	Daniel Schenker
+// Description:	Fragment Shader
+//=============================================================================
+
 #version 150
 
-in vec3 vsOutColor;
 in vec2 vsOutTexCoord;
+in vec4 vsOutColor;
 
 out vec4 fsOutColor;
 
@@ -10,6 +18,6 @@ uniform sampler2D tex;
 void main()
 {
 	//fsOutColor = texture(tex, vsOutTexCoord);
-	//fsOutColor = texture(tex, vsOutTexCoord) * vec4(vsOutColor, 1.0);
-	fsOutColor = vec4(vsOutColor, 1.0);
+	//fsOutColor = texture(tex, vsOutTexCoord) * vec4(vsOutColor);
+	fsOutColor = vec4(vsOutColor);
 }

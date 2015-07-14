@@ -1,27 +1,28 @@
 //=============================================================================
-// File:		Program.h
-// Created:		2015/02/11
+// File:		ModelInstance.h
+// Created:		2015/02/15
 // Last Edited:	2015/02/16
 // Copyright:	Daniel Schenker
-// Description:	Program
+// Description:	ModelInstance
 //=============================================================================
 
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#ifndef MODELINSTANCE_H
+#define MODELINSTANCE_H
 
 //=============================================================================
 //Includes
 //=============================================================================
 
-// Standard C++ Libraries
-#include <vector>
-
-// Daniel Schenker
-#include "Shader.h"
+// Third-Party Libraries
+//  GLM
+#include <glm/glm.hpp>
 
 //=============================================================================
 //Forward Declarations
 //=============================================================================
+
+class Camera;
+class ModelAsset;
 
 //=============================================================================
 //Enums
@@ -31,29 +32,49 @@
 //Class Declarations
 //=============================================================================
 
-class Program
+class ModelInstance
 {
 public:
 	//Constructors
-	Program(const std::vector<Shader>& shaders);
+	ModelInstance(ModelAsset* mpAsset, Camera* mpCamera);
 	//Destructor
-	~Program();
-private:
-	//Disable Copy Constructor
-	Program(const Program&);
-	const Program& operator=(const Program&);
+	~ModelInstance();
 
 	//Member Functions
 public:
+	//General
+	void UpdateTransform();
+	void Render();
 	// Getters
-	GLuint GetProgramID() const;
-	GLint GetAttrib(const GLchar* pAttribName) const;
-	GLint GetUniform(const GLchar* pUniformName) const;
+	glm::mat4 GetScale() const;
+	glm::mat4 GetRotate() const;
+	glm::vec3 GetRotationAxis() const;
+	glm::mat4 GetTranslate() const;
 	// Setters
+	void SetScale(const glm::mat4& scale);
+	void SetRotate(const glm::mat4& rotate);
+	void SetRotationAxis(const glm::vec3& rotationAxis);
+	void SetTranslate(const glm::mat4& translate);
 
 	//Member Variables
 private:
-	GLuint mProgramID;
+	// Model Asset
+	ModelAsset* mpAsset;
+	// Model Matrix
+	glm::mat4 mTransform;
+	//  Scale
+	glm::mat4 mScale;
+	//  Rotate
+	glm::mat4 mRotate;
+	glm::vec3 mRotationAxis;
+	//  Translate
+	glm::mat4 mTranslate;
+	//  Shader Uniform
+	GLuint mUniformModel;
+	// Camera
+	Camera* mpCamera;
+	//  Shader Uniform
+	GLuint mUniformCamera;
 };
 
-#endif //#ifndef PROGRAM_H
+#endif //#ifndef MODELINSTANCE_H

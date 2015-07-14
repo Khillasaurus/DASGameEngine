@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.h
 // Created:		2015/02/10
-// Last Edited:	2015/02/13
+// Last Edited:	2015/02/15
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -27,6 +27,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Standard C++ Libraries
+#include <list>
 
 // Daniel Schenker
 
@@ -35,6 +36,8 @@
 //=============================================================================
 
 class Camera;
+class ModelAsset;
+class ModelInstance;
 class Program;
 class Texture;
 
@@ -60,7 +63,6 @@ private:
 	void Initialize();
 	void Run();
 	void Terminate();
-	void CleanUp();
 
 	// GLFW
 	bool InitializeGLFW();
@@ -70,14 +72,25 @@ private:
 	bool InitializeGLEW();
 
 	// Initialize Sub-Functions
-	void LoadRectangle();
-	void LoadShaders();
+	void LoadAssets();
+		void LoadModelAssets();
+			void LoadModelAssetCube();
+	Program* LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile);
 
 	// Run Sub-Functions
 	void Input();
 	void AI();
 	void Physics();
 	void Render();
+
+
+	// Terminate Sub-Functions
+	void CleanUp();
+		void CleanUpAssets();
+		void CleanUpInstances();
+
+	//Test Functions
+	void CreateInstances();
 
 	//Member Variables
 private:
@@ -100,31 +113,19 @@ private:
 	Camera* mpCamera;
 	GLuint mUniformCamera;
 
-	// Data
-	//  Programs
-	Program* mpProgram001;
-	//  Rectangle
-	//   VAO
-	GLuint mRectVao;
-	//   Vertices
-	GLfloat* mpRectVertices;//TODO: change this to be a vector or something that knows the length of the array
-	//   Model
-	glm::mat4 mRectModel;
+	// Shader Programs
+	Program* mpProgramCube;
+
+	// Textures
+	Texture* mpTextureCube;
+
+	// Assets & Instances
+	//  Models
+	ModelAsset* mpModelAssetCube;
+	std::list<ModelInstance> mListModelInstances;
+
+	
 	GLuint mRectUniformModel;
-	//    Scale
-	glm::mat4 mRectScale;
-	//    Rotate
-	glm::mat4 mRectRotate;
-	glm::vec3 mRectRotationAxis;
-	//    Translate
-	glm::mat4 mRectTranslate;
-	//   VBO
-	GLuint mRectVbo;
-	//   EBO
-	GLuint mRectEbo;
-	GLuint* mpRectElements;//TODO: make same change as with mpRectVertices
-	//  Textures
-	Texture* mpTex;
 	//temp
 	GLfloat mRectDegreesRotated;
 };

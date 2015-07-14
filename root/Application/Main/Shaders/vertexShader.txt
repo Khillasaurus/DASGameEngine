@@ -1,3 +1,11 @@
+//=============================================================================
+// File:		vertexShader.txt
+// Created:		2015/01/29
+// Last Edited:	2015/02/16
+// Copyright:	Daniel Schenker
+// Description:	Vertex Shader
+//=============================================================================
+
 #version 150
 
 uniform mat4 camera;
@@ -5,10 +13,10 @@ uniform mat4 model;
 
 in vec3 vsInPosition;
 in vec2 vsInTexCoord;
-in vec3 vsInColor;
+in vec4 vsInColor;
 
 out vec2 vsOutTexCoord;
-out vec3 vsOutColor;
+out vec4 vsOutColor;
 
 void main()
 {

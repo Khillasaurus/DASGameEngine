@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/13
+// Last Edited:	2015/02/16
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -19,6 +19,8 @@
 // Daniel Schenker
 #include "Application.h"
 #include "Camera.h"
+#include "ModelAsset.h"
+#include "ModelInstance.h"
 #include "Program.h"
 #include "Texture.h"
 
@@ -54,23 +56,16 @@ Application::Application()
 	//Camera
 ,	mpCamera(nullptr)
 ,	mUniformCamera(0)
+	//Shader Programs
+,	mpProgramCube(nullptr)
+	//Textures
+,	mpTextureCube(nullptr)
 	//Data
-	// Shaders
-,	mpProgram001(nullptr)
-	// Rectangle
-,	mRectVao(0)
-,	mpRectVertices(nullptr)
-,	mRectModel(1.0f)
+	//  Models
+,	mpModelAssetCube(nullptr)
+//,	mListModelInstances()//not sure how to initialize this yet
+
 ,	mRectUniformModel(0)
-,	mRectScale(1.0f)
-,	mRectRotate(1.0f)
-,	mRectRotationAxis(0.0f, 0.0f, 0.0f)
-,	mRectTranslate(1.0f)
-,	mRectVbo(0)
-,	mRectEbo(0)
-,	mpRectElements(nullptr)
-	// Textures
-,	mpTex(nullptr)
 	//temp
 ,	mRectDegreesRotated(0.0f)
 {
@@ -117,18 +112,9 @@ void Application::Initialize()
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			//Shaders
-			LoadShaders();
-
-			//Individual Objects
-
-			// Rectangle
-			LoadRectangle();
-
 			//Camera
 			if(mpCamera == nullptr)
 			{
-				//do stuff
 				mpCamera = new Camera();
 				mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 				mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
@@ -137,6 +123,33 @@ void Application::Initialize()
 			{
 				fprintf(stderr, "WARNING: mpCamera is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
 			}
+
+			//Shaders
+			if(mpProgramCube == nullptr)
+			{
+				mpProgramCube = LoadShaders("Shaders/vertexShader.txt", "Shaders/fragmentShader.txt");
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
+			}
+
+			//Textures
+			if(mpTextureCube == nullptr)
+			{
+				mpTextureCube = new Texture("../../Resources/Textures/sample.png");
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: mpTextureCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
+			}
+
+			//Individual Objects
+			// Assets
+			//  Models
+			LoadAssets();
+			//  Instances
+			CreateInstances();
 		}
 	}
 }
@@ -174,48 +187,6 @@ void Application::Terminate()
 {
 	CleanUp();
 	TerminateGLFW();
-}
-
-//-----------------------------------------------------------------------------
-
-void Application::CleanUp()
-{
-	//Camera
-	if(mpCamera != nullptr)
-	{
-		delete mpCamera;
-		mpCamera = nullptr;
-	}
-
-	//Shaders
-	if(mpProgram001 != nullptr)
-	{
-		delete mpProgram001;
-		mpProgram001 = nullptr;
-	}
-
-	//Individual Objects
-	// Rectangle
-	if(mpRectVertices != nullptr)
-	{
-		delete[] mpRectVertices;
-		mpRectVertices = nullptr;
-	}
-	glDeleteBuffers(1, &mRectEbo);
-	if(mpRectElements != nullptr)
-	{
-		delete[] mpRectElements;
-		mpRectElements = nullptr;
-	}
-	glDeleteBuffers(1, &mRectVbo);
-	glDeleteVertexArrays(1, &mRectVao);
-
-	//Textures
-	if(mpTex != nullptr)
-	{
-		delete mpTex;
-		mpTex = nullptr;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -303,12 +274,29 @@ bool Application::InitializeGLEW()
 // Initialize Sub-Functions
 //-----------------------------------------------------------------------------
 
-void Application::LoadRectangle()
+void Application::LoadAssets()
 {
-	//Data
+	//Models
+	LoadModelAssets();
+}
 
-	// Vertices in Object Coordinates
-	mpRectVertices = new GLfloat[8 * 8]
+//-----------------------------------------------------------------------------
+
+void Application::LoadModelAssets()
+{
+	//Cube
+	LoadModelAssetCube();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadModelAssetCube()
+{
+	//  Cube
+	const unsigned int kVertexCount = 8;
+	const unsigned int kDataBitsPerVertex = 9;
+
+	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
 	{
 		//	  2---3
 		//	 /|  /|
@@ -317,22 +305,23 @@ void Application::LoadRectangle()
 		//	|/  |/
 		//	4---5
 
-	//	Position				TexCoords		Color
+		//Position				TexCoords		Color: RGBA
 		
 		//Top
-		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,		1.0f,  0.0f,  0.0f,	//0
-		 0.5f,  0.5f,  0.5f,	0.0f, 0.0f,		1.0f,  0.5f,  0.0f,	//1
-		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f,	//2
-		 0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		1.0f,  1.0f,  0.0f,	//3
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 1.0f,	//0
+		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,		1.0f,  0.5f,  0.0f, 1.0f,	//1
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 1.0f,	//2
+		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 1.0f,	//3
 
 		//Bottom
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f,	//4
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f,	//5
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f,	//6
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f	//7
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f, 1.0f,	//4
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 1.0f,	//5
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 1.0f,	//6
+		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 1.0f	//7
 	};
 
-	mpRectElements = new GLuint[3 * 2 * 6]
+	const unsigned int kElementCount = 3 * 2 * 6;
+	GLuint* pElements = new GLuint[kElementCount]
 	{
 		//Top
 		0, 1, 2,
@@ -359,165 +348,45 @@ void Application::LoadRectangle()
 		5, 4, 7
 	};
 
-	// Model
-	//   Scale
-	mRectScale = glm::mat4(1.0f);//not doing any scaling at the moment
-	
-	//   Rotate
-	mRectRotate = glm::mat4(1.0f);//not doing any rotating at the moment
-	mRectRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-	
-	//   Translate
-	mRectTranslate  = glm::mat4(1.0f);//not doing any translating at the moment
-
-	//Combine SRT into Model
-	mRectModel = mRectTranslate * mRectRotate * mRectScale;
-
-
-	//Vertex Array Object (VAO)
-	//Note:	VAOs store all of the links between attributes and their corresponding VBOs with raw vertex data.
-	// Creation
-	if(mRectVao != 0)
-	{
-		fprintf(stderr, "WARNING: mRectVao is being used due to it not having a default value of GLuint == 0. Attempting to continue regardless.\n");
-	}
-	glGenVertexArrays(1, &mRectVao);
-	// Enable Usage (by binding)
-	glBindVertexArray(mRectVao);
-
-
-	//Vertex Buffer Object (VBO)
-	//Note:	Since OpenGL manages memory, GLuint vboTriangle is a positive number reference to the memory that the VBO will occupy.
-	// Creation
-	if(mRectVbo != 0)
-	{
-		fprintf(stderr, "WARNING: mRectVbo is being used due to it not having a default value of GLuint == 0. Attempting to continue regardless.\n");
-	}
-	glGenBuffers(1, &mRectVbo);
-	// Set a specific VBO as the active object in the array buffer
-	glBindBuffer(GL_ARRAY_BUFFER, mRectVbo);
-	// Copy vertex data to the active object previously specified to the array buffer
-	glBufferData
+	mpModelAssetCube = new ModelAsset
 	(
-		GL_ARRAY_BUFFER,					//currently active array buffer
-		sizeof(mpRectVertices[0]) * 8 * 8,	//size of vertices data in bytes
-		mpRectVertices,						//actual vertices data
-		GL_STATIC_DRAW						//usage of vertex data
+		mpProgramCube,
+		true,
+		mpTextureCube,
+		3,
+		true,
+		5,
+		kVertexCount,
+		3,
+		2,
+		4,
+		pVertices,
+		kElementCount,
+		pElements,
+		GL_TRIANGLES
 	);
 
-
-	//Element  Buffer Objects (EBO)
-	if(mRectEbo != 0)
+	// Clean up temp variables
+	if(pVertices != nullptr)
 	{
-		fprintf(stderr, "WARNING: mRectEbo is being used due to it not having a default value of GLuint == 0. Attempting to continue regardless.\n");
+		delete[] pVertices;
+		pVertices = nullptr;
 	}
-	glGenBuffers(1, &mRectEbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRectEbo);
-	glBufferData
-	(
-		GL_ELEMENT_ARRAY_BUFFER,
-		sizeof(mpRectElements[0]) * 3 * 2 * 6,
-		mpRectElements,
-		GL_STATIC_DRAW
-	);
-
-
-	//Specify the layout of the vertex data
-	
-	// Position
-	GLint posAttrib = glGetAttribLocation(mpProgram001->GetProgramID(), "vsInPosition");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer
-	(
-		posAttrib,				//which attribute? in this case, referencing vsInPosition.
-		3,						//number of values (size) for attribute (vsInPosition). in this case, 3 for x, y, z
-		GL_FLOAT,				//type of each component
-		GL_FALSE,				//should attribute (input) values be normalized?
-		8 * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
-		0						//array buffer offset
-	);
-
-	//  Texture
-	GLint texAttrib = glGetAttribLocation(mpProgram001->GetProgramID(), "vsInTexCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer
-	(
-		texAttrib,						//which attribute? in this case, referencing vsInTexCoord.
-		2,								//number of values (size) for attribute (vsInTexCoord). in this case, 2 for u, v
-		GL_FLOAT,						//type of each component
-		GL_FALSE,						//should attribute (input) values be normalized?
-		8 * sizeof(GLfloat),			//stride (how many bytes between each position attribute in the array)
-		(void*)(3 * sizeof(GLfloat))	//array buffer offset
-	);
-
-	// Color
-	GLint colAttrib = glGetAttribLocation(mpProgram001->GetProgramID(), "vsInColor");
-	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer
-	(
-		colAttrib,						//which attribute? in this case, referencing vsInColor.
-		3,								//number of values (size) for attribute (vsInColor). in this case, 3 for r, g, b
-		GL_FLOAT,						//type of each component
-		GL_FALSE,						//should attribute (input) values be normalized?
-		8 * sizeof(float),				//stride (how many bytes between each position attribute in the array)
-		(void*)(5 * sizeof(GLfloat))	//array buffer offset
-	);
-	
-	//   Load
-	if(mpTex != nullptr)
+	if(pElements != nullptr)
 	{
-		fprintf(stderr, "WARNING: mpTex is being used Overwriting texture. Potential memory leak may occur.\n");
+		delete[] pElements;
+		pElements = nullptr;
 	}
-	//glGenTextures(1, &mTex);
-	mpTex = new Texture("../../Resources/Textures/pngexample.png");
-	if(mpTex->GetIsTextureLoaded() == false)
-	{
-		fprintf(stderr, "WARNING: mpTex texture not loaded. Attempting to continue regardless.\n");
-	}
-
-	//Unbind the VBO and VAO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 
 //-----------------------------------------------------------------------------
 
-void Application::LoadShaders()
+Program* Application::LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile)
 {
 	std::vector<Shader> shaders;
-	shaders.push_back(Shader::CreateShaderFromFile("Shaders/vertexShader.txt", GL_VERTEX_SHADER));
-	shaders.push_back(Shader::CreateShaderFromFile("Shaders/fragmentShader.txt", GL_FRAGMENT_SHADER));
-	mpProgram001 = new Program(shaders);
-
-	/*
-	glUseProgram(mpProgram001->GetProgramID());
-
-	//MVP (Model View Projection)
-	//Note: model matrices are calculated individually for each instance, but the view and projection matrices are the same for all instances.
-
-	// View
-	mView = glm::lookAt
-	(
-		glm::vec3(1.0f, 1.5f, 2.0f),	//camera position
-		glm::vec3(0.0f, 0.0f, 0.0f),	//focal point
-		glm::vec3(0.0f, 1.0f, 0.0f)		//up axis
-	);
-	mUniformView = glGetUniformLocation(mpProgram001->GetProgramID(), "view");
-	glUniformMatrix4fv(mUniformView, 1, GL_FALSE, glm::value_ptr(mView));
-
-	// Projection
-	mProj = glm::perspective
-	(
-		glm::radians(90.0f),			//Vertical Field of View (FoV) in degrees
-		mWindowSize.x / mWindowSize.y,	//aspect ratio
-		0.1f,							//near plane
-		100.0f							//far plane
-	);
-	mUniformProj = glGetUniformLocation(mpProgram001->GetProgramID(), "proj");
-	glUniformMatrix4fv(mUniformProj, 1, GL_FALSE, glm::value_ptr(mProj));
-
-	glUseProgram(0);
-	*/
+	shaders.push_back(Shader::CreateShaderFromFile(vertexShaderFile, GL_VERTEX_SHADER));
+	shaders.push_back(Shader::CreateShaderFromFile(fragmentShaderFile, GL_FRAGMENT_SHADER));
+	return new Program(shaders);
 }
 
 //-----------------------------------------------------------------------------
@@ -576,15 +445,15 @@ void Application::Input()
 	// Rect
 	if(glfwGetKey(mpWindow, 'X'))
 	{
-		mRectRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+		mListModelInstances.front().SetRotationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Y'))
 	{
-		mRectRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+		mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Z'))
 	{
-		mRectRotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+		mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 
@@ -614,8 +483,9 @@ void Application::Physics()
 		mRectDegreesRotated -= 360.0f;
 	}
 	//  Update model based on changes that may have occured during the input stage
-	mRectRotate = glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mRectRotationAxis);
-	mRectModel = mRectTranslate * mRectRotate * mRectScale;
+	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
+	mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
+	mListModelInstances.front().UpdateTransform();
 }
 
 //-----------------------------------------------------------------------------
@@ -627,40 +497,87 @@ void Application::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(mpProgram001->GetProgramID());
-
-	//Camera
-	mUniformCamera = glGetUniformLocation(mpProgram001->GetProgramID(), "camera");
-	glUniformMatrix4fv(mUniformCamera, 1, GL_FALSE, glm::value_ptr(mpCamera->GetMatrix()));
-
-	//Individual Objects
-
-	// Rectangle
-
-	//  Model
-	mRectUniformModel = glGetUniformLocation(mpProgram001->GetProgramID(), "model");
-	glUniformMatrix4fv(mRectUniformModel, 1, GL_FALSE, glm::value_ptr(mRectModel));
-
-	//  Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mpTex->GetObjectID());
-	glUniform1i(glGetUniformLocation(mpProgram001->GetProgramID(), "tex"), 0);
-
-	//  VAO
-	glBindVertexArray(mRectVao);
-
-	//  Draw Elements
-	glDrawElements(GL_TRIANGLES, 3 * 2 * 6, GL_UNSIGNED_INT, 0);
-
-	//Unbind
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// Unbind the Program
-	glUseProgram(0);
+	//Instances
+	//TODO: learn what kind of iterator I need here
+	std::list<ModelInstance>::iterator it;
+	for(it = mListModelInstances.begin(); it != mListModelInstances.end(); ++it)
+	{
+		it->Render();
+	}
 
 	//Swap the back buffer and the front buffer
 	glfwSwapBuffers(mpWindow);
+}
+
+//-----------------------------------------------------------------------------
+// Terminate Sub-Functions
+//-----------------------------------------------------------------------------
+
+void Application::CleanUp()
+{
+	//Camera
+	if(mpCamera != nullptr)
+	{
+		delete mpCamera;
+		mpCamera = nullptr;
+	}
+
+	//Shaders
+	if(mpProgramCube != nullptr)
+	{
+		delete mpProgramCube;
+		mpProgramCube = nullptr;
+	}
+	//Textures
+	if(mpTextureCube != nullptr)
+	{
+		delete mpTextureCube;
+		mpTextureCube = nullptr;
+	}
+
+	//Assets
+	CleanUpAssets();
+
+	//Instances
+	CleanUpInstances();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::CleanUpAssets()
+{
+	//Cube
+	if(mpModelAssetCube != nullptr)
+	{
+		delete mpModelAssetCube;
+		mpModelAssetCube = nullptr;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::CleanUpInstances()
+{
+	mListModelInstances.clear();
+}
+
+//-----------------------------------------------------------------------------
+// Test Functions
+//-----------------------------------------------------------------------------
+
+void Application::CreateInstances()
+{
+	ModelInstance cube0001(mpModelAssetCube, mpCamera);
+	mListModelInstances.push_back(cube0001);
+
+	ModelInstance cube0002(mpModelAssetCube, mpCamera);
+	cube0002.SetScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)));
+	cube0002.SetTranslate(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, -1.5f, -2.5f)));
+	cube0002.UpdateTransform();
+	mListModelInstances.push_back(cube0002);
+
+	//Set initial rotation axis for cube00001
+	mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 //-----------------------------------------------------------------------------
