@@ -19,6 +19,8 @@
 #include "ModelInstance.h"
 #include "Program.h"
 
+//#define BUFFER_OFFSET(i) ((unsigned int*)NULL + (i))
+
 //=============================================================================
 //Statics
 //=============================================================================
@@ -115,7 +117,22 @@ void DSGraphics::ModelInstance::Render()
 	// Elements
 	if(mpAsset->GetHasElements() == true)
 	{
-		glDrawElements(mpAsset->GetDrawType(), mpAsset->GetElementCount(), GL_UNSIGNED_INT, 0);
+		unsigned int elementCountPerDrawType = mpAsset->GetElementCountPerDrawType();
+		unsigned int elementCountTotal = mpAsset->GetElementCountTotal();
+
+		if(elementCountPerDrawType == 0)
+		{
+			glDrawElements(mpAsset->GetDrawType(), mpAsset->GetElementCountTotal(), GL_UNSIGNED_INT, 0);
+		}
+		else
+		{
+			for(unsigned int drawn = 0; drawn < elementCountTotal; drawn += elementCountPerDrawType)
+			{
+				//glDrawElements(mpAsset->GetDrawType(), elementCountPerDrawType, GL_UNSIGNED_INT, BUFFER_OFFSET(drawn));
+				glDrawElements(mpAsset->GetDrawType(), elementCountPerDrawType, GL_UNSIGNED_INT, reinterpret_cast<void*>(drawn * sizeof(GLuint)));
+				//glDrawElements(mpAsset->GetDrawType(), elementCountPerDrawType, GL_UNSIGNED_INT, drawn * sizeof(GLuint));
+			}
+		}
 	}
 	// Arrays
 	else

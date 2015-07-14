@@ -59,9 +59,10 @@ namespace DSGraphics
 			unsigned int colorDimensions,
 			GLfloat* pVertices,
 			bool hasElements,
-			unsigned int elementCount,
+			unsigned int elementCountTotal,
 			GLuint* pElements,
-			GLenum drawType
+			GLenum drawType,
+			unsigned int elementCountPerDrawType
 		);
 		//Destructor
 		~ModelAsset();
@@ -75,8 +76,9 @@ namespace DSGraphics
 		GLuint GetVao() const;
 		unsigned int GetVertexCount() const;
 		bool GetHasElements() const;
-		unsigned int GetElementCount() const;
+		unsigned int GetElementCountTotal() const;
 		GLenum GetDrawType() const;
+		unsigned int GetElementCountPerDrawType() const;
 		// Setters
 
 		//Member Variables
@@ -104,10 +106,11 @@ namespace DSGraphics
 		// Elements
 		const bool mkHasElements;
 		GLuint mEbo;
-		const unsigned int mkElementCount;
+		const unsigned int mkElementCountTotal;
 		GLuint* mpElements;//TODO: make same change as with mpRectVertices
 		// Draw Info
 		GLenum mDrawType;
+		unsigned int mElementCountPerDrawType;//CHECK: is this safe for all type? eg, I doubt it's safe for line segments created from rectangles that are not square
 		GLint mDrawStart;
 	};
 

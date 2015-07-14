@@ -63,6 +63,8 @@ Application::Application()
 	//,	mListModelInstancesBackground()
 	//,	mListModelInstances()//not sure how to initialize this yet
 //Individual Objects
+,	mBgMeshSize(4.0f, 4.0f)
+,	mBgMeshDistanceBetweenVertices(0.1f, 0.0f, 0.1f)
 ,	mBgMeshLengthX(0.1f)
 ,	mBgMeshLengthY(0.0f)
 ,	mBgMeshLengthZ(0.1f)
@@ -340,32 +342,131 @@ void Application::LoadModelAssets()
 
 void Application::LoadModelAssetBgMesh()
 {
-	
-	const unsigned int kVertexCount = 3;
 	const unsigned int kPositionDimensions = 3;
 
-	GLfloat* pVertices = new GLfloat[kVertexCount * kPositionDimensions]
-	{
-		// -z
-		//	2
-		//	| \
-		//	0---1 +x
+	printf("Setting pVerticesVec3 initial values.\n");
 
-		//Position
-	//	x				y				z
-		 0.0f,			 0.0f,			 0.0f,				//0
-		 mBgMeshLengthX, 0.0f,			 0.0f,				//1
-		 0.0f,			 0.0f,			(-mBgMeshLengthZ)	//2
-	};
+	glm::vec3* pVerticesVec3 = new glm::vec3[static_cast<int>(mBgMeshSize.x * mBgMeshSize.y)];
 
-	//A line segment is made up from 2 vertices. A triangle has the same number of sides (line segments) as vertices (3).
-	const unsigned int kElementCount = 2 * kVertexCount;
-	GLuint* pElements = new GLuint[kElementCount]
+	for(int row = 0; row < static_cast<int>(mBgMeshSize.y); ++row)
 	{
-		0, 1,
-		1, 2,
-		2, 0
-	};
+		for(int col = 0; col < static_cast<int>(mBgMeshSize.x); ++col)
+		{
+			pVerticesVec3[(static_cast<int>(mBgMeshSize.x) * row) + col] = glm::vec3(col * mBgMeshLengthX, 0.0f, row * (-mBgMeshLengthZ));
+			printf("pVerticesVec3[%u] = x: %f, y: %f, z: %f\n", ((static_cast<int>(mBgMeshSize.x) * row) + col), (col * mBgMeshLengthX), 0.0f, (row * (-mBgMeshLengthZ)));
+		}
+	}
+
+	printf("\nConverting pVerticesVec3 to pVertices.\n");
+
+	//Convert pVerticesVec3 to GLfloat by creating a new array 3 times as big and deep copying (TODO: make this more efficient)
+	const unsigned int kVertexCount = static_cast<int>(3 * mBgMeshSize.x * mBgMeshSize.y);
+	GLfloat* pVertices = new GLfloat[kVertexCount];
+	
+	for(int i = 0; i < static_cast<int>(mBgMeshSize.x * mBgMeshSize.y); ++i)
+	{
+		pVertices[i * 3] = pVerticesVec3[i].x;
+		printf("pVertices[%u] = x: %f\n", (i * 3), pVerticesVec3[i].x);
+	
+		pVertices[(i * 3) + 1] = pVerticesVec3[i].y;
+		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].y);
+		
+		pVertices[(i * 3) + 2] = pVerticesVec3[i].z;
+		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].z);
+	}
+
+
+	/*
+	===
+	Q1: How many line segments in an x * y vertex grid?
+	===
+
+	SQUARES													RECTANGLES
+
+	12 _ 13 _ 14 _ 15										 4 _  5 _  6
+	 |    |    |    |										 |    |    |
+	 8 _  9 _ 10 _ 11										 0 _  1 _  2
+	 |    |    |    |
+	 4 _  5 _  6 _  7
+	 |    |    |    |
+	 0 _  1 _  2 _  3
+
+	HORIZONTAL												HORIZONTAL
+	There are (col - 1) line segments PER row				There are (col - 1) line segments PER row
+	= row * (col - 1)										= row * (col - 1)
+	= 4   * (4   - 1)										= 2   * (3   - 1)
+	= 12													= 4
+
+	VERTICAL												VERTICAL
+	There are (row - 1) line segments PER col				There are (row - 1) line segments PER col
+	= col * (row - 1)										= col * (row - 1)
+	= 4   * (4   - 1)										= 3   * (2   - 1)
+	= 12													= 3
+
+	TOTAL													TOTAL
+	= Horizontal + Vertical									= Horizontal + Vertical
+	= 12         + 12										= 4          + 3
+	= 24													= 7
+
+	= (row * (col - 1)) + (col * (row - 1))					= (row * (col - 1)) + (col * (row - 1))
+	= (4   * (4   - 1)) + (4   * (4   - 1))					= (2   * (3   - 1)) + (3   * (2   - 1))
+	= (4 * 3) + (4 * 3)										= (2 * 2) + (3 * 1)
+	= 12 + 12												= 4 + 3
+	= 24													= 7
+
+	OR (more efficiently)									OR (more efficiently)
+
+	= (col * row * 2) - row - col							= (col * row * 2) - row - col
+	= (4   * 4   * 2) - 4   - 4								= (3   * 2   * 2) - 2   - 3
+	= (16 * 2) - 8											= (6 * 2) - 5
+	= 32 - 8												= 12 - 5
+	= 24													= 7
+
+	===
+	Q2: How to calculate elements of line segments in an x * y vertex grid?
+	===
+	*/
+
+	//const unsigned int kElementCount = static_cast<int>((mBgMeshSize.y * (mBgMeshSize.x - 1)) + (mBgMeshSize.x * (mBgMeshSize.y - 1)));
+	//const unsigned int kElementCount = (mBgMeshSize.x * mBgMeshSize.y * 2) - mBgMeshSize.y - mBgMeshSize.x;
+
+	printf("Setting pElements initial values.\n");
+
+	//Note: I realised I can use line segment strips instead of line segments, as it uses fewer elements, so I am doing so for now. Later I may need to return to line segments for efficient general relativity animation.
+	//const unsigned int verticesPerLineStripHorizontal = static_cast<int>(mBgMeshSize.x);
+	//const unsigned int verticesPerLineStripVertical = static_cast<int>(mBgMeshSize.y);
+	//const unsigned int kElementCount = verticesPerLineStrip * (mBgMeshSize.x + mBgMeshSize.y)//square calculation. rectangle calculation nets same result. this is more efficient, but works for squares only.
+	const unsigned int kElementCount = static_cast<int>((mBgMeshSize.y * mBgMeshSize.x) + (mBgMeshSize.x * mBgMeshSize.y));//const unsigned int kElementCount = (mBgMeshSize.y * verticesPerLineStripHorizontal) + (mBgMeshSize.x * verticesPerLineStripVertical)//alternate way of writing
+
+	GLuint* pElements = new GLuint[kElementCount];
+
+	//Horizontal Line Strips
+	printf("- Horizontal Line Strips.\n");
+	//pass in one horizontal line strip at a time
+	for(int row = 0; row < static_cast<int>(mBgMeshSize.y); ++row)
+	{
+		for(int col = 0; col < static_cast<int>(mBgMeshSize.x); ++col)
+		{
+			pElements[(static_cast<int>(mBgMeshSize.x) * row) + col] = (static_cast<int>(mBgMeshSize.x) * row) + col;
+			printf("pElements[%u] = %u\n", ((static_cast<int>(mBgMeshSize.x) * row) + col), ((static_cast<int>(mBgMeshSize.x) * row) + col));
+			//pElements[(static_cast<int>(mBgMeshSize.x) * row) + col] = (col * row) + col;
+			//pElements[(col * row) + col] = (col * row) + col;
+		}
+	}
+	int skipFromHToVLineStrips = static_cast<int>(mBgMeshSize.y * mBgMeshSize.x);
+	//Vertical Line Strips
+	printf("- Vertical Line Strips.\n");
+	//pass in one vertical line strip at a time
+	for(int col = 0; col < static_cast<int>(mBgMeshSize.x); ++col)
+	{
+		for(int row = 0; row < static_cast<int>(mBgMeshSize.y); ++row)
+		{
+			pElements[skipFromHToVLineStrips + ((static_cast<int>(mBgMeshSize.x) * row) + col)] = static_cast<int>(col + (mBgMeshSize.x * row));
+			//pElements[skipFromHToVLineStrips + (col * row) + col] = static_cast<int>(col + (mBgMeshSize.x * row));
+			printf("pElements[%u] = %u\n", (skipFromHToVLineStrips + (col * row) + col), (static_cast<int>(col + (mBgMeshSize.x * row))));
+		}
+	}
+
 
 	if(mpModelAssetBgMesh == nullptr)
 	{
@@ -385,7 +486,8 @@ void Application::LoadModelAssetBgMesh()
 			true,				//Has Elements?
 			kElementCount,		//Element Count
 			pElements,			//Elements,
-			GL_LINES			//Draw Type
+			GL_LINE_STRIP,		//Draw Type
+			4					//Element Count Per Draw Type if variable
 		);
 	}
 	else
@@ -394,10 +496,20 @@ void Application::LoadModelAssetBgMesh()
 	}
 
 	// Clean up temp variables
+	if(pVerticesVec3 != nullptr)
+	{
+		delete[] pVerticesVec3;
+		pVerticesVec3 = nullptr;
+	}
 	if(pVertices != nullptr)
 	{
 		delete[] pVertices;
 		pVertices = nullptr;
+	}
+	if(pElements != nullptr)
+	{
+		delete[] pElements;
+		pElements = nullptr;
 	}
 }
 
@@ -479,7 +591,8 @@ void Application::LoadModelAssetCube()
 			true,			//Has Elements?
 			kElementCount,	//Element Count
 			pElements,		//Elements,
-			GL_LINES		//Draw Type
+			GL_LINES,		//Draw Type
+			0
 		);
 	}
 	else
@@ -506,29 +619,8 @@ void Application::CreateInitialInstances()
 {
 	//Background
 	// Mesh
-	mBgMeshInstanceCount = 256;
-
-	//Create first bgMesh outside loop so that it can be referenced for positional tiling inside creation loop
-	DSGraphics::ModelInstance bgMeshFirst(mpModelAssetBgMesh, mpCamera);
-	mModelInstancesBackgroundList.push_back(bgMeshFirst);
-	glm::vec3 bgMeshFirstPos = bgMeshFirst.GetPosition();
-
-	//Create bgMesh'es starting with the 2nd one onwards
-	for(unsigned int i = 1; i < mBgMeshInstanceCount; ++i)
-	{
-		DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
-		//TODO: Set position based off of fill algorithm instead (not coded yet)
-		int horizontalOffset = i % 16;
-		int verticalOffset = i / 16;
-		bgMesh.SetPosition(glm::vec3
-		(
-			bgMeshFirstPos.x + (horizontalOffset * mBgMeshLengthX),
-			0.0f,//in this case this is the same as: bgMeshFirstPos.y + (i * mBgMeshLengthY)
-			bgMeshFirstPos.z - (verticalOffset * mBgMeshLengthZ)
-		));
-		bgMesh.UpdateTransform();
-		mModelInstancesBackgroundList.push_back(bgMesh);
-	}
+	DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
+	mModelInstancesBackgroundList.push_back(bgMesh);
 
 
 	//Cube

@@ -134,6 +134,8 @@ private:
 
 	// Individual Objects
 	//  Background Mesh
+	glm::vec2 mBgMeshSize;
+	glm::vec3 mBgMeshDistanceBetweenVertices;
 	GLfloat mBgMeshLengthX;
 	GLfloat mBgMeshLengthY;
 	GLfloat mBgMeshLengthZ;

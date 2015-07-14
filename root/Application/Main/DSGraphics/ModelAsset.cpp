@@ -39,9 +39,10 @@ DSGraphics::ModelAsset::ModelAsset
 	unsigned int colorDimensions,
 	GLfloat* pVertices,
 	bool hasElements,
-	unsigned int elementCount,
+	unsigned int elementCountTotal,
 	GLuint* pElements,
-	GLenum drawType
+	GLenum drawType,
+	unsigned int elementCountPerDrawType
 )
 :	mpProgram(pProgram)
 ,	mkHasTexture(hasTexture)
@@ -59,9 +60,10 @@ DSGraphics::ModelAsset::ModelAsset
 ,	mVbo(0)
 ,	mkHasElements(hasElements)
 ,	mEbo(0)
-,	mkElementCount(elementCount)
+,	mkElementCountTotal(elementCountTotal)
 ,	mpElements(nullptr)
 ,	mDrawType(drawType)
+,	mElementCountPerDrawType(elementCountPerDrawType)
 ,	mDrawStart(0)
 {
 	//Deep Copy Data
@@ -76,8 +78,8 @@ DSGraphics::ModelAsset::ModelAsset
 	// Element
 	if(mkHasElements == true)
 	{
-		mpElements = new GLuint[mkElementCount];
-		for(unsigned int i = 0; i < mkElementCount; ++i)
+		mpElements = new GLuint[mkElementCountTotal];
+		for(unsigned int i = 0; i < mkElementCountTotal; ++i)
 		{
 			mpElements[i] = pElements[i];
 		}
@@ -115,7 +117,7 @@ DSGraphics::ModelAsset::ModelAsset
 		glBufferData
 		(
 			GL_ELEMENT_ARRAY_BUFFER,
-			sizeof(mpElements[0]) * mkElementCount,
+			sizeof(mpElements[0]) * mkElementCountTotal,
 			mpElements,
 			GL_STATIC_DRAW
 		);
@@ -258,9 +260,9 @@ bool DSGraphics::ModelAsset::GetHasElements() const
 
 //-----------------------------------------------------------------------------
 
-unsigned int DSGraphics::ModelAsset::GetElementCount() const
+unsigned int DSGraphics::ModelAsset::GetElementCountTotal() const
 {
-	return mkElementCount;
+	return mkElementCountTotal;
 }
 
 //-----------------------------------------------------------------------------
@@ -268,6 +270,13 @@ unsigned int DSGraphics::ModelAsset::GetElementCount() const
 GLenum DSGraphics::ModelAsset::GetDrawType() const
 {
 	return mDrawType;
+}
+
+//-----------------------------------------------------------------------------
+
+unsigned int DSGraphics::ModelAsset::GetElementCountPerDrawType() const
+{
+	return mElementCountPerDrawType;
 }
 
 //-----------------------------------------------------------------------------
