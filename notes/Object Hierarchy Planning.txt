@@ -1,0 +1,32 @@
+things that are solid
+environmentals (walls, crates, projectiles, powerups, etc)
+player
+units (enemies, cpu-only controlled allies, cpu controller neutrals, etc)
+
+things that aren't solid
+abstracts (text, cursor, ui, buttons, etc, anything rendered using screen coordinates)
+aesthetics (grass, any non-solid rendered using clip coordinates (mvp space))
+
+regarding things that aren't solid that act upon solids:
+these things fit into the non-solid category, and pull data from the solid category
+
+regarding particle effects:
+these are special. they technically belong in the environmental, abstract and aesthetic categories. This is because they can be rendered using either clip coordinates or screen coordinates, and can pull their data for where to exist from anywhere)
+
+all solids have:
+physics (whether it be "moveable" or not)
+
+interactables can be solid or not, so they can have a parent class of any type, based on the need
+
+players and units differ by the fact that units have AI and players do not. a player's "AI" is the input calculated from human actions, and thus is too different to be classified as AI.
+
+a cpu controlled player that can also be controlled by players (e.g. Tales of games) is not a unit cpu because the "AI" of the player is a computer calculating controller (button) inputs, rather than logic decisions. a cpu unit doesn't think in terms of "what button should I press next?", but rather "what action should I perform next?"
+
+regarding abstracts vs aesthetics:
+the difference between the two is that an aesthetic has the model-view-projection matrix applied to it in order to render it in clip space, while an abstract is rendered using only screen coordinates, and thus has no matrices applied to it. depth is not a factor of determining whether something is an abstract or aesthetic as a result.
+
+a background can be either an aesthetic or an abstract:
+abstract style background:
+a tiling background would be an abstract that moves based on the camera's coordinates, and snaps positions whenever any side is about to enter the screens boundaries. another way of thinking about this is that the tiling background is rendered using screen coordinates, not by using clip space.
+aesthitic style background:
+any background that does not tile, such as a clear color or a skybox would be an aesthetic background because it is calculated as the furthest most object in clip space, and not screen coordinates.
