@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.h
 // Created:		2015/02/10
-// Last Edited:	2015/02/12
+// Last Edited:	2015/02/13
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -34,6 +34,7 @@
 // Forward Declarations
 //=============================================================================
 
+class Camera;
 class Program;
 class Texture;
 
@@ -74,6 +75,7 @@ private:
 
 	// Run Sub-Functions
 	void Input();
+	void AI();
 	void Physics();
 	void Render();
 
@@ -89,14 +91,18 @@ private:
 	glm::vec2 mWindowSize;
 	const char* mWindowTitle;
 
+	// Time
+	double mLastTime;
+	double mThisTime;
+	double mElapsedTime;
+
+	// Camera
+	Camera* mpCamera;
+	GLuint mUniformCamera;
+
 	// Data
 	//  Programs
 	Program* mpProgram001;
-	//  Camera
-	glm::mat4 mView;
-	GLuint mUniformView;
-	glm::mat4 mProj;
-	GLuint mUniformProj;
 	//  Rectangle
 	//   VAO
 	GLuint mRectVao;
@@ -119,7 +125,8 @@ private:
 	GLuint* mpRectElements;//TODO: make same change as with mpRectVertices
 	//  Textures
 	Texture* mpTex;
-
+	//temp
+	GLfloat mRectDegreesRotated;
 };
 
 #endif //#ifndef APPLICATION_H

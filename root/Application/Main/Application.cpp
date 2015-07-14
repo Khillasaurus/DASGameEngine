@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/12
+// Last Edited:	2015/02/13
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -18,6 +18,7 @@
 
 // Daniel Schenker
 #include "Application.h"
+#include "Camera.h"
 #include "Program.h"
 #include "Texture.h"
 
@@ -42,17 +43,20 @@ void OnError(int errorCode, const char* msg);
 Application::Application()
 	//General
 :	mQuit(false)
+	//Window
 ,	mpWindow(nullptr)
 ,	mWindowSize(1280, 720)
 ,	mWindowTitle("Daniel Schenker's Application")
+	//Time
+,	mLastTime(0.0)
+,	mThisTime(0.0)
+,	mElapsedTime(0.0)
+	//Camera
+,	mpCamera(nullptr)
+,	mUniformCamera(0)
 	//Data
 	// Shaders
 ,	mpProgram001(nullptr)
-	// Camera
-,	mView(1.0f)
-,	mUniformView(0)
-,	mProj(1.0f)
-,	mUniformProj(0)
 	// Rectangle
 ,	mRectVao(0)
 ,	mpRectVertices(nullptr)
@@ -67,6 +71,8 @@ Application::Application()
 ,	mpRectElements(nullptr)
 	// Textures
 ,	mpTex(nullptr)
+	//temp
+,	mRectDegreesRotated(0.0f)
 {
 	Initialize();
 	Run();
@@ -118,6 +124,19 @@ void Application::Initialize()
 
 			// Rectangle
 			LoadRectangle();
+
+			//Camera
+			if(mpCamera == nullptr)
+			{
+				//do stuff
+				mpCamera = new Camera();
+				mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+				mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: mpCamera is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
+			}
 		}
 	}
 }
@@ -127,17 +146,21 @@ void Application::Initialize()
 //   2. Main game loop
 void Application::Run()
 {
+	mLastTime = glfwGetTime();
+
 	//[Closed] Event Loop
 	while(mQuit == false)//while(glfwWindowShouldClose(mpWindow) == false)
 	{
-		//Input
+		//Time
+		mThisTime = glfwGetTime();
+		mElapsedTime = mThisTime - mLastTime;
+
 		Input();
-
-		//Physics
+		AI();
 		Physics();
-
-		//Render
 		Render();
+
+		mLastTime = mThisTime;
 	}
 
 	//Close the window
@@ -157,12 +180,20 @@ void Application::Terminate()
 
 void Application::CleanUp()
 {
+	//Camera
+	if(mpCamera != nullptr)
+	{
+		delete mpCamera;
+		mpCamera = nullptr;
+	}
+
 	//Shaders
 	if(mpProgram001 != nullptr)
 	{
 		delete mpProgram001;
 		mpProgram001 = nullptr;
 	}
+
 	//Individual Objects
 	// Rectangle
 	if(mpRectVertices != nullptr)
@@ -458,6 +489,7 @@ void Application::LoadShaders()
 	shaders.push_back(Shader::CreateShaderFromFile("Shaders/fragmentShader.txt", GL_FRAGMENT_SHADER));
 	mpProgram001 = new Program(shaders);
 
+	/*
 	glUseProgram(mpProgram001->GetProgramID());
 
 	//MVP (Model View Projection)
@@ -485,6 +517,7 @@ void Application::LoadShaders()
 	glUniformMatrix4fv(mUniformProj, 1, GL_FALSE, glm::value_ptr(mProj));
 
 	glUseProgram(0);
+	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -493,11 +526,69 @@ void Application::LoadShaders()
 
 void Application::Input()
 {
-	// Retrieve
+	//Retrieve
 	glfwPollEvents();
-		
-	// Handle
-	//  If key pressed: escape
+
+
+	//Camera
+	const float kMoveSpeed = 2.0f; //units per second
+
+	// Reset
+	if(glfwGetKey(mpWindow, '`'))
+	{
+		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+	}
+
+	//Poll in counter clockwise direction, starting at 0 radians/degrees (right)
+	// Right
+	else if(glfwGetKey(mpWindow, 'D'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionRight());
+	}
+	// Forward
+	else if(glfwGetKey(mpWindow, 'W'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionForward());
+	}
+	// Left
+	else if(glfwGetKey(mpWindow, 'A'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionRight()));
+	}
+	// Backwards
+	else if(glfwGetKey(mpWindow, 'S'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionForward()));
+	}
+	// Up
+	else if(glfwGetKey(mpWindow, 'E'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionUp());
+	}
+	// Down
+	else if(glfwGetKey(mpWindow, 'Q'))
+	{
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));
+	}
+
+
+	//Individual Objects
+	// Rect
+	if(glfwGetKey(mpWindow, 'X'))
+	{
+		mRectRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+	}
+	else if(glfwGetKey(mpWindow, 'Y'))
+	{
+		mRectRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+	}
+	else if(glfwGetKey(mpWindow, 'Z'))
+	{
+		mRectRotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+	}
+
+
+	//If key pressed: escape
 	if(glfwGetKey(mpWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		mQuit = true;
@@ -506,48 +597,24 @@ void Application::Input()
 
 //-----------------------------------------------------------------------------
 
+void Application::AI()
+{
+}
+
+//-----------------------------------------------------------------------------
+
 void Application::Physics()
 {
-	//TEMP testing
-	// Handle
-	//  If key pressed: space
-	if(glfwGetKey(mpWindow, GLFW_KEY_X) == GLFW_PRESS)
+	//Individual Objects
+	// Rect
+	const GLfloat kDegreesPerSecond = 180.0f;
+	mRectDegreesRotated += static_cast<float>(mElapsedTime) * kDegreesPerSecond;
+	while(mRectDegreesRotated > 360.0f)
 	{
-		mRectRotate = glm::rotate
-		(
-			glm::mat4(1.0f),
-			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f)
-		);
+		mRectDegreesRotated -= 360.0f;
 	}
-	else if(glfwGetKey(mpWindow, GLFW_KEY_Y) == GLFW_PRESS)
-	{
-		mRectRotate = glm::rotate
-		(
-			glm::mat4(1.0f),
-			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-	}
-	else if(glfwGetKey(mpWindow, GLFW_KEY_Z) == GLFW_PRESS)
-	{
-		mRectRotate = glm::rotate
-		(
-			glm::mat4(1.0f),
-			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
-		);
-	}
-
-	//Transforms
-	/*
-	mRectRotate = glm::rotate
-	(
-		glm::mat4(1.0f),
-		((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-	*/
+	//  Update model based on changes that may have occured during the input stage
+	mRectRotate = glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mRectRotationAxis);
 	mRectModel = mRectTranslate * mRectRotate * mRectScale;
 }
 
@@ -555,40 +622,44 @@ void Application::Physics()
 
 void Application::Render()
 {
-	// Background
+	//Background
 	// Clear the screen to black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(mpProgram001->GetProgramID());
 
-	// Individual Objects
+	//Camera
+	mUniformCamera = glGetUniformLocation(mpProgram001->GetProgramID(), "camera");
+	glUniformMatrix4fv(mUniformCamera, 1, GL_FALSE, glm::value_ptr(mpCamera->GetMatrix()));
 
-	//  Rectangle
+	//Individual Objects
 
-	//   Model
+	// Rectangle
+
+	//  Model
 	mRectUniformModel = glGetUniformLocation(mpProgram001->GetProgramID(), "model");
 	glUniformMatrix4fv(mRectUniformModel, 1, GL_FALSE, glm::value_ptr(mRectModel));
 
-	//   Texture
+	//  Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mpTex->GetObjectID());
 	glUniform1i(glGetUniformLocation(mpProgram001->GetProgramID(), "tex"), 0);
 
-	//   VAO
+	//  VAO
 	glBindVertexArray(mRectVao);
 
-	//   Draw Elements
+	//  Draw Elements
 	glDrawElements(GL_TRIANGLES, 3 * 2 * 6, GL_UNSIGNED_INT, 0);
 
-	//  Unbind
+	//Unbind
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Unbind the Program
 	glUseProgram(0);
 
-	// Swap the back buffer and the front buffer
+	//Swap the back buffer and the front buffer
 	glfwSwapBuffers(mpWindow);
 }
 
