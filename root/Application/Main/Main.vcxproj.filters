@@ -16,11 +16,14 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{73fdba97-7a61-4689-9a9d-4409fa06ac16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Graphics">
-      <UniqueIdentifier>{56ddb65b-738f-412f-8383-aa16fe5f8a3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Objects">
       <UniqueIdentifier>{236f4672-61a3-4749-b546-c656b1d043a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DSMathematics">
+      <UniqueIdentifier>{0e2aae01-eb45-4211-abeb-aa495cd9f2e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DSGraphics">
+      <UniqueIdentifier>{56ddb65b-738f-412f-8383-aa16fe5f8a3c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,25 +34,28 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\Camera.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\ModelAsset.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\ModelInstance.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\Program.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\Shader.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="DSGraphics\Texture.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClCompile>
     <ClCompile Include="Objects\Environmental.cpp">
       <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DSMathematics\Quaternion.cpp">
+      <Filter>Source Files\DSMathematics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -77,25 +83,28 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\Camera.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\ModelAsset.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\ModelInstance.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\Program.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\Shader.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="DSGraphics\Texture.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\DSGraphics</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Environmental.h">
       <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DSMathematics\Quaternion.h">
+      <Filter>Source Files\DSMathematics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

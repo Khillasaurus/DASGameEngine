@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Camera.cpp
 // Created:		2015/02/12
-// Last Edited:	2015/02/24
+// Last Edited:	2015/02/25
 // Copyright:	Daniel Schenker
 // Description:	Camera
 //=============================================================================
@@ -13,6 +13,7 @@
 // Third-Party Libraries
 //  GLM
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>//remember to remove this once all dependency on this class is removed
 
 // Standard C++ Libraries
 #define _USE_MATH_DEFINES
@@ -38,7 +39,8 @@
 DSGraphics::Camera::Camera
 (
 	glm::vec3 position,
-	glm::quat orientation,
+	const DSMathematics::Quaternion& orientation,///
+	///glm::quat orientation,
 	float fov,
 	float nearPlane,
 	float farPlane,
@@ -96,6 +98,14 @@ void DSGraphics::Camera::MoveLocal(const glm::vec3& offset)
 
 //-----------------------------------------------------------------------------
 
+void DSGraphics::Camera::Rotate(const DSMathematics::Quaternion& rotation)
+{
+	mOrientation.Multiply(rotation);
+}
+
+//-----------------------------------------------------------------------------
+
+/*
 void DSGraphics::Camera::Rotate(float angle, const glm::vec3& axis)
 {
 	if(axis.length() != 1.0f)
@@ -104,6 +114,7 @@ void DSGraphics::Camera::Rotate(float angle, const glm::vec3& axis)
 	}
 	mOrientation = glm::rotate(mOrientation, angle, axis);
 }
+*/
 
 //-----------------------------------------------------------------------------
 
@@ -122,6 +133,7 @@ void DSGraphics::Camera::LookAt(glm::vec3 position)
 // Helper Functions
 //-----------------------------------------------------------------------------
 
+/*
 void DSGraphics::Camera::NormalizeQuaternion()
 {
 	//Don't normalize if we don't have to
@@ -140,6 +152,7 @@ void DSGraphics::Camera::NormalizeQuaternion()
 		mOrientation.z /= mag;
 	}
 }
+*/
 
 //-----------------------------------------------------------------------------
 
@@ -167,7 +180,9 @@ glm::mat4 DSGraphics::Camera::QuaternionToMatrix() const
 			);
 	*/
 
-	return glm::mat4_cast(mOrientation);
+	//return glm::mat4_cast(mOrientation);
+
+	return glm::mat4_cast(glm::quat(mOrientation.mW, mOrientation.mV.x, mOrientation.mV.y, mOrientation.mV.z));
 }
 
 //-----------------------------------------------------------------------------
@@ -207,32 +222,42 @@ const glm::vec3& DSGraphics::Camera::GetPosition() const
 
 //-----------------------------------------------------------------------------
 
+const DSMathematics::Quaternion& DSGraphics::Camera::GetOrientation() const///
+{
+	return mOrientation;
+}
+
+/*
 const glm::quat& DSGraphics::Camera::GetOrientation() const
 {
 	return mOrientation;
 }
+*/
 
 //-----------------------------------------------------------------------------
 
 float DSGraphics::Camera::GetAngle() const
 {
-	return glm::angle(mOrientation);
+
+	return glm::angle(glm::quat(mOrientation.mW, mOrientation.mV.x, mOrientation.mV.y, mOrientation.mV.z));
 }
 
 //-----------------------------------------------------------------------------
 
 const glm::vec3& DSGraphics::Camera::GetAxis() const
 {
-	return glm::axis(mOrientation);
+	return glm::axis(glm::quat(mOrientation.mW, mOrientation.mV.x, mOrientation.mV.y, mOrientation.mV.z));
 }
 
 //-----------------------------------------------------------------------------
 
 glm::vec3 DSGraphics::Camera::GetDirectionRight() const
 {
-	glm::vec4 right = mOrientation * glm::vec4(1, 0, 0, 1);
+	return mOrientation.Rotate(glm::vec3(1.0f, 0.0f, 0.0f));
+	
+	//glm::vec4 right = mOrientation * glm::vec4(1, 0, 0, 1);
 
-	return glm::vec3(right);
+	//return glm::vec3(right);
 
 	//return glm::vec3(QuaternionToMatrix()[0]);
 }
@@ -241,9 +266,11 @@ glm::vec3 DSGraphics::Camera::GetDirectionRight() const
 
 glm::vec3 DSGraphics::Camera::GetDirectionUp() const
 {
-	glm::vec4 up = mOrientation * glm::vec4(0, 1, 0, 1);
+	return mOrientation.Rotate(glm::vec3(0.0f, 1.0f, 0.0f));
 
-	return glm::vec3(up);
+	//glm::vec4 up = mOrientation * glm::vec4(0, 1, 0, 1);
+
+	//return glm::vec3(up);
 	//return glm::vec3(QuaternionToMatrix()[1]);
 }
 
@@ -251,9 +278,11 @@ glm::vec3 DSGraphics::Camera::GetDirectionUp() const
 
 glm::vec3 DSGraphics::Camera::GetDirectionForward() const
 {
-	glm::vec4 forward = mOrientation * glm::vec4(0, 0, -1, 1);
+	return mOrientation.Rotate(glm::vec3(0.0f, 0.0f, -1.0f));
 
-	return glm::vec3(forward);
+	//glm::vec4 forward = mOrientation * glm::vec4(0, 0, -1, 1);
+
+	//return glm::vec3(forward);
 	/*
 	glm::mat4 matFromQuat = QuaternionToMatrix();
 
@@ -356,7 +385,7 @@ glm::mat4 DSGraphics::Camera::GetView() const
 
 	//I believe it should be done in this order (reverse order), because we are undoing the effects (namely rotation followed by translation) applied to the camera.
 	//Since they were applied rotation first, translation second, we must undo the operations in the correct order (namely translation first, rotation second).
-	return glm::mat4_cast(mOrientation) * glm::translate(glm::mat4(), -mPosition);
+	return glm::mat4_cast(glm::quat(mOrientation.mW, mOrientation.mV.x, mOrientation.mV.y, mOrientation.mV.z)) * glm::translate(glm::mat4(), -mPosition);
 }
 
 //-----------------------------------------------------------------------------
@@ -421,13 +450,26 @@ void DSGraphics::Camera::SetPosition(const glm::vec3& position)
 
 //-----------------------------------------------------------------------------
 
-void DSGraphics::Camera::SetOrientation(const glm::quat& orientation)
+void DSGraphics::Camera::SetOrientation(const DSMathematics::Quaternion& orientation)///
 {
 	mOrientation = orientation;
 }
 
+/*
+void DSGraphics::Camera::SetOrientation(const glm::quat& orientation)
+{
+	mOrientation = orientation;
+}
+*/
+
 //-----------------------------------------------------------------------------
 
+void DSGraphics::Camera::SetOrientation(float a, const glm::vec3& n)///
+{
+	mOrientation = DSMathematics::Quaternion(a, n);
+}
+
+/*
 void DSGraphics::Camera::SetOrientation(float angle, const glm::vec3& axis)
 {
 	glm::vec3 unitVector = axis;
@@ -441,8 +483,14 @@ void DSGraphics::Camera::SetOrientation(float angle, const glm::vec3& axis)
 
 	mOrientation = glm::angleAxis(angle, unitVector);
 }
+*/
 
 //-----------------------------------------------------------------------------
+
+void DSGraphics::Camera::SetOrientation(float w, float x, float y, float z)///
+{
+	mOrientation = DSMathematics::Quaternion(w, x, y, z);
+}
 
 /*
 void DSGraphics::Camera::SetOrientation(const glm::vec3& right, const glm::vec3& up)
@@ -453,6 +501,7 @@ void DSGraphics::Camera::SetOrientation(const glm::vec3& right, const glm::vec3&
 
 //-----------------------------------------------------------------------------
 
+/*
 void DSGraphics::Camera::SetAngle(float angle)
 {
 	while(angle > 360.0f)
@@ -466,9 +515,11 @@ void DSGraphics::Camera::SetAngle(float angle)
 	
 	mOrientation = glm::angleAxis(angle, GetAxis());
 }
+*/
 
 //-----------------------------------------------------------------------------
 
+/*
 void DSGraphics::Camera::SetAxis(const glm::vec3& axis)
 {
 	glm::vec3 unitVector = axis;
@@ -482,6 +533,7 @@ void DSGraphics::Camera::SetAxis(const glm::vec3& axis)
 
 	mOrientation = glm::angleAxis(GetAngle(), unitVector);
 }
+*/
 
 //-----------------------------------------------------------------------------
 

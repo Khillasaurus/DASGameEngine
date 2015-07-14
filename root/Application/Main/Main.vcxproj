@@ -85,6 +85,7 @@
     <ClCompile Include="DSGraphics\Program.cpp" />
     <ClCompile Include="DSGraphics\Shader.cpp" />
     <ClCompile Include="DSGraphics\Texture.cpp" />
+    <ClCompile Include="DSMathematics\Quaternion.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Objects\Environmental.cpp" />
   </ItemGroup>
@@ -104,6 +105,7 @@
     <ClInclude Include="DSGraphics\Program.h" />
     <ClInclude Include="DSGraphics\Shader.h" />
     <ClInclude Include="DSGraphics\Texture.h" />
+    <ClInclude Include="DSMathematics\Quaternion.h" />
     <ClInclude Include="Objects\Environmental.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
