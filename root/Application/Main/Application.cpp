@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/18
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -52,12 +52,16 @@ Application::Application()
 ,	mpCamera(nullptr)
 ,	mUniformCamera(0)
 	//Shader Programs
+,	mpProgramBgMesh(nullptr)
 ,	mpProgramCube(nullptr)
 	//Textures
 ,	mpTextureCube(nullptr)
 	//Data
 	//  Models
+,	mpModelAssetBgMesh(nullptr)
 ,	mpModelAssetCube(nullptr)
+	//  Instance Lists
+//,	mListModelInstancesBackground()
 //,	mListModelInstances()//not sure how to initialize this yet
 
 ,	mRectUniformModel(0)
@@ -94,57 +98,8 @@ void Application::Initialize()
 	{
 		if(InitializeGLEW() == true)
 		{
-			//General
-			// print out some info about the graphics drivers
-			std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-			std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-			std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-			std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-
-			//OpenGL Settings
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			//Camera
-			if(mpCamera == nullptr)
-			{
-				mpCamera = new DSGraphics::Camera();
-				mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
-				mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
-			}
-			else
-			{
-				fprintf(stderr, "WARNING: mpCamera is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
-			}
-
-			//Shaders
-			if(mpProgramCube == nullptr)
-			{
-				mpProgramCube = LoadShaders("Shaders/vertexShader.txt", "Shaders/fragmentShader.txt");
-			}
-			else
-			{
-				fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
-			}
-
-			//Textures
-			if(mpTextureCube == nullptr)
-			{
-				mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes2.png");
-			}
-			else
-			{
-				fprintf(stderr, "WARNING: mpTextureCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. A memory leak may occur.\n");
-			}
-
-			//Individual Objects
-			// Assets
-			//  Models
-			LoadAssets();
-			//  Instances
-			CreateInstances();
+			Load();
+			CreateInitialInstances();
 		}
 	}
 }
@@ -249,11 +204,23 @@ bool Application::InitializeGLEW()
 	glewExperimental = GL_TRUE;
 	if(glewInit() == GLEW_OK)
 	{
-		// make sure OpenGL version 4.0 API is available
+		//Make sure OpenGL version 4.0 API is available
 		if(!GLEW_VERSION_4_0)
 		{
 			throw std::runtime_error("ERROR: OpenGL 4.0 API is not available.");
 		}
+
+		//Print out some info about the graphics drivers
+		std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+		std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+		std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+		std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+
+		//OpenGL Settings
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		return true;
 	}
@@ -269,6 +236,85 @@ bool Application::InitializeGLEW()
 // Initialize Sub-Functions
 //-----------------------------------------------------------------------------
 
+void Application::Load()
+{
+		LoadCamera();
+		LoadShaders();
+		LoadTextures();
+		LoadAssets();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadCamera()
+{
+	//Camera
+	if(mpCamera == nullptr)
+	{
+		mpCamera = new DSGraphics::Camera();
+		mpCamera->SetPosition(glm::vec3(0.0f, 4.0f, 4.0f));
+		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpCamera is being used due to it not having a default value of nullptr. Attempting to continue regardless. Camera values may be incorrect unless this is intentional.\n");
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadShaders()
+{
+	//Shaders
+	
+	// Background Mesh
+	if(mpProgramBgMesh == nullptr)
+	{
+		mpProgramBgMesh = CreateProgram("Shaders/BackgroundMesh/bgmesh.vertexshader", "Shaders/BackgroundMesh/bgmesh.fragmentshader");
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
+	}
+
+	// Cube
+	if(mpProgramCube == nullptr)
+	{
+		mpProgramCube = CreateProgram("Shaders/vertexShader.txt", "Shaders/fragmentShader.txt");
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+DSGraphics::Program* Application::CreateProgram(const char* vertexShaderFile, const char* fragmentShaderFile)
+{
+	std::vector<DSGraphics::Shader> shaders;
+	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(vertexShaderFile, GL_VERTEX_SHADER));
+	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(fragmentShaderFile, GL_FRAGMENT_SHADER));
+	return new DSGraphics::Program(shaders);
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadTextures()
+{
+	//Textures
+	if(mpTextureCube == nullptr)
+	{
+		mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes2.png");
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpTextureCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect texture may appear unless this is intentional.\n");
+	}
+}
+
+//-----------------------------------------------------------------------------
+
 void Application::LoadAssets()
 {
 	//Models
@@ -279,8 +325,75 @@ void Application::LoadAssets()
 
 void Application::LoadModelAssets()
 {
+	//Background Mesh
+	LoadModelAssetBgMesh();
+
 	//Cube
 	LoadModelAssetCube();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadModelAssetBgMesh()
+{
+	
+	const unsigned int kVertexCount = 3;
+	const unsigned int kPositionDimensions = 3;
+
+	GLfloat* pVertices = new GLfloat[kVertexCount * kPositionDimensions]
+	{
+		// -z
+		//	2
+		//	| \
+		//	0---1 +x
+
+		//Position
+		 0.0f,	 0.0f,	 0.0f,	//0
+		 0.01f,	 0.0f,	 0.0f,	//1
+		 0.0f,	 0.0f,	-0.01f	//2
+	};
+
+	//A line segment is made up from 2 vertices. A triangle has the same number of sides (line segments) as vertices (3).
+	const unsigned int kElementCount = 2 * kVertexCount;
+	GLuint* pElements = new GLuint[kElementCount]
+	{
+		0, 1,
+		1, 2,
+		2, 0
+	};
+
+	if(mpModelAssetBgMesh == nullptr)
+	{
+		mpModelAssetBgMesh = new DSGraphics::ModelAsset
+		(
+			mpProgramBgMesh,	//Program
+			false,				//Has Texture?
+			nullptr,			//Texture
+			0,					//Texture Coords Offset
+			false,				//Has Colors?
+			0,					//rgba Offset
+			kVertexCount,		//Vertex Count
+			kPositionDimensions,//Position Dimensions
+			0,					//Texture Dimensions
+			0,					//Color Dimensions
+			pVertices,			//Vertices
+			true,				//Has Elements?
+			kElementCount,		//Element Count
+			pElements,			//Elements,
+			GL_LINES			//Draw Type
+		);
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpModelAssetBgMesh is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
+	}
+
+	// Clean up temp variables
+	if(pVertices != nullptr)
+	{
+		delete[] pVertices;
+		pVertices = nullptr;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -343,24 +456,31 @@ void Application::LoadModelAssetCube()
 		5, 4, 7
 	};
 
-	mpModelAssetCube = new DSGraphics::ModelAsset
-	(
-		mpProgramCube,
-		true,
-		mpTextureCube,
-		3,
-		true,
-		5,
-		kVertexCount,
-		3,
-		2,
-		4,
-		pVertices,
-		true,
-		kElementCount,
-		pElements,
-		GL_LINES
-	);
+	if(mpModelAssetCube == nullptr)
+	{
+		mpModelAssetCube = new DSGraphics::ModelAsset
+		(
+			mpProgramCube,	//Program
+			true,			//Has Texture?
+			mpTextureCube,	//Texture
+			3,				//Texture Coords Offset
+			true,			//Has Colors?
+			5,				//rgba Offset
+			kVertexCount,	//Vertex Count
+			3,				//Position Dimensions
+			2,				//Texture Dimensions
+			4,				//Color Dimensions
+			pVertices,		//Vertices
+			true,			//Has Elements?
+			kElementCount,	//Element Count
+			pElements,		//Elements,
+			GL_LINES		//Draw Type
+		);
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpModelAssetCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
+	}
 
 	// Clean up temp variables
 	if(pVertices != nullptr)
@@ -377,12 +497,26 @@ void Application::LoadModelAssetCube()
 
 //-----------------------------------------------------------------------------
 
-DSGraphics::Program* Application::LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile)
+void Application::CreateInitialInstances()
 {
-	std::vector<DSGraphics::Shader> shaders;
-	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(vertexShaderFile, GL_VERTEX_SHADER));
-	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(fragmentShaderFile, GL_FRAGMENT_SHADER));
-	return new DSGraphics::Program(shaders);
+	//Background
+	// Mesh
+	DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
+	mListModelInstancesBackground.push_back(bgMesh);
+
+
+	//Cube
+	DSGraphics::ModelInstance cube0001(mpModelAssetCube, mpCamera);
+	mListModelInstances.push_back(cube0001);
+
+	DSGraphics::ModelInstance cube0002(mpModelAssetCube, mpCamera);
+	cube0002.SetSize(glm::vec3(0.5f));
+	cube0002.SetPosition(glm::vec3(2.0f, -1.5f, -2.5f));
+	cube0002.UpdateTransform();
+	mListModelInstances.push_back(cube0002);
+
+	//Set initial rotation axis for cube00001
+	mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 //-----------------------------------------------------------------------------
@@ -401,39 +535,76 @@ void Application::Input()
 	// Reset
 	if(glfwGetKey(mpWindow, '`'))
 	{
+		mpCamera->OffsetOrientation(0.0f, 0.0f);
 		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+	}
+	//Look at origin
+	else if(glfwGetKey(mpWindow, 'O'))
+	{
+		mpCamera->LookAt(glm::vec3(0.0f));
+	}
+	//Tilt Up
+	else if(glfwGetKey(mpWindow, 'R'))
+	{
+		mpCamera->OffsetOrientation(0.0f, 30.0f);
+	}
+	//Tilt Down
+	else if(glfwGetKey(mpWindow, 'F'))
+	{
+		mpCamera->OffsetOrientation(0.0f, -30.0f);
 	}
 
 	//Poll in counter clockwise direction, starting at 0 radians/degrees (right)
-	// Right
+	// East
 	else if(glfwGetKey(mpWindow, 'D'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionRight());
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
+
+		//Right
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionRight());
 	}
-	// Forward
+	// North
 	else if(glfwGetKey(mpWindow, 'W'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionForward());
+		//North
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
+
+		//Forward
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionForward());
 	}
-	// Left
+	// West
 	else if(glfwGetKey(mpWindow, 'A'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionRight()));
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
+
+		//Left
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionRight()));
 	}
-	// Backwards
+	// South
 	else if(glfwGetKey(mpWindow, 'S'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionForward()));
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
+
+		//Backwards
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionForward()));
 	}
 	// Up
 	else if(glfwGetKey(mpWindow, 'E'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionUp());
+		//Up relative to global up (like on Earth, towards the sky)
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
+
+		//Up based on camera orientation (like in Space)
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionUp());
 	}
 	// Down
 	else if(glfwGetKey(mpWindow, 'Q'))
 	{
-		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));
+		//Down relative to global Down (like on Earth, towards center of planet)
+		mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+
+		//Down based on camera orientation (like in Space)
+		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));
 	}
 
 
@@ -441,15 +612,15 @@ void Application::Input()
 	// Rect
 	if(glfwGetKey(mpWindow, 'X'))
 	{
-		mListModelInstances.front().SetRotationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
+		mListModelInstances.front().SetOrientationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Y'))
 	{
-		mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+		mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Z'))
 	{
-		mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
+		mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 
@@ -480,7 +651,8 @@ void Application::Physics()
 	}
 	//  Update model based on changes that may have occured during the input stage
 	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
-	mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
+	mListModelInstances.front().SetOrientationAngle(glm::radians(mRectDegreesRotated));
+	//mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
 	mListModelInstances.front().UpdateTransform();
 }
 
@@ -493,9 +665,22 @@ void Application::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Instances
-	//TODO: learn what kind of iterator I need here
+	//Camera
+	//glm::vec4 posToLookAt = mListModelInstancesBackground.begin()->GetTranslate() * glm::vec4(1.0f);
+	//mpCamera->LookAt(glm::vec3(posToLookAt));
+
+	//Instance Lists
+	
+	// Background
 	std::list<DSGraphics::ModelInstance>::iterator it;
+	for(it = mListModelInstancesBackground.begin(); it != mListModelInstancesBackground.end(); ++it)
+	{
+		it->Render();
+	}
+
+	// Cube
+	//TODO: learn what kind of iterator I need here
+	//std::list<DSGraphics::ModelInstance>::iterator it;
 	for(it = mListModelInstances.begin(); it != mListModelInstances.end(); ++it)
 	{
 		it->Render();
@@ -542,6 +727,13 @@ void Application::CleanUp()
 
 void Application::CleanUpAssets()
 {
+	//Background Mesh
+	if(mpModelAssetBgMesh != nullptr)
+	{
+		delete mpModelAssetBgMesh;
+		mpModelAssetBgMesh = nullptr;
+	}
+
 	//Cube
 	if(mpModelAssetCube != nullptr)
 	{
@@ -554,27 +746,13 @@ void Application::CleanUpAssets()
 
 void Application::CleanUpInstances()
 {
+	mListModelInstancesBackground.clear();
 	mListModelInstances.clear();
 }
 
 //-----------------------------------------------------------------------------
 // Test Functions
 //-----------------------------------------------------------------------------
-
-void Application::CreateInstances()
-{
-	DSGraphics::ModelInstance cube0001(mpModelAssetCube, mpCamera);
-	mListModelInstances.push_back(cube0001);
-
-	DSGraphics::ModelInstance cube0002(mpModelAssetCube, mpCamera);
-	cube0002.SetScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)));
-	cube0002.SetTranslate(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, -1.5f, -2.5f)));
-	cube0002.UpdateTransform();
-	mListModelInstances.push_back(cube0002);
-
-	//Set initial rotation axis for cube00001
-	mListModelInstances.front().SetRotationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-}
 
 //-----------------------------------------------------------------------------
 // Helper Functions

@@ -1,0 +1,24 @@
+//=============================================================================
+// File:		bgmesh.vertexshader
+// Created:		2015/02/18
+// Last Edited:	2015/02/18
+// Copyright:	Daniel Schenker
+// Description:	Vertex Shader for the background mesh
+//=============================================================================
+
+#version 400
+
+uniform mat4 camera;
+uniform mat4 model;
+
+in vec3 vsInPosition;
+
+out vec4 vsOutColor;
+
+void main()
+{
+	//if(vsInPosition.x
+	vsOutColor.xyzw = vec4(0.64, 0.87, 1.0, 1.0);
+	
+	gl_Position = camera * model * vec4(vsInPosition, 1);
+}

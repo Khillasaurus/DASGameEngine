@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/18
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -53,36 +53,59 @@ namespace DSGraphics
 		//General
 		void UpdateTransform();
 		void Render();
+		//TODO: Move, Turn, etc
+	private:
+		//UpdateTransform Sub-Functions
+		void UpdateScale();
+		void UpdateRotate();
+		void UpdateTranslate();
+	public:
 		// Getters
-		glm::mat4 GetScale() const;
-		glm::mat4 GetRotate() const;
-		glm::vec3 GetRotationAxis() const;
-		glm::mat4 GetTranslate() const;
+		glm::vec3 GetSize() const;
+		//glm::vec3 GetOrientation() const;
+		GLfloat GetOrientationAngleInRadians() const;
+		glm::vec3 GetOrientationAxis() const;
+		glm::vec3 GetPosition() const;
 		// Setters
-		void SetScale(const glm::mat4& scale);
-		void SetRotate(const glm::mat4& rotate);
-		void SetRotationAxis(const glm::vec3& rotationAxis);
-		void SetTranslate(const glm::mat4& translate);
+		void SetSize(const glm::vec3& size);
+		//void SetOrientation(const glm::vec3& orientation);
+		void SetOrientationAngle(GLfloat radians);
+		void SetOrientationAxis(const glm::vec3& rotationAxis);
+		void SetPosition(const glm::vec3& position);
 
 		//Member Variables
 	private:
-		// Model Asset
-		DSGraphics::ModelAsset* mpAsset;
-		// Model Matrix
-		glm::mat4 mTransform;
-		//  Scale
-		glm::mat4 mScale;
-		//  Rotate
-		glm::mat4 mRotate;
-		glm::vec3 mRotationAxis;
-		//  Translate
-		glm::mat4 mTranslate;
-		//  Shader Uniform
-		GLuint mUniformModel;
-		// Camera
-		DSGraphics::Camera* mpCamera;
-		//  Shader Uniform
-		GLuint mUniformCamera;
+		//Externally Accessible (not encapsulated)
+			// Model Asset
+			DSGraphics::ModelAsset* mpAsset;
+
+			glm::vec3 mSize;
+			//glm::vec3 mOrientation;
+			GLfloat mOrientationAngle;
+			glm::vec3 mOrientationAxis;
+			glm::vec3 mPosition;
+
+			// Camera
+			DSGraphics::Camera* mpCamera;
+
+		//Externally Inaccessible (encapsulated)
+			// Model Matrix
+			glm::mat4 mTransform;
+			//  Scale
+			glm::mat4 mScale;
+			bool mSizeUpdated;
+			//  Rotate
+			glm::mat4 mRotate;
+			//glm::vec3 mRotationAxis;
+			bool mOrientationUpdated;
+			//  Translate
+			glm::mat4 mTranslate;
+			bool mPositionUpdated;
+			//  Shader Uniform
+			GLuint mUniformModel;
+		
+			//  Shader Uniform
+			GLuint mUniformCamera;
 	};
 
 }//namespace DSGraphics

@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/18
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -219,6 +219,13 @@ DSGraphics::ModelAsset::~ModelAsset()
 GLuint DSGraphics::ModelAsset::GetProgramID() const
 {
 	return mpProgram->GetProgramID();
+}
+
+//-----------------------------------------------------------------------------
+
+bool DSGraphics::ModelAsset::GetHasTexture() const
+{
+	return mkHasTexture;
 }
 
 //-----------------------------------------------------------------------------

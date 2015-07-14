@@ -46,6 +46,7 @@ DSGraphics::Camera::Camera()
 ,	mFarPlane(100.0f)
 ,	mViewportAspectRatio(16.0f / 9.0f)
 {
+	LookAt(glm::vec3(0.0f));
 }
 
 //-----------------------------------------------------------------------------

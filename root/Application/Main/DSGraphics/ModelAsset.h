@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/17
+// Last Edited:	2015/02/18
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -70,6 +70,7 @@ namespace DSGraphics
 	public:
 		// Getters
 		GLuint GetProgramID() const;
+		bool GetHasTexture() const;
 		GLuint GetTextureObjectID() const;
 		GLuint GetVao() const;
 		unsigned int GetVertexCount() const;

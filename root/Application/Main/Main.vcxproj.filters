@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{56ddb65b-738f-412f-8383-aa16fe5f8a3c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\BackgroundMesh">
+      <UniqueIdentifier>{850a5e1c-86ef-4c79-8d0a-875904805248}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -52,6 +55,12 @@
     </None>
     <None Include="Shaders\vertexShader.txt">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BackgroundMesh\bgmesh.fragmentshader">
+      <Filter>Shaders\BackgroundMesh</Filter>
+    </None>
+    <None Include="Shaders\BackgroundMesh\bgmesh.vertexshader">
+      <Filter>Shaders\BackgroundMesh</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

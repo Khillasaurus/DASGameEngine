@@ -72,10 +72,16 @@ private:
 	bool InitializeGLEW();
 
 	// Initialize Sub-Functions
-	void LoadAssets();
-		void LoadModelAssets();
-			void LoadModelAssetCube();
-	DSGraphics::Program* LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile);
+	void Load();
+		void LoadCamera();
+		void LoadShaders();
+			DSGraphics::Program* CreateProgram(const char* vertexShaderFile, const char* fragmentShaderFile);
+		void LoadTextures();
+		void LoadAssets();
+			void LoadModelAssets();
+				void LoadModelAssetBgMesh();
+				void LoadModelAssetCube();
+	void CreateInitialInstances();
 
 	// Run Sub-Functions
 	void Input();
@@ -88,9 +94,6 @@ private:
 	void CleanUp();
 		void CleanUpAssets();
 		void CleanUpInstances();
-
-	//Test Functions
-	void CreateInstances();
 
 	//Member Variables
 private:
@@ -114,14 +117,19 @@ private:
 	GLuint mUniformCamera;
 
 	// Shader Programs
+	DSGraphics::Program* mpProgramBgMesh;
 	DSGraphics::Program* mpProgramCube;
 
 	// Textures
 	DSGraphics::Texture* mpTextureCube;
 
-	// Assets & Instances
+	// Assets
 	//  Models
+	DSGraphics::ModelAsset* mpModelAssetBgMesh;
 	DSGraphics::ModelAsset* mpModelAssetCube;
+
+	//  Instance Lists
+	std::list<DSGraphics::ModelInstance> mListModelInstancesBackground;
 	std::list<DSGraphics::ModelInstance> mListModelInstances;
 
 	
