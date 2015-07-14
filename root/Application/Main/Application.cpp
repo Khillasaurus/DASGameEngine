@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/18
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -363,17 +363,25 @@ void Application::LoadModelAssetBgMesh()
 	const unsigned int kVertexCount = static_cast<int>(3 * mBgMeshSize.x * mBgMeshSize.y);
 	GLfloat* pVertices = new GLfloat[kVertexCount];
 	
+	GLfloat* pVerticesIterator = nullptr;
 	for(int i = 0; i < static_cast<int>(mBgMeshSize.x * mBgMeshSize.y); ++i)
 	{
-		pVertices[i * 3] = pVerticesVec3[i].x;
+		pVerticesIterator = &pVertices[i * 3];
+		*pVerticesIterator = pVerticesVec3[i].x;
+		++pVerticesIterator;
+		*pVerticesIterator = pVerticesVec3[i].y;
+		++pVerticesIterator;
+		*pVerticesIterator = pVerticesVec3[i].z;
+		//pVertices[i * 3] = pVerticesVec3[i].x;
 		printf("pVertices[%u] = x: %f\n", (i * 3), pVerticesVec3[i].x);
 	
-		pVertices[(i * 3) + 1] = pVerticesVec3[i].y;
+		//pVertices[(i * 3) + 1] = pVerticesVec3[i].y;
 		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].y);
 		
-		pVertices[(i * 3) + 2] = pVerticesVec3[i].z;
+		//pVertices[(i * 3) + 2] = pVerticesVec3[i].z;
 		printf("pVertices[%u] = x: %f\n", ((i * 3) + 1), pVerticesVec3[i].z);
 	}
+	pVerticesIterator = nullptr;
 
 
 	/*
@@ -461,9 +469,9 @@ void Application::LoadModelAssetBgMesh()
 	{
 		for(int row = 0; row < static_cast<int>(mBgMeshSize.y); ++row)
 		{
-			pElements[skipFromHToVLineStrips + ((static_cast<int>(mBgMeshSize.x) * row) + col)] = static_cast<int>(col + (mBgMeshSize.x * row));
+			pElements[skipFromHToVLineStrips + ((static_cast<int>(mBgMeshSize.y) * col) + row)] = static_cast<int>(col + (mBgMeshSize.x * row));
 			//pElements[skipFromHToVLineStrips + (col * row) + col] = static_cast<int>(col + (mBgMeshSize.x * row));
-			printf("pElements[%u] = %u\n", (skipFromHToVLineStrips + (col * row) + col), (static_cast<int>(col + (mBgMeshSize.x * row))));
+			printf("pElements[%u] = %u\n", (skipFromHToVLineStrips + ((static_cast<int>(mBgMeshSize.y) * col) + row)), (static_cast<int>(col + (mBgMeshSize.x * row))));
 		}
 	}
 
@@ -484,10 +492,10 @@ void Application::LoadModelAssetBgMesh()
 			0,					//Color Dimensions
 			pVertices,			//Vertices
 			true,				//Has Elements?
-			kElementCount,		//Element Count
-			pElements,			//Elements,
+			kElementCount,		//Element Count Total
+			pElements,			//Elements
 			GL_LINE_STRIP,		//Draw Type
-			4					//Element Count Per Draw Type if variable
+			mBgMeshSize.x		//Element Count Per Draw Type if variable
 		);
 	}
 	else
