@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/27
+// Last Edited:	2015/03/02
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -251,12 +251,7 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM), DSMathematics::Quaternion(), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
-		//mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
-		//mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
 		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		//mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
-		//mpCamera->OffsetOrientation(0.0f, 45.0f);//temp
-		//mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
 	else
 	{
@@ -451,13 +446,12 @@ void Application::Input()
 
 
 	//Camera
-	const float kMoveSpeed = 2.0f; //units per second
+	const float kMoveSpeed = 2.0f;//units per second
 
 	// Reset
 	if(glfwGetKey(mpWindow, '`'))
 	{
 		mpCamera->SetPosition(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM));
-		//mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
 		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	//Look at origin
@@ -468,16 +462,12 @@ void Application::Input()
 	//Tilt Up
 	else if(glfwGetKey(mpWindow, 'R'))
 	{
-		//mpCamera->OffsetOrientation(0.0f, 30.0f);
-		//mpCamera->Rotate(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		DSMathematics::Quaternion tempQ(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		mpCamera->Rotate(tempQ);
 	}
 	//Tilt Down
 	else if(glfwGetKey(mpWindow, 'F'))
 	{
-		//mpCamera->OffsetOrientation(0.0f, -30.0f);
-		//mpCamera->Rotate(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		DSMathematics::Quaternion tempQ(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		mpCamera->Rotate(tempQ);
 	}
@@ -486,59 +476,32 @@ void Application::Input()
 	// East
 	else if(glfwGetKey(mpWindow, 'D'))
 	{
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
-
-		//Right
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionRight());
 	}
 	// North
 	else if(glfwGetKey(mpWindow, 'W'))
 	{
-		//North
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
-
-		//Forward
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionForward());
 	}
 	// West
 	else if(glfwGetKey(mpWindow, 'A'))
 	{
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
-
-		//Left
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionRight()));
 	}
 	// South
 	else if(glfwGetKey(mpWindow, 'S'))
 	{
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
-
-		//Backwards
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionForward()));
 	}
 	// Up
 	else if(glfwGetKey(mpWindow, 'E'))
 	{
-		//Up relative to global up (like on Earth, towards the sky)
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
-
-		//Up based on camera orientation (like in Space)
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * mpCamera->GetDirectionUp());
 	}
 	// Down
 	else if(glfwGetKey(mpWindow, 'Q'))
 	{
-		//Down relative to global Down (like on Earth, towards center of planet)
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
 		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
-
-		//Down based on camera orientation (like in Space)
-		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));
 	}
 	// Local Right
 	else if(glfwGetKey(mpWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)

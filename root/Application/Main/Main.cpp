@@ -1,8 +1,10 @@
 //=============================================================================
 // File:		Main.cpp
 // Created:		2015/01/28
-// Last Edited:	2015/02/11
+// Last Edited:	2015/03/01
 // Copyright:	Daniel Schenker
+//				All files in this solution are copyright Daniel Schenker.
+//				Please contact Daniel Schenker at D.A.Schenker@gmail.com to request file usage.
 // Description:	Main.cpp
 //=============================================================================
 
