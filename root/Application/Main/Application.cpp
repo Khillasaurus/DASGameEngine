@@ -657,7 +657,7 @@ void Application::Input()
 	{
 		//mpCamera->OffsetOrientation(0.0f, 30.0f);
 		//mpCamera->Rotate(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
-		DSMathematics::Quaternion tempQ(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
+		DSMathematics::Quaternion tempQ(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		mpCamera->Rotate(tempQ);
 	}
 	//Tilt Down
@@ -665,7 +665,7 @@ void Application::Input()
 	{
 		//mpCamera->OffsetOrientation(0.0f, -30.0f);
 		//mpCamera->Rotate(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
-		DSMathematics::Quaternion tempQ(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
+		DSMathematics::Quaternion tempQ(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 		mpCamera->Rotate(tempQ);
 	}
 
@@ -732,20 +732,20 @@ void Application::Input()
 	{
 		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
 	}
-	// Local Forwards
+	// Local Forward
 	else if(glfwGetKey(mpWindow, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 	// Local Left
 	else if(glfwGetKey(mpWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
 	{
 		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
 	}
-	// Local Backwards
+	// Local Backward
 	else if(glfwGetKey(mpWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 

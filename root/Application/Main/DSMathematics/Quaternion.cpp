@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Quaternion.cpp
 // Created:		2015/02/25
-// Last Edited:	2015/02/25
+// Last Edited:	2015/02/26
 // Copyright:	Daniel Schenker
 // Description:	Quaternion
 //=============================================================================
@@ -9,6 +9,9 @@
 //=============================================================================
 //Includes
 //=============================================================================
+
+//debugging only
+#include <stdio.h>
 
 // Daniel Schenker
 #include "Quaternion.h"
@@ -135,19 +138,23 @@ glm::vec3 DSMathematics::Quaternion::Rotate(const glm::vec3& v) const
 	A simplified version of the basic equation is used instead for optimization.
 	*/
 
+	//Above mentioned optimized form:
+	//glm::vec3 mVCrossv = glm::cross(mV, v);//original
+	glm::vec3 vCrossmV = glm::cross(v, mV);//testing, seems to work correctly
+	return v + ((2.0f * mW) * vCrossmV) + (2.0f * glm::cross(mV, vCrossmV));
+
+	
+	//Above mentioned basic equation form:
+	/*
 	DSMathematics::Quaternion p;
 	p.mW = 0;
 	p.mV = v;
 
-	//Above mentioned optimized form:
-	glm::vec3 mVCrossv = glm::cross(mV, v);
-	return v + (mVCrossv * (2.0f * mW)) + (glm::cross(mV, mVCrossv) * 2.0f);
-
-	/*
-	Above mentioned basic equation form:
-
 	const Quaternion& q = (*this);
-	return (q * p * q.Invert()).mV;
+	//return (q * p * q.Invert()).mV;
+	DSMathematics::Quaternion res = p.Multiply(q.Invert());
+	res = q.Multiply(res);
+	return res.mV;
 	*/
 }
 

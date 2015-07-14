@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Camera.cpp
 // Created:		2015/02/12
-// Last Edited:	2015/02/25
+// Last Edited:	2015/02/26
 // Copyright:	Daniel Schenker
 // Description:	Camera
 //=============================================================================
@@ -100,7 +100,7 @@ void DSGraphics::Camera::MoveLocal(const glm::vec3& offset)
 
 void DSGraphics::Camera::Rotate(const DSMathematics::Quaternion& rotation)
 {
-	mOrientation.Multiply(rotation);
+	mOrientation = mOrientation.Multiply(rotation);
 }
 
 //-----------------------------------------------------------------------------
@@ -266,6 +266,9 @@ glm::vec3 DSGraphics::Camera::GetDirectionRight() const
 
 glm::vec3 DSGraphics::Camera::GetDirectionUp() const
 {
+	//For some reason this gives DirectionUp... sometimes...
+	//return mOrientation.Rotate(glm::vec3(0.0f, 0.0f, -1.0f));
+
 	return mOrientation.Rotate(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//glm::vec4 up = mOrientation * glm::vec4(0, 1, 0, 1);
@@ -278,7 +281,11 @@ glm::vec3 DSGraphics::Camera::GetDirectionUp() const
 
 glm::vec3 DSGraphics::Camera::GetDirectionForward() const
 {
+	//For some reason this gives DirectionForward... sometimes...
+	//return mOrientation.Rotate(glm::vec3(0.0f, -1.0f, 0.0f));
 	return mOrientation.Rotate(glm::vec3(0.0f, 0.0f, -1.0f));
+
+	//return mOrientation.Rotate(glm::vec3(0.0f, 0.0f, -1.0f));
 
 	//glm::vec4 forward = mOrientation * glm::vec4(0, 0, -1, 1);
 
