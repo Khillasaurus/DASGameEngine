@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/16
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -308,16 +308,16 @@ void Application::LoadModelAssetCube()
 		//Position				TexCoords		Color: RGBA
 		
 		//Top
-		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 0.0f,	//0
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,		1.0f,  0.5f,  0.0f, 1.0f,	//1
-		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 0.0f,	//2
-		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 0.7f,	//3
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 1.0f,	//0 0.0f,	
+		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,		1.0f,  0.5f,  0.0f, 1.0f,	//1 1.0f,	
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 1.0f,	//2 0.0f,	
+		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 1.0f,	//3 0.7f,	
 
 		//Bottom
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f, 1.0f,	//4
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 0.0f,	//5
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 0.5f,	//6
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 0.5f	//7
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f, 1.0f,	//4 1.0f,	
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 1.0f,	//5 0.0f,	
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 1.0f,	//6 0.5f,	
+		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 1.0f	//7 0.5f	
 	};
 
 	const unsigned int kElementCount = 3 * 2 * 6;
@@ -361,9 +361,10 @@ void Application::LoadModelAssetCube()
 		2,
 		4,
 		pVertices,
+		true,
 		kElementCount,
 		pElements,
-		GL_TRIANGLES
+		GL_LINES
 	);
 
 	// Clean up temp variables

@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/16
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -44,11 +44,11 @@ ModelInstance::ModelInstance(ModelAsset* pAsset, Camera* pCamera)
 ,	mUniformCamera(0)
 {
 	//TODO: Error checking stuff
-	if(mpCamera != nullptr)
-	{
+	//if(mpCamera != nullptr)
+	//{
 		//mUniformCamera = glGetUniformLocation(mpAsset->mpProgram->GetProgramID(), "camera");
 		//mUniformModel = glGetUniformLocation(mpAsset->mpProgram->GetProgramID(), "model");
-	}
+	//}
 }
 
 //-----------------------------------------------------------------------------
@@ -95,8 +95,17 @@ void ModelInstance::Render()
 	// VAO
 	glBindVertexArray(mpAsset->GetVao());
 
-	//Draw Elements
-	glDrawElements(mpAsset->GetDrawType(), mpAsset->GetElementCount(), GL_UNSIGNED_INT, 0);
+	//Draw
+	// Elements
+	if(mpAsset->GetHasElements() == true)
+	{
+		glDrawElements(mpAsset->GetDrawType(), mpAsset->GetElementCount(), GL_UNSIGNED_INT, 0);
+	}
+	// Arrays
+	else
+	{
+		glDrawArrays(mpAsset->GetDrawType(), 0, mpAsset->GetVertexCount());
+	}
 
 	//Unbind
 	glBindVertexArray(0);

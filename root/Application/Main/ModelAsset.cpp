@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/16
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -39,6 +39,7 @@ ModelAsset::ModelAsset
 	unsigned int textureDimensions,
 	unsigned int colorDimensions,
 	GLfloat* pVertices,
+	bool hasElements,
 	unsigned int elementCount,
 	GLuint* pElements,
 	GLenum drawType
@@ -57,6 +58,7 @@ ModelAsset::ModelAsset
 ,	mkColorDimensions(colorDimensions)
 ,	mpVertices(nullptr)
 ,	mVbo(0)
+,	mkHasElements(hasElements)
 ,	mEbo(0)
 ,	mkElementCount(elementCount)
 ,	mpElements(nullptr)
@@ -73,10 +75,13 @@ ModelAsset::ModelAsset
 	}
 
 	// Element
-	mpElements = new GLuint[mkElementCount];
-	for(unsigned int i = 0; i < mkElementCount; ++i)
+	if(mkHasElements == true)
 	{
-		mpElements[i] = pElements[i];
+		mpElements = new GLuint[mkElementCount];
+		for(unsigned int i = 0; i < mkElementCount; ++i)
+		{
+			mpElements[i] = pElements[i];
+		}
 	}
 
 	//Vertex Array Object (VAO)
@@ -104,15 +109,18 @@ ModelAsset::ModelAsset
 
 
 	//Element  Buffer Objects (EBO)
-	glGenBuffers(1, &mEbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEbo);
-	glBufferData
-	(
-		GL_ELEMENT_ARRAY_BUFFER,
-		sizeof(mpElements[0]) * mkElementCount,
-		mpElements,
-		GL_STATIC_DRAW
-	);
+	if(mkHasElements == true)
+	{
+		glGenBuffers(1, &mEbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEbo);
+		glBufferData
+		(
+			GL_ELEMENT_ARRAY_BUFFER,
+			sizeof(mpElements[0]) * mkElementCount,
+			mpElements,
+			GL_STATIC_DRAW
+		);
+	}
 
 
 	//Specify the layout of the vertex data
@@ -179,11 +187,14 @@ ModelAsset::~ModelAsset()
 		delete[] mpVertices;
 		mpVertices = nullptr;
 	}
-	glDeleteBuffers(1, &mEbo);
-	if(mpElements != nullptr)
+	if(mkHasElements == true)
 	{
-		delete[] mpElements;
-		mpElements = nullptr;
+		glDeleteBuffers(1, &mEbo);
+		if(mpElements != nullptr)
+		{
+			delete[] mpElements;
+			mpElements = nullptr;
+		}
 	}
 	glDeleteBuffers(1, &mVbo);
 	glDeleteVertexArrays(1, &mVao);
@@ -223,6 +234,20 @@ GLuint ModelAsset::GetTextureObjectID() const
 GLuint ModelAsset::GetVao() const
 {
 	return mVao;
+}
+
+//-----------------------------------------------------------------------------
+
+unsigned int ModelAsset::GetVertexCount() const
+{
+	return mkVertexCount;
+}
+
+//-----------------------------------------------------------------------------
+
+bool ModelAsset::GetHasElements() const
+{
+	return mkHasElements;
 }
 
 //-----------------------------------------------------------------------------

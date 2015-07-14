@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/16
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -52,6 +52,7 @@ public:
 		unsigned int textureDimensions,
 		unsigned int colorDimensions,
 		GLfloat* pVertices,
+		bool hasElements,
 		unsigned int elementCount,
 		GLuint* pElements,
 		GLenum drawType
@@ -65,6 +66,8 @@ public:
 	GLuint GetProgramID() const;
 	GLuint GetTextureObjectID() const;
 	GLuint GetVao() const;
+	unsigned int GetVertexCount() const;
+	bool GetHasElements() const;
 	unsigned int GetElementCount() const;
 	GLenum GetDrawType() const;
 	// Setters
@@ -92,6 +95,7 @@ private:
 	// VBO
 	GLuint mVbo;
 	// Elements
+	const bool mkHasElements;
 	GLuint mEbo;
 	const unsigned int mkElementCount;
 	GLuint* mpElements;//TODO: make same change as with mpRectVertices
