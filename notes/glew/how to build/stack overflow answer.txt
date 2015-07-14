@@ -1,0 +1,33 @@
+# In regards to GLEW: #
+I suggest you use GLEW for now, and switch to GLEW MX (**M**ultiple Rendering Conte**x**ts) once you need the additional functionality it provides.
+
+According to http://glew.sourceforge.net/advanced.html
+
+> Starting with release 1.2.0, thread-safe support for multiple rendering contexts, possibly with different capabilities, is available. **Since this is not required by most users**, [GLEW MX] is not added to the binary releases to maintain compatibility between different versions.
+
+### Here is how you build glew: ###
+>Note: Just because you are using a 64 bit machine, doesn't mean that you have Visual Studio set up to run 64 bit applications. **I suggest you use the 32 bit versions of libraries** until you are ready to reap the benefits of using the 64 bit versions, as you can switch later.
+
+**1.** Link your project with the *static* GLEW library in the *lib* folder. This is either glew32s.lib or GLEW depending on your platform.
+ > Note: glew32s.lib is to link statically, glew32.lib (without the s) is to link dynamically. <br><br> If you prefer to dynamically link with GLEW instead, leave out the define and link with glew32.lib instead of glew32s.lib on Windows. Don't forget to include glew32.dll or libGLEW.so with your executable!
+
+![Linker - Additional Library Directories][1]
+![Linker - Input - Additional Dependencies][2]
+**2.** Add the *include* folder to your include path.
+
+![C C++ - General - Additional Include Directories][3]
+**3.** Include the header in your program, but make sure that it is included before the OpenGL headers or the library you used to create your window.
+
+![Code - Headers][4]
+
+# In regards to GLUT: #
+Could someone else answer (or edit my answer), as I have not used GLUT yet.
+
+# Additional Sources Used For This Answer: #
+https://open.gl/
+
+
+  [1]: http://i.stack.imgur.com/ESrqF.png
+  [2]: http://i.stack.imgur.com/MDIem.png
+  [3]: http://i.stack.imgur.com/Ob1VL.png
+  [4]: http://i.stack.imgur.com/1Qtn2.png

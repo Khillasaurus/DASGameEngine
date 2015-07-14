@@ -1,0 +1,195 @@
+//=============================================================================
+// File:		Shader.cpp
+// Created:		2015/02/10
+// Last Edited:	2015/02/11
+// Copyright:	Daniel Schenker
+// Description:	Shader
+//=============================================================================
+
+//=============================================================================
+//Includes
+//=============================================================================
+
+// Standard C++ Libraries
+#include <fstream>
+#include <string>
+#include <vector>
+
+// Daniel Schenker
+#include "Shader.h"
+
+//=============================================================================
+//Statics
+//=============================================================================
+
+//=============================================================================
+//Class Definitions
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// Constuctors
+//-----------------------------------------------------------------------------
+
+Shader::Shader()
+:	mShaderProgramID(-1)
+,	mVertexShader(-1)
+,	mFragmentShader(-1)
+{
+}
+
+//-----------------------------------------------------------------------------
+// Destructor
+//-----------------------------------------------------------------------------
+
+Shader::~Shader()
+{
+	//Program
+	glDeleteProgram(mShaderProgramID);
+	//Fragment
+	glDeleteShader(mFragmentShader);
+	//Vertex
+	glDeleteShader(mVertexShader);
+}
+
+//-----------------------------------------------------------------------------
+// Public Member Functions
+//-----------------------------------------------------------------------------
+
+//Compiles shaders and combines them into a program
+void Shader::LoadShaderProgram(const char* pVertexShaderFile, const char* pFragmentShaderFile)
+{
+	//Vertex Shader Object
+	// Creation
+	if(mVertexShader != -1)
+	{
+		fprintf(stderr, "WARNING: mVertexShader is being used due to it not having a default value of GLuint == -1. Attempting to continue regardless.\n");
+	}
+	mVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Load
+	//Note:	Load data into the Vertex Shader Object.
+	std::string vertexShaderData = "";
+	ReadShader(pVertexShaderFile, vertexShaderData);
+	const GLchar* pVertexSource = vertexShaderData.c_str();
+	
+	glShaderSource(mVertexShader, 1, &pVertexSource, NULL);
+	// Compile
+	//Note:	Compile vertex shader into code that can be executed by the graphics card.
+	glCompileShader(mVertexShader);
+	// Success Check
+	GLint compiledSuccessfullyVertexShader = GL_FALSE;
+	int infoLogLengthVertexShader = 0;
+	glGetShaderiv(mVertexShader, GL_COMPILE_STATUS, &compiledSuccessfullyVertexShader);
+	if(compiledSuccessfullyVertexShader == GL_FALSE)
+	{
+		printf("ERROR: Vertex Shader Object could not be compiled. Please see info log following.\n");
+		glGetShaderiv(mVertexShader, GL_INFO_LOG_LENGTH, &infoLogLengthVertexShader);
+		if(infoLogLengthVertexShader > 0)
+		{
+			std::vector<char> vertexShaderErrorMessage(infoLogLengthVertexShader + 1);
+			glGetShaderInfoLog(mVertexShader, infoLogLengthVertexShader, NULL, &vertexShaderErrorMessage[0]);
+			printf("%s\n", &vertexShaderErrorMessage[0]);
+		}
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+
+	//Fragment Shader Object
+	// Creation
+	if(mFragmentShader != -1)
+	{
+		fprintf(stderr, "WARNING: mFragmentShader is being used due to it not having a default value of GLuint == -1. Attempting to continue regardless.\n");
+	}
+	mFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Load
+	//due to error with ReadShader function, I'm hard coding it for now
+	//const GLchar* pFragmentSource = ReadShader(pFragmentShaderFile).c_str();
+	std::string fragmentShaderData = "";
+	ReadShader(pFragmentShaderFile, fragmentShaderData);
+	const GLchar* pFragmentSource = fragmentShaderData.c_str();
+
+	glShaderSource(mFragmentShader, 1, &pFragmentSource, NULL);
+	// Compile
+	glCompileShader(mFragmentShader);
+	// Success Check
+	GLint compiledSuccessfullyFragmentShader = GL_FALSE;
+	int infoLogLengthFragmentShader = 0;
+	glGetShaderiv(mFragmentShader, GL_COMPILE_STATUS, &compiledSuccessfullyFragmentShader);
+	if(compiledSuccessfullyFragmentShader == GL_FALSE)
+	{
+		glGetShaderiv(mFragmentShader, GL_INFO_LOG_LENGTH, &infoLogLengthFragmentShader);
+		if(infoLogLengthFragmentShader > 0)
+		{
+			std::vector<char> fragmentShaderErrorMessage(infoLogLengthFragmentShader + 1);
+			glGetShaderInfoLog(mFragmentShader, infoLogLengthFragmentShader, NULL, &fragmentShaderErrorMessage[0]);
+			printf("%s\n", &fragmentShaderErrorMessage[0]);
+		}
+		printf("ERROR: Fragment Shader Object could not be compiled. Please see info log.\n");
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+	//Program
+	//Note:	A program is created by connecting shader objects.
+	// Creation
+	if(mShaderProgramID != -1)
+	{
+		fprintf(stderr, "WARNING: mShaderProgramID is being used due to it not having a default value of GLuint == -1. Attempting to continue regardless.\n");
+	}
+	mShaderProgramID = glCreateProgram();
+	// Attachment
+	//  Vertex Shader Object
+	glAttachShader(mShaderProgramID, mVertexShader);
+	//  Fragment Shader Object
+	glAttachShader(mShaderProgramID, mFragmentShader);
+	// Specify
+	//Note:	Since a fragment shader is allowed to write to multiple buffers,
+	//		specific Fragment Shader Output must be specified to specific Buffers
+	glBindFragDataLocation(mShaderProgramID, 0, "fsOutColor");
+	// Link
+	glLinkProgram(mShaderProgramID);
+	//TODO: GL_LINK_STATUS
+	glUseProgram(mShaderProgramID);
+}
+
+//-----------------------------------------------------------------------------
+// Private Member Functions
+//-----------------------------------------------------------------------------
+
+//Reads a shader file and stores the contents in shaderData
+void Shader::ReadShader(const char* pShaderFile, std::string& shaderData)
+{
+	shaderData = "";
+
+	//Open a shaderFile in read mode
+	std::ifstream shaderStream(pShaderFile, std::ios::in);
+
+	//Check if shaderFile was opened succesfully
+	if(shaderStream.is_open() == true)
+	{
+		//Story line by line from the shaderFile into line
+		std::string line = "";
+		while(getline(shaderStream, line))
+		{
+			//Create a new line after each line is copied from the temp std::sting line buffer into the shaderCode
+			shaderData += "\n" + line;
+		}
+		//Close the shaderFile
+		shaderStream.close();
+	}
+	else
+	{
+		fprintf(stderr, "ERROR: Could not open Shader File: %s.\n", pShaderFile);
+		getchar();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Helper Functions
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Getters
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Setters
+//-----------------------------------------------------------------------------

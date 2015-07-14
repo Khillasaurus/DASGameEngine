@@ -1,0 +1,18 @@
+#version 150 core
+
+in vec2 vsInPosition;
+in vec3 vsInColor;
+in vec2 vsInTexCoord;
+
+out vec3 vsOutColor;
+out vec2 vsOutTexCoord;
+
+uniform mat4 mvp;
+
+void main()
+{
+	vsOutColor = vsInColor;
+	vsOutTexCoord = vsInTexCoord;
+	
+	gl_Position = mvp * vec4(vsInPosition, 0.0, 1.0);
+}

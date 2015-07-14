@@ -1,0 +1,626 @@
+//=============================================================================
+// File:		Main.cpp
+// Created:		2015/01/28
+// Last Edited:	2015/02/04
+// Copyright:	Daniel Schenker
+// Description:	Main.cpp
+//=============================================================================
+
+//=============================================================================
+//Includes
+//=============================================================================
+
+// Third-Party Libraries
+//  GLEW
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+//  GLFW
+#include <GLFW/glfw3.h>
+
+//  GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+//  zlib
+#include <zlib.h>
+
+//  libpng
+#include <png.h>
+
+// Standard C++ Libraries
+#include <fstream>
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <time.h>
+#include <vector>
+
+// Daniel Schenker
+#define TEXTURE_LOAD_ERROR 0
+
+
+//=============================================================================
+//Function Prototypes
+//=============================================================================
+
+GLuint LoadShaderProgram(const char* pVertexShaderFile, const char* pFragmentShaderFile);
+void ReadShader(const char* pShaderFile, std::string& shaderData);
+GLuint LoadTexture(const char* pImageFile, int& width, int& height);//Right now modifying the arguments width and height serve no purpose, but I am leaving this functionality in for now as it could be helpful in the future, and it is easy to remove if it proves to not be necessary.
+
+//=============================================================================
+//Main
+//=============================================================================
+int main()
+{
+	//Initialization
+
+	// GLFW
+
+	glfwInit();
+
+	//  Configuration
+
+	//minimum Version 3.2
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+	//is the window resizeable? No
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+	//create the actual window
+	GLFWwindow* pWindow = glfwCreateWindow(800, 600, "Window Title", nullptr, nullptr);//Windowed
+	//GLFWwindow* pWindow = glfwCreateWindow(800, 600, "Window Title", glfwGetPrimaryMonitor(), nullptr);
+	if(pWindow == nullptr)
+	{
+		fprintf(stderr, "ERROR: Failed to open a GLFW window. Please update your graphics card drivers to a version that supports OpenGL 3.2 or higher.\n");
+	}
+
+	//OpenGL context - set pWindow to active
+	glfwMakeContextCurrent(pWindow);
+
+	// GLEW
+
+	//Force GLEW to use a modern OpenGL method for checking if a function is available in case the supported extensions given by experimental or pre-release drivers are incorrect or lacking info.
+	glewExperimental = GL_TRUE;
+	if(glewInit() != GLEW_OK)
+	{
+		fprintf(stderr, "ERROR: Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Shaders
+	//  Shader Program Number 1
+	GLuint shaderProgram = LoadShaderProgram("Shaders/simplevertexshader.vertexshader", "Shaders/simplefragmentshader.fragmentshader");
+
+	// Vertex Array Object (VAO)
+
+	//Note:	VAOs store all of the links between attributes and their corresponding VBOs with raw vertex data.
+	//  Creation
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	//  Enable Usage (by binding)
+	glBindVertexArray(vao);
+
+	//=====
+	// Individual Objects
+	//=====
+	
+	//  Rectangle
+	
+	//   Data
+
+	//    Vertices in Object Coordinates
+	GLfloat rectVertices[] =
+	{
+	//	Position							Color							TexCoords
+		-0.5f,  0.5f, /* left	top */		1.0f,  0.0f,  0.0f, /* RGB */	0.0f, 1.0f,
+		 0.5f,  0.5f, /* right	top */		0.0f,  1.0f,  0.0f, /* RGB */	1.0f, 1.0f,
+		 0.5f, -0.5f, /* right	bottom */	0.0f,  0.0f,  1.0f, /* RGB */	1.0f, 0.0f,
+		-0.5f, -0.5f, /* left	bottom */	1.0f,  1.0f,  1.0f, /* RGB */	0.0f, 0.0f
+	};
+	
+	//    Calculate model-view-projection (mvp) matrix
+	//Random Notes: model = glm::rotate(model, glm::radians(0.f), rotationAxis) * glm::scale(model, glm::vec3(5.0f, 5.0f, 1.0f));
+	//     Model
+
+	//      Scale
+	glm::mat4 rectScale = glm::mat4(1.0f);//not doing any scaling at the moment
+	
+	//      Rotate
+	glm::mat4 rectRotate = glm::mat4(1.0f);//not doing any rotating at the moment
+	glm::vec3 rectRotationAxis(0.0f, 0.0f, 1.0f);
+	
+	//      Translate
+	glm::mat4 rectTranslate  = glm::mat4(1.0f);//not doing any translating at the moment
+
+	//Combine SRT into Model
+	glm::mat4 rectModel = rectTranslate * rectRotate * rectScale;
+
+	//     View
+	glm::mat4 rectView = glm::lookAt
+	(
+		glm::vec3(1.0f, 1.0f, 1.0f),	//camera position
+		glm::vec3(0.0f, 0.0f, 0.0f),	//focal point
+		glm::vec3(0.0f, 1.0f, 0.0f)		//up axis
+	);
+
+	//     Projection
+	glm::mat4 rectProj = glm::perspective
+	(
+		45.0f,				//Field of View (FoV) in degrees
+		800.0f / 600.0f,	//aspect ratio
+		1.0f,				//near plane
+		10.0f				//far plane
+	);
+
+	glm::mat4 rectMvp = rectProj * rectView * rectModel;
+
+	//Get a handle for our mvp uniform
+	GLuint rectUniMvp = glGetUniformLocation(shaderProgram, "mvp");
+
+
+	//   Vertex Buffer Object (VBO)
+	//Note:	Since OpenGL manages memory, GLuint vboTriangle is a positive number reference to the memory that the VBO will occupy.
+	GLuint rectVbo;
+	glGenBuffers(1, &rectVbo);
+	
+
+	//    Set a specific VBO as the active object in the array buffer
+	glBindBuffer(GL_ARRAY_BUFFER, rectVbo);
+	//    Copy vertex data to the active object previously specified to the array buffer
+	glBufferData
+	(
+		GL_ARRAY_BUFFER,		//currently active array buffer
+		sizeof(rectVertices),	//size of vertices data in bytes
+		rectVertices,			//actual vertices data
+		GL_STATIC_DRAW			//usage of vertex data
+	);
+
+	//   Element  Buffer Objects (EBO)
+	GLuint rectEbo;
+	glGenBuffers(1, &rectEbo);
+
+	GLuint rectElements[] =
+	{
+		0, 1, 2,	//LT, RT, RB
+		2, 3, 0		//RB, LB, LT
+	};
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectEbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectElements), rectElements, GL_STATIC_DRAW);
+
+	// Specify the layout of the vertex data
+	
+	//  Position
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "vsInPosition");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer
+	(
+		posAttrib,				//which attribute? in this case, referencing vsInPosition.
+		2,						//number of values (size) for attribute (input)? in this case, 2 for x, y
+		GL_FLOAT,				//type of each component
+		GL_FALSE,				//should attribute (input) values be normalized?
+		7 * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
+		0						//array buffer offset
+	);
+
+	//  Color
+	GLint colAttrib = glGetAttribLocation(shaderProgram, "vsInColor");
+	glEnableVertexAttribArray(colAttrib);
+	glVertexAttribPointer
+	(
+		colAttrib,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		7 * sizeof(float),
+		(void*)(2 * sizeof(GLfloat))
+	);
+
+	//  Texture
+	GLint texAttrib = glGetAttribLocation(shaderProgram, "vsInTexCoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+	
+	//   Load
+	GLuint tex;
+	glGenTextures(1, &tex);
+
+	int texWidth = 0;
+	int texHeight = 0;
+
+	GLuint texture = LoadTexture("../../Resources/Textures/sample.png", texWidth, texHeight);
+	GLuint texture2 = LoadTexture("../../Resources/Textures/pngexample.png", texWidth, texHeight);//I shouldn't reuse texWidth and texHeight, but this is just for testing's sake
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+	//Run
+
+	//[Closed] Event Loop
+	while(glfwWindowShouldClose(pWindow) == false)
+	{
+		//Input
+		
+		// Retrieve
+		glfwPollEvents();
+		
+		// Handle
+		//  If key pressed: escape
+		if(glfwGetKey(pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		{
+			//Close the window
+			glfwSetWindowShouldClose(pWindow, GL_TRUE);
+		}
+
+		//Render
+		
+		// Background
+		// Clear the screen to black
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Individual VBOs
+		//  Rectangle
+		//   Transforms
+		//rectRotate = glm::rotate(rectRotate, glm::radians(90.0f), rectRotationAxis);
+		rectRotate = glm::rotate
+		(
+			glm::mat4(1.0f),
+			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		);
+		rectModel = rectTranslate * rectRotate * rectScale;
+		rectMvp = rectProj * rectView * rectModel;
+		glUniformMatrix4fv(rectUniMvp, 1, GL_FALSE, glm::value_ptr(rectMvp));
+		//   Elements
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		// Swap the back buffer and the front buffer
+		glfwSwapBuffers(pWindow);
+	}
+
+	//Termination
+	// CleanUp
+	//Note: Once things get converted to class form, deleting the vertex shader and fragment shader will be easily possible due to their IDs existing as member variables, and not function scope variables.
+	//  Textures
+	glDeleteTextures(1, &tex);
+	//  Shaders
+	//   Programs
+	glDeleteProgram(shaderProgram);
+	//  Fragment
+	//glDeleteShader(fragmentShader);
+	//  Vertex
+	//glDeleteShader(vertexShader);
+	//  EBOs
+	glDeleteBuffers(1, &rectEbo);
+	//  VBOs
+	//glDeleteBuffers(1, &vboTriangle);
+	glDeleteBuffers(1, &rectVbo);
+	//  VAOs
+	glDeleteVertexArrays(1, &vao);
+	// GLFW
+	glfwTerminate();
+}
+
+//=============================================================================
+//Helper Functions
+//=============================================================================
+
+//Compiles shaders and combines them into a program
+GLuint LoadShaderProgram(const char* pVertexShaderFile, const char* pFragmentShaderFile)
+{
+	//Vertex Shader Object
+	// Creation
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Load
+	//Note:	Load data into the Vertex Shader Object.
+	std::string vertexShaderData = "";
+	ReadShader(pVertexShaderFile, vertexShaderData);
+	const GLchar* pVertexSource = vertexShaderData.c_str();
+	
+	glShaderSource(vertexShader, 1, &pVertexSource, NULL);
+	// Compile
+	//Note:	Compile vertex shader into code that can be executed by the graphics card.
+	glCompileShader(vertexShader);
+	// Success Check
+	GLint compiledSuccessfullyVertexShader = GL_FALSE;
+	int infoLogLengthVertexShader = 0;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiledSuccessfullyVertexShader);
+	if(compiledSuccessfullyVertexShader == GL_FALSE)
+	{
+		printf("ERROR: Vertex Shader Object could not be compiled. Please see info log following.\n");
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLogLengthVertexShader);
+		if(infoLogLengthVertexShader > 0)
+		{
+			std::vector<char> vertexShaderErrorMessage(infoLogLengthVertexShader + 1);
+			glGetShaderInfoLog(vertexShader, infoLogLengthVertexShader, NULL, &vertexShaderErrorMessage[0]);
+			printf("%s\n", &vertexShaderErrorMessage[0]);
+		}
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+
+	//Fragment Shader Object
+	// Creation
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Load
+	//due to error with ReadShader function, I'm hard coding it for now
+	//const GLchar* pFragmentSource = ReadShader(pFragmentShaderFile).c_str();
+	std::string fragmentShaderData = "";
+	ReadShader(pFragmentShaderFile, fragmentShaderData);
+	const GLchar* pFragmentSource = fragmentShaderData.c_str();
+
+	glShaderSource(fragmentShader, 1, &pFragmentSource, NULL);
+	// Compile
+	glCompileShader(fragmentShader);
+	// Success Check
+	GLint compiledSuccessfullyFragmentShader = GL_FALSE;
+	int infoLogLengthFragmentShader = 0;
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiledSuccessfullyFragmentShader);
+	if(compiledSuccessfullyFragmentShader == GL_FALSE)
+	{
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &infoLogLengthFragmentShader);
+		if(infoLogLengthFragmentShader > 0)
+		{
+			std::vector<char> fragmentShaderErrorMessage(infoLogLengthFragmentShader + 1);
+			glGetShaderInfoLog(fragmentShader, infoLogLengthFragmentShader, NULL, &fragmentShaderErrorMessage[0]);
+			printf("%s\n", &fragmentShaderErrorMessage[0]);
+		}
+		printf("ERROR: Fragment Shader Object could not be compiled. Please see info log.\n");
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+	//Program
+	//Note:	A program is created by connecting shader objects.
+	// Creation
+	GLuint shaderProgram = glCreateProgram();
+	// Attachment
+	//  Vertex Shader Object
+	glAttachShader(shaderProgram, vertexShader);
+	//  Fragment Shader Object
+	glAttachShader(shaderProgram, fragmentShader);
+	// Specify
+	//Note:	Since a fragment shader is allowed to write to multiple buffers,
+	//		specific Fragment Shader Output must be specified to specific Buffers
+	glBindFragDataLocation(shaderProgram, 0, "fsOutColor");
+	// Link
+	glLinkProgram(shaderProgram);
+	//TODO: GL_LINK_STATUS
+	glUseProgram(shaderProgram);
+
+	return shaderProgram;
+}
+
+//Reads a shader file and stores the contents in shaderData
+void ReadShader(const char* pShaderFile, std::string& shaderData)
+{
+	shaderData = "";
+
+	//Open a shaderFile in read mode
+	std::ifstream shaderStream(pShaderFile, std::ios::in);
+
+	//Check if shaderFile was opened succesfully
+	if(shaderStream.is_open() == true)
+	{
+		//Story line by line from the shaderFile into line
+		std::string line = "";
+		while(getline(shaderStream, line))
+		{
+			//Create a new line after each line is copied from the temp std::sting line buffer into the shaderCode
+			shaderData += "\n" + line;
+		}
+		//Close the shaderFile
+		shaderStream.close();
+	}
+	else
+	{
+		printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", pShaderFile);
+		getchar();
+	}
+}
+
+GLuint LoadTexture(const char* pImageFile, int& width, int& height)
+{
+	//Test if pImageFile is a png by checking the header
+	png_byte header[8];
+
+	//Open pImageFile in read only binary mode
+	FILE* pFile = nullptr;
+	errno_t err;
+	err = fopen_s(&pFile, pImageFile, "rb");
+	//If the file opened successfully
+	if(err == 0)
+	{
+		//Read the header
+		fread(header, 1, 8, pFile);
+
+		//Is the image of type png?
+		if(png_sig_cmp(header, 0, 8) == 0)
+		{
+			//Create png object struct
+			png_structp pPngObj = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+			if(pPngObj != nullptr)
+			{
+				//Create png info struct
+				png_infop pPngInfo = png_create_info_struct(pPngObj);
+				if(pPngInfo != nullptr)
+				{
+					//Create png end info struct
+					png_infop pPngInfoEnd = png_create_info_struct(pPngObj);
+					if(pPngInfoEnd != nullptr)
+					{
+						//Png error handling, taken from OpenGL Programming Wikibook, which is unsure if libpng man suggests this, hence switch in if else error logic flow.
+						if(setjmp(png_jmpbuf(pPngObj)))
+						{
+							png_destroy_read_struct(&pPngObj, &pPngInfo, &pPngInfoEnd);
+							fclose(pFile);
+
+							return TEXTURE_LOAD_ERROR;
+						}
+						else
+						{
+							//Initialize png reading
+							png_init_io(pPngObj, pFile);
+
+							//Inform libpng that the first 8 bytes have already been read
+							png_set_sig_bytes(pPngObj, 8);
+
+							//Read all the info up to the image data
+							png_read_info(pPngObj, pPngInfo);
+
+							//Image data
+							int bitDepth = 0;
+							int colorType = 0;
+							png_uint_32 imageWidth = 0;
+							png_uint_32 imageHeight = 0;
+
+							//Get info about png
+							png_get_IHDR(pPngObj, pPngInfo, &imageWidth, &imageHeight, &bitDepth, &colorType, NULL, NULL, NULL);
+
+							//Update width and height based on png info
+							width = imageWidth;
+							height = imageHeight;
+
+							//Row size in bytes
+							int rowBytes = png_get_rowbytes(pPngObj, pPngInfo);
+
+							//Allocate the pImageData as a big block, to be given to OpenGL
+							png_byte* pImageData = new png_byte[rowBytes * height];
+							if(pImageData != nullptr)
+							{
+								//pRowPointers points to pImageData for reading the png using libpng
+								png_bytep* pRowPointers = new png_bytep[height];
+								if(pRowPointers != nullptr)
+								{
+									//Set the individual pRowPointers to point at the correct offsets in pImageData
+									for(int i = 0; i < height; ++i)
+									{
+										pRowPointers[height - 1 - i] = pImageData + (i * rowBytes);
+									}
+
+									//Read the png into pImageData through pRowPointers
+									png_read_image(pPngObj, pRowPointers);
+
+									//Generate the OpenGL texture object
+									GLuint texture;
+									glGenTextures(1, &texture);
+									glBindTexture(GL_TEXTURE_2D, texture);
+									glTexImage2D
+									(
+										GL_TEXTURE_2D,			//target texture
+										0,						//level-of-detail. 0 is the base image level.
+										GL_RGBA,				//internal format
+										width,					//texture width
+										height,					//texture height
+										0,						//border. In older OpenGL specifications you could create a border around texture (it's really useless), specification 3.3 onwards, this parameter MUST be zero.
+										GL_RGBA,				//format of the pixel data
+										GL_UNSIGNED_BYTE,		//data type of the pixel data
+										(GLvoid*) pImageData	//pointer to the image data in memory
+									);
+
+									//Clean up memory
+									png_destroy_read_struct(&pPngObj, &pPngInfo, &pPngInfoEnd);
+									delete[] pImageData;
+									pImageData = nullptr;
+									delete[] pRowPointers;
+									pRowPointers = nullptr;
+									pPngInfoEnd = nullptr;
+									pPngInfo = nullptr;
+									pPngObj = nullptr;
+									fclose(pFile);
+									pFile = nullptr;
+
+									return texture;
+								}
+								else
+								{
+									//Clean up memory
+									png_destroy_read_struct(&pPngObj, &pPngInfo, &pPngInfoEnd);
+									pRowPointers = nullptr;
+									delete[] pImageData;
+									pImageData = nullptr;
+									pPngInfoEnd = nullptr;
+									pPngInfo = nullptr;
+									pPngObj = nullptr;
+									fclose(pFile);
+									pFile = nullptr;
+									
+									return TEXTURE_LOAD_ERROR;
+								}
+							}
+							else
+							{
+								//Clean up memory
+								png_destroy_read_struct(&pPngObj, &pPngInfo, &pPngInfoEnd);
+								pImageData = nullptr;
+								pPngInfoEnd = nullptr;
+								pPngInfo = nullptr;
+								pPngObj = nullptr;
+								fclose(pFile);
+								pFile = nullptr;
+
+								return TEXTURE_LOAD_ERROR;
+							}
+
+						}
+					}
+					else
+					{
+						printf("ERRPR: Could not create png info end struct for image \"%s\".\n", pImageFile);
+						png_destroy_read_struct(&pPngObj, &pPngInfo, (png_infopp) NULL);
+						pPngInfoEnd = nullptr;
+						pPngInfo = nullptr;
+						pPngObj = nullptr;
+						fclose(pFile);
+						pFile = nullptr;
+
+						return TEXTURE_LOAD_ERROR;
+					}
+				}
+				else
+				{
+					printf("ERRPR: Could not create png info struct for image \"%s\".\n", pImageFile);
+					png_destroy_read_struct(&pPngObj, (png_infopp) NULL, (png_infopp) NULL);
+					pPngInfo = nullptr;
+					pPngObj = nullptr;
+					fclose(pFile);
+					pFile = nullptr;
+
+					return TEXTURE_LOAD_ERROR;
+				}
+			}
+			else
+			{
+				printf("ERROR: Could not allocate and initialize png struct for image \"%s\".\n", pImageFile);
+				pPngObj = nullptr;
+				fclose(pFile);
+				pFile = nullptr;
+
+				return TEXTURE_LOAD_ERROR;
+			}
+		}
+		else
+		{
+			printf("ERROR: Image \"%s\" is not of type png.\n", pImageFile);
+			fclose(pFile);
+			pFile = nullptr;
+
+			return TEXTURE_LOAD_ERROR;
+		}
+	}
+	else
+	{
+		printf("ERROR: Image \"%s\" could not be opened.\n", pImageFile);
+		pFile = nullptr;
+
+		return TEXTURE_LOAD_ERROR;
+	}
+}

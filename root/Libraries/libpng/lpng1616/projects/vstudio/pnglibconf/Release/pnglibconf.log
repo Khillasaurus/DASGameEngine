@@ -1,0 +1,11 @@
+﻿Build started 2/2/2015 6:47:12 AM.
+     1>Project "C:\Users\Ticklebuns\Desktop\Learning OpenGL - Round 4\root\Libraries\libpng\lpng1616\projects\vstudio\pnglibconf\pnglibconf.vcxproj" on node 3 (Build target(s)).
+     1>CustomBuildStep:
+         copy ..\..\..\scripts\pnglibconf.h.prebuilt ..\..\..\pnglibconf.h
+         :VCEnd
+                 1 file(s) copied.
+     1>Done Building Project "C:\Users\Ticklebuns\Desktop\Learning OpenGL - Round 4\root\Libraries\libpng\lpng1616\projects\vstudio\pnglibconf\pnglibconf.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.53

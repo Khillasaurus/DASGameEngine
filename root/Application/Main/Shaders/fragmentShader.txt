@@ -1,0 +1,15 @@
+#version 150 core
+
+in vec3 vsOutColor;
+in vec2 vsOutTexCoord;
+
+out vec4 fsOutColor;
+
+uniform sampler2D tex;
+
+void main()
+{
+	//fsOutColor = texture(tex, vsOutTexCoord);
+	fsOutColor = texture(tex, vsOutTexCoord) * vec4(vsOutColor, 1.0);
+	//fsOutColor = vec4(vsOutColor, 1.0);
+}

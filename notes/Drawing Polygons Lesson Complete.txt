@@ -1,0 +1,372 @@
+//=============================================================================
+// File:		Main.cpp
+// Created:		2015/01/28
+// Last Edited:	2015/01/29
+// Copyright:	Daniel Schenker
+// Description:	Main.cpp
+//=============================================================================
+
+//=============================================================================
+//Includes
+//=============================================================================
+
+// Standard Headers
+#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <time.h>
+
+// GLEW
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+// GLFW
+#include <GLFW/glfw3.h>
+
+// GLM
+
+
+//=============================================================================
+//Function Prototypes
+//=============================================================================
+
+GLuint LoadShaderProgram(const char* filePathVertexShader, const char* filePathFragmentShader);
+std::string ReadShader(const char* filePathShader);
+
+//=============================================================================
+//Main
+//=============================================================================
+int main()
+{
+	//Initialization
+
+	// GLFW
+	glfwInit();
+
+	//  Configuration
+
+	//minimum Version 3.2
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+	//is the window resizeable? No
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+	//create the actual window
+	GLFWwindow* pWindow = glfwCreateWindow(800, 600, "Window Title", nullptr, nullptr);//Windowed
+	//GLFWwindow* pWindow = glfwCreateWindow(800, 600, "Window Title", glfwGetPrimaryMonitor(), nullptr);
+
+	//OpenGL context - set pWindow to active
+	glfwMakeContextCurrent(pWindow);
+
+	// GLEW
+	glewExperimental = GL_TRUE;
+	glewInit();
+
+	// Vertex Array Object (VAO)
+	//Note:	VAOs store all of the links between attributes and their corresponding VBOs with raw vertex data.
+	//  Creation
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	//  Enable Usage (by binding)
+	glBindVertexArray(vao);
+
+	// Vertex Buffer Objects (VBOs)
+	
+	////  Triangle
+	////   Creation
+	////Note:	Since OpenGL manages memory, GLuint vboTriangle is a positive number reference to the memory that the VBO will occupy.
+	//GLuint vboTriangle;
+	//glGenBuffers(1, &vboTriangle);
+	////   Data
+	////    Vertices in World Coordiantes
+	//GLfloat verticesTriangleWC[] =
+	//{
+	//	 0.0f,	 0.5f,	/* top		center */ 1.0f, 0.0f, 0.0f,	// RGB
+	//	 0.5f,	-0.5f,	/* right	bottom */ 0.0f, 1.0f, 0.0f,	// RGB
+	//	-0.5f,	-0.5f,	/* left		bottom */ 0.0f, 0.0f, 1.0f	// RGB
+	//};
+	
+	//  Rectangle
+	//   Creation
+	GLuint vboRectangle;
+	glGenBuffers(1, &vboRectangle);
+	//   Data
+	//    Vertices in World Coordinates
+	GLfloat verticesRectWC[] =
+	{
+		-0.5f,  0.5f, /* left	top */		1.0f,  0.0f,  0.0f, //RGB
+		 0.5f,  0.5f, /* right	top */		0.0f,  1.0f,  0.0f, //RGB
+		 0.5f, -0.5f, /* right	bottom */	0.0f,  0.0f,  1.0f, //RGB
+		-0.5f, -0.5f, /* left	bottom */	1.0f,  1.0f,  1.0f  //RGB
+	};
+
+	////   Set a specific VBO as the active object in the array buffer
+	//glBindBuffer(GL_ARRAY_BUFFER, vboTriangle);
+	////   Copy vertex data to the active object previously specified to the array buffer
+	//glBufferData
+	//(
+	//	GL_ARRAY_BUFFER,			//currently active array buffer
+	//	sizeof(verticesTriangleWC),	//size of vertices data in bytes
+	//	verticesTriangleWC,			//actual vertices data
+	//	GL_STATIC_DRAW				//usage of vertex data
+	//);
+
+	//   Set a specific VBO as the active object in the array buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vboRectangle);
+	//   Copy vertex data to the active object previously specified to the array buffer
+	glBufferData
+	(
+		GL_ARRAY_BUFFER,		//currently active array buffer
+		sizeof(verticesRectWC),	//size of vertices data in bytes
+		verticesRectWC,			//actual vertices data
+		GL_STATIC_DRAW			//usage of vertex data
+	);
+
+	// Element  Buffer Object (EBO)
+	//  Creation
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
+
+	GLuint elements[] =
+	{
+		0, 1, 2,	//LT, RT, RB
+		2, 3, 0		//RB, LB, LT
+	};
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+	// Shader Program
+	GLuint shaderProgram = LoadShaderProgram("Shaders/simplevertexshader.vertexshader", "Shaders/simplefragmentshader.fragmentshader");
+
+	//Link between vertex data and attributes
+	// Specify the layout of the vertex data
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "vertexInPosition");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer
+	(
+		posAttrib,				//which attribute? in this case, referencing vertexInPosition.
+		2,						//number of values (size) for attribute (input)? in this case, 2 for x, y
+		GL_FLOAT,				//type of each component
+		GL_FALSE,				//should attribute (input) values be normalized?
+		5 * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
+		0						//array buffer offset
+	);
+
+	GLint colAttrib = glGetAttribLocation(shaderProgram, "vertexInColor");
+	glEnableVertexAttribArray(colAttrib);
+	glVertexAttribPointer
+	(
+		colAttrib,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		5 * sizeof(float),
+		(void*)(2 * sizeof(GLfloat))
+	);
+
+	//Run
+
+	//[Closed] Event Loop
+	while(glfwWindowShouldClose(pWindow) == false)
+	{
+		//Input
+		
+		// Retrieve
+		glfwPollEvents();
+		
+		// Handle
+		//  If key pressed: escape
+		if(glfwGetKey(pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		{
+			//Close the window
+			glfwSetWindowShouldClose(pWindow, GL_TRUE);
+		}
+
+		//Render
+		
+		// Background
+		// Clear the screen to black
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Individual VBOs
+
+		// Arrays
+		/*
+		glDrawArrays
+		(
+			GL_TRIANGLES,	//primitive type (commonly point, line or triangle)
+			0,				//how many vertices to skip at the beginning
+			3				//number of vertices (not primitives!)
+		);
+		*/
+		// Elements
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		// Swap the back buffer and the front buffer
+		glfwSwapBuffers(pWindow);
+	}
+
+	//Termination
+	// CleanUp
+	//Note: Once things get converted to class form, deleting the vertex shader and fragment shader will be easily possible due to their IDs existing as member variables, and not function scope variables.
+	//  Shaders
+	//   Programs
+	glDeleteProgram(shaderProgram);
+	//  Vertex
+	//glDeleteShader(vertexShader);
+	//  Fragment
+	//glDeleteShader(fragmentShader);
+	//  EBOs
+	glDeleteBuffers(1, &ebo);
+	//  VBOs
+	//glDeleteBuffers(1, &vboTriangle);
+	glDeleteBuffers(1, &vboRectangle);
+	//  VAOs
+	glDeleteVertexArrays(1, &vao);
+	// GLFW
+	glfwTerminate();
+}
+
+//=============================================================================
+//Helper Functions
+//=============================================================================
+
+//Compiles shaders and combines them into a program
+GLuint LoadShaderProgram(const char* filePathVertexShader, const char* filePathFragmentShader)
+{
+	//Vertex Shader Object
+	// Creation
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Load
+	//Note:	Load data into the Vertex Shader Object.
+	//due to error with ReadShader function, I'm hard coding it for now
+	//const GLchar* pVertexSource = ReadShader(filePathVertexShader).c_str();
+	
+	const GLchar* pVertexSource =
+		"#version 150 core\n"
+		"in vec2 vertexInPosition;"
+		"in vec3 vertexInColor;"
+		"out vec3 vertexOutColor;"
+		"void main()"
+		"{"
+		"	vertexOutColor = vertexInColor;"
+		"	gl_Position = vec4(vertexInPosition, 0.0, 1.0);"
+		"}";
+	
+	glShaderSource(vertexShader, 1, &pVertexSource, NULL);
+	// Compile
+	//Note:	Compile vertex shader into code that can be executed by the graphics card.
+	glCompileShader(vertexShader);
+	// Success Check
+	GLint compiledSuccessfullyVertexShader = GL_FALSE;
+	int infoLogLengthVertexShader = 0;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiledSuccessfullyVertexShader);
+	if(compiledSuccessfullyVertexShader == GL_FALSE)
+	{
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLogLengthVertexShader);
+		if(infoLogLengthVertexShader > 0)
+		{
+			std::vector<char> vertexShaderErrorMessage(infoLogLengthVertexShader + 1);
+			glGetShaderInfoLog(vertexShader, infoLogLengthVertexShader, NULL, &vertexShaderErrorMessage[0]);
+			printf("%s\n", &vertexShaderErrorMessage[0]);
+		}
+		printf("ERROR: Vertex Shader Object could not be compiled. Please see info log.\n");
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+
+	//Fragment Shader Object
+	// Creation
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Load
+	//due to error with ReadShader function, I'm hard coding it for now
+	//const GLchar* pFragmentSource = ReadShader(filePathFragmentShader).c_str();
+
+	const GLchar* pFragmentSource =
+		"#version 150 core\n"
+		"in vec3 vertexOutColor;"
+		"out vec4 colorOutColor;"
+		"void main()"
+		"{"
+		"	colorOutColor = vec4(vertexOutColor, 1.0);"
+		"}";
+
+	glShaderSource(fragmentShader, 1, &pFragmentSource, NULL);
+	// Compile
+	glCompileShader(fragmentShader);
+	// Success Check
+	GLint compiledSuccessfullyFragmentShader = GL_FALSE;
+	int infoLogLengthFragmentShader = 0;
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiledSuccessfullyFragmentShader);
+	if(compiledSuccessfullyFragmentShader == GL_FALSE)
+	{
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &infoLogLengthFragmentShader);
+		if(infoLogLengthFragmentShader > 0)
+		{
+			std::vector<char> fragmentShaderErrorMessage(infoLogLengthFragmentShader + 1);
+			glGetShaderInfoLog(fragmentShader, infoLogLengthFragmentShader, NULL, &fragmentShaderErrorMessage[0]);
+			printf("%s\n", &fragmentShaderErrorMessage[0]);
+		}
+		printf("ERROR: Fragment Shader Object could not be compiled. Please see info log.\n");
+	}
+	//TODO: GL_INFO_LOG_LENGTH
+
+	//Program
+	//Note:	A program is created by connecting shader objects.
+	// Creation
+	GLuint shaderProgram = glCreateProgram();
+	// Attachment
+	//  Vertex Shader Object
+	glAttachShader(shaderProgram, vertexShader);
+	//  Fragment Shader Object
+	glAttachShader(shaderProgram, fragmentShader);
+	// Specify
+	//Note:	Since a fragment shader is allowed to write to multiple buffers,
+	//		specific Fragment Shader Output must be specified to specific Buffers
+	glBindFragDataLocation(shaderProgram, 0, "colorOutColor");
+	// Link
+	glLinkProgram(shaderProgram);
+	//TODO: GL_LINK_STATUS
+	glUseProgram(shaderProgram);
+
+	return shaderProgram;
+}
+
+//Reads a shader file and returns the contents in the form a std::string
+//somewhere in my code I am reading in an extra character. I believe it to be the very first character as a new line, but I'm not entirely sure. maybe the last new line character?
+std::string ReadShader(const char* filePathShader)
+{
+	std::string shaderCode = "";
+
+	//Open a shaderFile in read mode
+	std::ifstream shaderStream(filePathShader, std::ios::in);
+
+	//Check if shaderFile was opened succesfully
+	if(shaderStream.is_open() == true)
+	{
+		//Story line by line from the shaderFile into line
+		std::string line = "";
+		while(getline(shaderStream, line))
+		{
+			//Create a new line after each line is copied from the temp std::sting line buffer into the shaderCode
+			shaderCode += "\n" + line;
+		}
+		//Close the shaderFile
+		shaderStream.close();
+	}
+	else
+	{
+		printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", filePathShader);
+		getchar();
+		return 0;
+	}
+
+	return shaderCode;
+}
