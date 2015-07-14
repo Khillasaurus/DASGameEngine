@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Texture.cpp
 // Created:		2015/02/12
-// Last Edited:	2015/02/12
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Texture
 //=============================================================================
@@ -25,7 +25,7 @@
 // Constuctors
 //-----------------------------------------------------------------------------
 
-Texture::Texture(const char* pImageFile, GLint minMagFiler, GLint wrapMode)
+DSGraphics::Texture::Texture(const char* pImageFile, GLint minMagFiler, GLint wrapMode)
 :	mIsTextureLoaded(false)
 ,	mObjectID(0)
 ,	mWidth(0)
@@ -231,7 +231,7 @@ Texture::Texture(const char* pImageFile, GLint minMagFiler, GLint wrapMode)
 // Destructor
 //-----------------------------------------------------------------------------
 
-Texture::~Texture()
+DSGraphics::Texture::~Texture()
 {
 	glDeleteTextures(1, &mObjectID);
 }
@@ -252,28 +252,28 @@ Texture::~Texture()
 // Getters
 //-----------------------------------------------------------------------------
 
-bool Texture::GetIsTextureLoaded() const
+bool DSGraphics::Texture::GetIsTextureLoaded() const
 {
 	return mIsTextureLoaded;
 }
 
 //-----------------------------------------------------------------------------
 
-GLuint Texture::GetObjectID() const
+GLuint DSGraphics::Texture::GetObjectID() const
 {
 	return mObjectID;
 }
 
 //-----------------------------------------------------------------------------
 
-png_uint_32 Texture::GetWidth() const
+png_uint_32 DSGraphics::Texture::GetWidth() const
 {
 	return mWidth;
 }
 
 //-----------------------------------------------------------------------------
 
-png_uint_32 Texture::GetHeight() const
+png_uint_32 DSGraphics::Texture::GetHeight() const
 {
 	return mHeight;
 }

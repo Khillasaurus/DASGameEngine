@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Shader.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/02/11
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Shader
 //=============================================================================
@@ -30,7 +30,7 @@
 // Constuctors
 //-----------------------------------------------------------------------------
 
-Shader::Shader(const std::string& shaderCode, GLenum shaderType)
+DSGraphics::Shader::Shader(const std::string& shaderCode, GLenum shaderType)
 :	mShaderID(0)
 ,	mpRefCount(nullptr)
 {
@@ -76,7 +76,7 @@ Shader::Shader(const std::string& shaderCode, GLenum shaderType)
 // Destructor
 //-----------------------------------------------------------------------------
 
-Shader::~Shader()
+DSGraphics::Shader::~Shader()
 {
 	//_refCount will be nullptr if constructor failed and threw an exception
 	if(mpRefCount != nullptr)
@@ -89,7 +89,7 @@ Shader::~Shader()
 // Copy Constructor
 //-----------------------------------------------------------------------------
 
-Shader::Shader(const Shader& other)
+DSGraphics::Shader::Shader(const Shader& other)
 :	mShaderID(other.mShaderID)
 ,	mpRefCount(other.mpRefCount)
 {
@@ -100,7 +100,7 @@ Shader::Shader(const Shader& other)
 // Copy Assignment Operator
 //-----------------------------------------------------------------------------
 
-Shader& Shader::operator = (const Shader& other)
+DSGraphics::Shader& DSGraphics::Shader::operator = (const Shader& other)
 {
 	Release();
 	mShaderID = other.mShaderID;
@@ -115,7 +115,7 @@ Shader& Shader::operator = (const Shader& other)
 //-----------------------------------------------------------------------------
 //  General
 
-Shader Shader::CreateShaderFromFile(const std::string& filePath, GLenum shaderType)
+DSGraphics::Shader DSGraphics::Shader::CreateShaderFromFile(const std::string& filePath, GLenum shaderType)
 {
 	//open file
 	std::ifstream f;
@@ -141,7 +141,7 @@ Shader Shader::CreateShaderFromFile(const std::string& filePath, GLenum shaderTy
 //-----------------------------------------------------------------------------
 //  General
 
-void Shader::Retain()
+void DSGraphics::Shader::Retain()
 {
 	assert(mpRefCount);
 	*mpRefCount += 1;
@@ -149,7 +149,7 @@ void Shader::Retain()
 
 //-----------------------------------------------------------------------------
 
-void Shader::Release()
+void DSGraphics::Shader::Release()
 {
 	assert(mpRefCount && *mpRefCount > 0);
 	*mpRefCount -= 1;
@@ -172,7 +172,7 @@ void Shader::Release()
 // Getters
 //-----------------------------------------------------------------------------
 
-GLuint Shader::GetShaderID() const
+GLuint DSGraphics::Shader::GetShaderID() const
 {
 	return mShaderID;
 }

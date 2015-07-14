@@ -18,11 +18,6 @@
 
 // Daniel Schenker
 #include "Application.h"
-#include "Camera.h"
-#include "ModelAsset.h"
-#include "ModelInstance.h"
-#include "Program.h"
-#include "Texture.h"
 
 //=============================================================================
 //Function Prototypes
@@ -115,7 +110,7 @@ void Application::Initialize()
 			//Camera
 			if(mpCamera == nullptr)
 			{
-				mpCamera = new Camera();
+				mpCamera = new DSGraphics::Camera();
 				mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 				mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 			}
@@ -137,7 +132,7 @@ void Application::Initialize()
 			//Textures
 			if(mpTextureCube == nullptr)
 			{
-				mpTextureCube = new Texture("../../Resources/Textures/stripes2.png");
+				mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes2.png");
 			}
 			else
 			{
@@ -348,7 +343,7 @@ void Application::LoadModelAssetCube()
 		5, 4, 7
 	};
 
-	mpModelAssetCube = new ModelAsset
+	mpModelAssetCube = new DSGraphics::ModelAsset
 	(
 		mpProgramCube,
 		true,
@@ -382,12 +377,12 @@ void Application::LoadModelAssetCube()
 
 //-----------------------------------------------------------------------------
 
-Program* Application::LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile)
+DSGraphics::Program* Application::LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile)
 {
-	std::vector<Shader> shaders;
-	shaders.push_back(Shader::CreateShaderFromFile(vertexShaderFile, GL_VERTEX_SHADER));
-	shaders.push_back(Shader::CreateShaderFromFile(fragmentShaderFile, GL_FRAGMENT_SHADER));
-	return new Program(shaders);
+	std::vector<DSGraphics::Shader> shaders;
+	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(vertexShaderFile, GL_VERTEX_SHADER));
+	shaders.push_back(DSGraphics::Shader::CreateShaderFromFile(fragmentShaderFile, GL_FRAGMENT_SHADER));
+	return new DSGraphics::Program(shaders);
 }
 
 //-----------------------------------------------------------------------------
@@ -500,7 +495,7 @@ void Application::Render()
 
 	//Instances
 	//TODO: learn what kind of iterator I need here
-	std::list<ModelInstance>::iterator it;
+	std::list<DSGraphics::ModelInstance>::iterator it;
 	for(it = mListModelInstances.begin(); it != mListModelInstances.end(); ++it)
 	{
 		it->Render();
@@ -568,10 +563,10 @@ void Application::CleanUpInstances()
 
 void Application::CreateInstances()
 {
-	ModelInstance cube0001(mpModelAssetCube, mpCamera);
+	DSGraphics::ModelInstance cube0001(mpModelAssetCube, mpCamera);
 	mListModelInstances.push_back(cube0001);
 
-	ModelInstance cube0002(mpModelAssetCube, mpCamera);
+	DSGraphics::ModelInstance cube0002(mpModelAssetCube, mpCamera);
 	cube0002.SetScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)));
 	cube0002.SetTranslate(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, -1.5f, -2.5f)));
 	cube0002.UpdateTransform();

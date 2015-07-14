@@ -12,7 +12,6 @@
 
 // Daniel Schenker
 #include "ModelAsset.h"
-#include "Program.h"
 
 //=============================================================================
 //Statics
@@ -26,11 +25,11 @@
 // Constuctors
 //-----------------------------------------------------------------------------
 
-ModelAsset::ModelAsset
+DSGraphics::ModelAsset::ModelAsset
 (
-	Program* pProgram,
+	DSGraphics::Program* pProgram,
 	bool hasTexture,
-	Texture* pTexture,
+	DSGraphics::Texture* pTexture,
 	unsigned int textureCoordsOffset,
 	bool hasColors,
 	unsigned int rgbaOffset,
@@ -179,7 +178,7 @@ ModelAsset::ModelAsset
 // Destructor
 //-----------------------------------------------------------------------------
 
-ModelAsset::~ModelAsset()
+DSGraphics::ModelAsset::~ModelAsset()
 {
 	// Rectangle
 	if(mpVertices != nullptr)
@@ -217,49 +216,49 @@ ModelAsset::~ModelAsset()
 // Getters
 //-----------------------------------------------------------------------------
 
-GLuint ModelAsset::GetProgramID() const
+GLuint DSGraphics::ModelAsset::GetProgramID() const
 {
 	return mpProgram->GetProgramID();
 }
 
 //-----------------------------------------------------------------------------
 
-GLuint ModelAsset::GetTextureObjectID() const
+GLuint DSGraphics::ModelAsset::GetTextureObjectID() const
 {
 	return mpTexture->GetObjectID();
 }
 
 //-----------------------------------------------------------------------------
 
-GLuint ModelAsset::GetVao() const
+GLuint DSGraphics::ModelAsset::GetVao() const
 {
 	return mVao;
 }
 
 //-----------------------------------------------------------------------------
 
-unsigned int ModelAsset::GetVertexCount() const
+unsigned int DSGraphics::ModelAsset::GetVertexCount() const
 {
 	return mkVertexCount;
 }
 
 //-----------------------------------------------------------------------------
 
-bool ModelAsset::GetHasElements() const
+bool DSGraphics::ModelAsset::GetHasElements() const
 {
 	return mkHasElements;
 }
 
 //-----------------------------------------------------------------------------
 
-unsigned int ModelAsset::GetElementCount() const
+unsigned int DSGraphics::ModelAsset::GetElementCount() const
 {
 	return mkElementCount;
 }
 
 //-----------------------------------------------------------------------------
 
-GLenum ModelAsset::GetDrawType() const
+GLenum DSGraphics::ModelAsset::GetDrawType() const
 {
 	return mDrawType;
 }

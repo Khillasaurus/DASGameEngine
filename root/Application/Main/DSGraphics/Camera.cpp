@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Camera.cpp
 // Created:		2015/02/12
-// Last Edited:	2015/02/13
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Camera
 //=============================================================================
@@ -36,7 +36,7 @@ static const float sMaxVerticalAngle = 85.0f;
 // Constuctors
 //-----------------------------------------------------------------------------
 
-Camera::Camera()
+DSGraphics::Camera::Camera()
 :	mPosition(0.0f, 0.0f, 1.0f)
 ,	mPitch(0.0f)
 ,	mYaw(0.0f)
@@ -52,7 +52,7 @@ Camera::Camera()
 // Destructor
 //-----------------------------------------------------------------------------
 
-Camera::~Camera()
+DSGraphics::Camera::~Camera()
 {
 }
 
@@ -60,14 +60,14 @@ Camera::~Camera()
 // Public Member Functions
 //-----------------------------------------------------------------------------
 
-void Camera::OffsetPosition(const glm::vec3& offset)
+void DSGraphics::Camera::OffsetPosition(const glm::vec3& offset)
 {
 	mPosition += offset;
 }
 
 //-----------------------------------------------------------------------------
 
-void Camera::OffsetOrientation(float rightAngle, float upAngle)
+void DSGraphics::Camera::OffsetOrientation(float rightAngle, float upAngle)
 {
 	mYaw += rightAngle;
 	mPitch += upAngle;
@@ -76,7 +76,7 @@ void Camera::OffsetOrientation(float rightAngle, float upAngle)
 
 //-----------------------------------------------------------------------------
 
-void Camera::LookAt(glm::vec3 position)
+void DSGraphics::Camera::LookAt(glm::vec3 position)
 {
 	assert(position != mPosition);
 
@@ -90,7 +90,7 @@ void Camera::LookAt(glm::vec3 position)
 // Private Member Functions
 //-----------------------------------------------------------------------------
 
-void Camera::NormalizeAngles()
+void DSGraphics::Camera::NormalizeAngles()
 {
 	mYaw = fmodf(mYaw, 360.0f);
 	
@@ -118,42 +118,42 @@ void Camera::NormalizeAngles()
 // Getters
 //-----------------------------------------------------------------------------
 
-const glm::vec3& Camera::GetPosition() const
+const glm::vec3& DSGraphics::Camera::GetPosition() const
 {
 	return mPosition;
 }
 
 //-----------------------------------------------------------------------------
 
-float Camera::GetFov() const
+float DSGraphics::Camera::GetFov() const
 {
 	return mFov;
 }
 
 //-----------------------------------------------------------------------------
 
-float Camera::GetNearPlane() const
+float DSGraphics::Camera::GetNearPlane() const
 {
 	return mNearPlane;
 }
 
 //-----------------------------------------------------------------------------
 
-float Camera::GetFarPlane() const
+float DSGraphics::Camera::GetFarPlane() const
 {
 	return mFarPlane;
 }
 
 //-----------------------------------------------------------------------------
 
-float Camera::GetViewportAspectRatio() const
+float DSGraphics::Camera::GetViewportAspectRatio() const
 {
 	return mViewportAspectRatio;
 }
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 Camera::GetOrientation() const
+glm::mat4 DSGraphics::Camera::GetOrientation() const
 {
 	glm::mat4 orientation(1.0f);
 
@@ -165,7 +165,7 @@ glm::mat4 Camera::GetOrientation() const
 
 //-----------------------------------------------------------------------------
 
-glm::vec3 Camera::GetDirectionForward() const
+glm::vec3 DSGraphics::Camera::GetDirectionForward() const
 {
 	glm::vec4 forward = glm::inverse(GetOrientation()) * glm::vec4(0, 0, -1, 1);
 
@@ -174,7 +174,7 @@ glm::vec3 Camera::GetDirectionForward() const
 
 //-----------------------------------------------------------------------------
 
-glm::vec3 Camera::GetDirectionRight() const
+glm::vec3 DSGraphics::Camera::GetDirectionRight() const
 {
 	glm::vec4 right = glm::inverse(GetOrientation()) * glm::vec4(1, 0, 0, 1);
 
@@ -183,7 +183,7 @@ glm::vec3 Camera::GetDirectionRight() const
 
 //-----------------------------------------------------------------------------
 
-glm::vec3 Camera::GetDirectionUp() const
+glm::vec3 DSGraphics::Camera::GetDirectionUp() const
 {
 	glm::vec4 up = glm::inverse(GetOrientation()) * glm::vec4(0, 1, 0, 1);
 
@@ -192,14 +192,14 @@ glm::vec3 Camera::GetDirectionUp() const
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 Camera::GetMatrix() const
+glm::mat4 DSGraphics::Camera::GetMatrix() const
 {
 	return GetProj() * GetView();
 }
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 Camera::GetView() const
+glm::mat4 DSGraphics::Camera::GetView() const
 {
 	/*
 	glm::mat4 test(1.0f);
@@ -216,7 +216,7 @@ glm::mat4 Camera::GetView() const
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 Camera::GetProj() const
+glm::mat4 DSGraphics::Camera::GetProj() const
 {
 	return
 		glm::perspective
@@ -232,14 +232,14 @@ glm::mat4 Camera::GetProj() const
 // Setters
 //-----------------------------------------------------------------------------
 
-void Camera::SetPosition(const glm::vec3& position)
+void DSGraphics::Camera::SetPosition(const glm::vec3& position)
 {
 	mPosition = position;
 }
 
 //-----------------------------------------------------------------------------
 
-void Camera::SetFoV(float fov)
+void DSGraphics::Camera::SetFoV(float fov)
 {
 	assert(fov > 0.0f && fov < 180.0f);
 
@@ -248,7 +248,7 @@ void Camera::SetFoV(float fov)
 
 //-----------------------------------------------------------------------------
 
-void Camera::SetNearPlane(float nearPlane)
+void DSGraphics::Camera::SetNearPlane(float nearPlane)
 {
 	assert((nearPlane > 0.0f) && (nearPlane < mFarPlane));
 
@@ -257,7 +257,7 @@ void Camera::SetNearPlane(float nearPlane)
 
 //-----------------------------------------------------------------------------
 
-void Camera::SetFarPlane(float farPlane)
+void DSGraphics::Camera::SetFarPlane(float farPlane)
 {
 	assert(farPlane > mNearPlane);
 
@@ -266,7 +266,7 @@ void Camera::SetFarPlane(float farPlane)
 
 //-----------------------------------------------------------------------------
 
-void Camera::SetPlanes(float nearPlane, float farPlane)
+void DSGraphics::Camera::SetPlanes(float nearPlane, float farPlane)
 {
 	assert(nearPlane > 0.0f);
 	assert(farPlane > nearPlane);
@@ -277,7 +277,7 @@ void Camera::SetPlanes(float nearPlane, float farPlane)
 
 //-----------------------------------------------------------------------------
 
-void Camera::SetViewportAspectRatio(float viewportAspectRatio)
+void DSGraphics::Camera::SetViewportAspectRatio(float viewportAspectRatio)
 {
 	assert(viewportAspectRatio > 0.0f);
 

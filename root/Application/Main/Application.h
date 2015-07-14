@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.h
 // Created:		2015/02/10
-// Last Edited:	2015/02/15
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -30,16 +30,16 @@
 #include <list>
 
 // Daniel Schenker
+//  DSGraphics
+#include "DSGraphics/Camera.h"
+#include "DSGraphics/ModelAsset.h"
+#include "DSGraphics/ModelInstance.h"
+#include "DSGraphics/Program.h"
+#include "DSGraphics/Texture.h"
 
 //=============================================================================
 // Forward Declarations
 //=============================================================================
-
-class Camera;
-class ModelAsset;
-class ModelInstance;
-class Program;
-class Texture;
 
 //=============================================================================
 //Enums
@@ -75,7 +75,7 @@ private:
 	void LoadAssets();
 		void LoadModelAssets();
 			void LoadModelAssetCube();
-	Program* LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile);
+	DSGraphics::Program* LoadShaders(const char* vertexShaderFile, const char* fragmentShaderFile);
 
 	// Run Sub-Functions
 	void Input();
@@ -110,19 +110,19 @@ private:
 	double mElapsedTime;
 
 	// Camera
-	Camera* mpCamera;
+	DSGraphics::Camera* mpCamera;
 	GLuint mUniformCamera;
 
 	// Shader Programs
-	Program* mpProgramCube;
+	DSGraphics::Program* mpProgramCube;
 
 	// Textures
-	Texture* mpTextureCube;
+	DSGraphics::Texture* mpTextureCube;
 
 	// Assets & Instances
 	//  Models
-	ModelAsset* mpModelAssetCube;
-	std::list<ModelInstance> mListModelInstances;
+	DSGraphics::ModelAsset* mpModelAssetCube;
+	std::list<DSGraphics::ModelInstance> mListModelInstances;
 
 	
 	GLuint mRectUniformModel;

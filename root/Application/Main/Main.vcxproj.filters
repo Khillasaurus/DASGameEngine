@@ -16,6 +16,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{73fdba97-7a61-4689-9a9d-4409fa06ac16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{56ddb65b-738f-412f-8383-aa16fe5f8a3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -24,23 +27,23 @@
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\Camera.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Program.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\ModelAsset.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\ModelInstance.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\Program.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ModelAsset.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\Shader.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ModelInstance.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DSGraphics\Texture.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,23 +58,23 @@
     <ClInclude Include="Application.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\Camera.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Program.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\ModelAsset.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\ModelInstance.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\Program.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ModelAsset.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\Shader.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ModelInstance.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="DSGraphics\Texture.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

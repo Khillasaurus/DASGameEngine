@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Program.cpp
 // Created:		2015/02/11
-// Last Edited:	2015/02/12
+// Last Edited:	2015/02/17
 // Copyright:	Daniel Schenker
 // Description:	Program
 //=============================================================================
@@ -25,7 +25,7 @@
 // Constuctors
 //-----------------------------------------------------------------------------
 
-Program::Program(const std::vector<Shader>& shaders)
+DSGraphics::Program::Program(const std::vector<DSGraphics::Shader>& shaders)
 :	mProgramID(0)
 {
 	if(shaders.size() <= 0)
@@ -80,7 +80,7 @@ Program::Program(const std::vector<Shader>& shaders)
 // Destructor
 //-----------------------------------------------------------------------------
 
-Program::~Program()
+DSGraphics::Program::~Program()
 {
 	//might be 0 if ctor fails by throwing exception
 	if(mProgramID != 0)
@@ -106,14 +106,14 @@ Program::~Program()
 // Getters
 //-----------------------------------------------------------------------------
 
-GLuint Program::GetProgramID() const
+GLuint DSGraphics::Program::GetProgramID() const
 {
 	return mProgramID;
 }
 
 //-----------------------------------------------------------------------------
 
-GLint Program::GetAttrib(const GLchar* pAttribName) const
+GLint DSGraphics::Program::GetAttrib(const GLchar* pAttribName) const
 {
 	if(pAttribName != nullptr)
 	{
@@ -133,7 +133,7 @@ GLint Program::GetAttrib(const GLchar* pAttribName) const
 
 //-----------------------------------------------------------------------------
 
-GLint Program::GetUniform(const GLchar* pUniformName) const
+GLint DSGraphics::Program::GetUniform(const GLchar* pUniformName) const
 {
 	if(pUniformName != nullptr)
 	{

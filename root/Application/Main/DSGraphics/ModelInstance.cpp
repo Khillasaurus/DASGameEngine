@@ -15,8 +15,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Daniel Schenker
-#include "Camera.h"
-#include "ModelAsset.h"
 #include "ModelInstance.h"
 #include "Program.h"
 
@@ -32,7 +30,7 @@
 // Constuctors
 //-----------------------------------------------------------------------------
 
-ModelInstance::ModelInstance(ModelAsset* pAsset, Camera* pCamera)
+DSGraphics::ModelInstance::ModelInstance(DSGraphics::ModelAsset* pAsset, DSGraphics::Camera* pCamera)
 :	mpAsset(pAsset)
 ,	mTransform(1.0f)
 ,	mScale(1.0f)
@@ -55,7 +53,7 @@ ModelInstance::ModelInstance(ModelAsset* pAsset, Camera* pCamera)
 // Destructor
 //-----------------------------------------------------------------------------
 
-ModelInstance::~ModelInstance()
+DSGraphics::ModelInstance::~ModelInstance()
 {
 }
 
@@ -66,14 +64,14 @@ ModelInstance::~ModelInstance()
 
 //-----------------------------------------------------------------------------
 
-void ModelInstance::UpdateTransform()
+void DSGraphics::ModelInstance::UpdateTransform()
 {
 	mTransform = mTranslate * mRotate * mScale;
 }
 
 //-----------------------------------------------------------------------------
 
-void ModelInstance::Render()
+void DSGraphics::ModelInstance::Render()
 {
 	//Bind the shaders
 	glUseProgram(mpAsset->GetProgramID());
@@ -125,28 +123,28 @@ void ModelInstance::Render()
 // Getters
 //-----------------------------------------------------------------------------
 
-glm::mat4 ModelInstance::GetScale() const
+glm::mat4 DSGraphics::ModelInstance::GetScale() const
 {
 	return mScale;
 }
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 ModelInstance::GetRotate() const
+glm::mat4 DSGraphics::ModelInstance::GetRotate() const
 {
 	return mRotate;
 }
 
 //-----------------------------------------------------------------------------
 
-glm::vec3 ModelInstance::GetRotationAxis() const
+glm::vec3 DSGraphics::ModelInstance::GetRotationAxis() const
 {
 	return mRotationAxis;
 }
 
 //-----------------------------------------------------------------------------
 
-glm::mat4 ModelInstance::GetTranslate() const
+glm::mat4 DSGraphics::ModelInstance::GetTranslate() const
 {
 	return mTranslate;
 }
@@ -155,28 +153,28 @@ glm::mat4 ModelInstance::GetTranslate() const
 // Setters
 //-----------------------------------------------------------------------------
 
-void ModelInstance::SetScale(const glm::mat4& scale)
+void DSGraphics::ModelInstance::SetScale(const glm::mat4& scale)
 {
 	mScale = scale;
 }
 
 //-----------------------------------------------------------------------------
 
-void ModelInstance::SetRotate(const glm::mat4& rotate)
+void DSGraphics::ModelInstance::SetRotate(const glm::mat4& rotate)
 {
 	mRotate = rotate;
 }
 
 //-----------------------------------------------------------------------------
 
-void ModelInstance::SetRotationAxis(const glm::vec3& rotationAxis)
+void DSGraphics::ModelInstance::SetRotationAxis(const glm::vec3& rotationAxis)
 {
 	mRotationAxis = rotationAxis;
 }
 
 //-----------------------------------------------------------------------------
 
-void ModelInstance::SetTranslate(const glm::mat4& translate)
+void DSGraphics::ModelInstance::SetTranslate(const glm::mat4& translate)
 {
 	mTranslate = translate;
 }
