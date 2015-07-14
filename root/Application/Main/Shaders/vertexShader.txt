@@ -6,7 +6,7 @@
 // Description:	Vertex Shader
 //=============================================================================
 
-#version 150
+#version 400
 
 uniform mat4 camera;
 uniform mat4 model;

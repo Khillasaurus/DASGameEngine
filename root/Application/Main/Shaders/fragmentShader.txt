@@ -6,7 +6,7 @@
 // Description:	Fragment Shader
 //=============================================================================
 
-#version 150
+#version 400
 
 in vec2 vsOutTexCoord;
 in vec4 vsOutColor;
@@ -19,5 +19,13 @@ void main()
 {
 	//fsOutColor = texture(tex, vsOutTexCoord);
 	//fsOutColor = texture(tex, vsOutTexCoord) * vec4(vsOutColor);
-	fsOutColor = vec4(vsOutColor);
+	//fsOutColor = vec4(vsOutColor);
+
+	vec4 texel = texture(tex, vsOutTexCoord);
+	//vec4 texel = vec4(vsOutColor);
+	if(texel.a < 0.5)
+	{
+		discard;
+	}
+	fsOutColor = texel;
 }

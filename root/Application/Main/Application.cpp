@@ -137,7 +137,7 @@ void Application::Initialize()
 			//Textures
 			if(mpTextureCube == nullptr)
 			{
-				mpTextureCube = new Texture("../../Resources/Textures/sample.png");
+				mpTextureCube = new Texture("../../Resources/Textures/stripes2.png");
 			}
 			else
 			{
@@ -200,8 +200,8 @@ bool Application::InitializeGLFW()
 		//  Configuration
 
 		//Minimum Version 3.2
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -213,7 +213,7 @@ bool Application::InitializeGLFW()
 		//mpWindow = glfwCreateWindow(static_cast<int>(mWindowSize.x), static_cast<int>(mWindowSize.y), mWindowTitle, glfwGetPrimaryMonitor(), nullptr);
 		if(mpWindow == nullptr)
 		{
-			throw std::runtime_error("ERROR: Failed to open a GLFW window. Please update your graphics card drivers to a version that supports OpenGL 3.2 or higher.");
+			throw std::runtime_error("ERROR: Failed to open a GLFW window. Please update your graphics card drivers to a version that supports OpenGL 4.0 or higher.");
 			mQuit = false;
 
 			return false;
@@ -254,10 +254,10 @@ bool Application::InitializeGLEW()
 	glewExperimental = GL_TRUE;
 	if(glewInit() == GLEW_OK)
 	{
-		// make sure OpenGL version 3.2 API is available
-		if(!GLEW_VERSION_3_2)
+		// make sure OpenGL version 4.0 API is available
+		if(!GLEW_VERSION_4_0)
 		{
-			throw std::runtime_error("ERROR: OpenGL 3.2 API is not available.");
+			throw std::runtime_error("ERROR: OpenGL 4.0 API is not available.");
 		}
 
 		return true;
@@ -308,16 +308,16 @@ void Application::LoadModelAssetCube()
 		//Position				TexCoords		Color: RGBA
 		
 		//Top
-		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 1.0f,	//0
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 0.0f,	//0
 		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,		1.0f,  0.5f,  0.0f, 1.0f,	//1
-		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 1.0f,	//2
-		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 1.0f,	//3
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 0.0f,	//2
+		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 0.7f,	//3
 
 		//Bottom
 		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f, 1.0f,	//4
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 1.0f,	//5
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 1.0f,	//6
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 1.0f	//7
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 0.0f,	//5
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 0.5f,	//6
+		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 0.5f	//7
 	};
 
 	const unsigned int kElementCount = 3 * 2 * 6;
@@ -476,7 +476,7 @@ void Application::Physics()
 {
 	//Individual Objects
 	// Rect
-	const GLfloat kDegreesPerSecond = 180.0f;
+	const GLfloat kDegreesPerSecond = 90.0f;
 	mRectDegreesRotated += static_cast<float>(mElapsedTime) * kDegreesPerSecond;
 	while(mRectDegreesRotated > 360.0f)
 	{
