@@ -721,6 +721,26 @@ void Application::Input()
 		//Down based on camera orientation (like in Space)
 		//mpCamera->OffsetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * (-mpCamera->GetDirectionUp()));
 	}
+	// Local Right
+	else if(glfwGetKey(mpWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(10.0f, 0.0f, 0.0f));
+	}
+	// Local Forwards
+	else if(glfwGetKey(mpWindow, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -10.0f));
+	}
+	// Local Left
+	else if(glfwGetKey(mpWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-10.0f, 0.0f, 0.0f));
+	}
+	// Local Backwards
+	else if(glfwGetKey(mpWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 10.0f));
+	}
 
 
 	//Individual Objects

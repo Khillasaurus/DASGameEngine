@@ -73,19 +73,26 @@ void DSGraphics::Camera::MoveWorld(const glm::vec3& offset)
 
 //-----------------------------------------------------------------------------
 
-/*
+//TOFIX
 void DSGraphics::Camera::MoveLocal(const glm::vec3& offset)
 {
-	//Use dot product or projection math or something
+	glm::vec3 right = glm::normalize(GetDirectionRight());
+	glm::vec3 up = glm::normalize(GetDirectionUp());
+	glm::vec3 backward = -glm::normalize(GetDirectionForward());
 
-
-	glm::vec4 right = mOrientation * glm::vec4(1, 0, 0, 1);
-
-	return glm::vec3(right);
-
-	//TODO
+	right.x *= offset.x;
+	right.y *= offset.x;
+	right.z *= offset.x;
+	up.x *= offset.y;
+	up.y *= offset.y;
+	up.z *= offset.y;
+	backward.x *= offset.z;
+	backward.y *= offset.z;
+	backward.z *= offset.z;
+	mPosition += right;
+	mPosition += up;
+	mPosition += backward;
 }
-*/
 
 //-----------------------------------------------------------------------------
 

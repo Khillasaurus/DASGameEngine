@@ -57,7 +57,7 @@ namespace DSGraphics
 	public:
 		// General
 		void MoveWorld(const glm::vec3& offset);//Moves camera using world coordinates
-		//void MoveLocal(const glm::vec3& offset);//Moves camera based on the cameras current orientation//TODO
+		void MoveLocal(const glm::vec3& offset);//Moves camera based on the cameras current orientation//TOFIX
 		void Rotate(float angle, const glm::vec3& axis);
 		//void LookAt(glm::vec3 position);//TODO
 	private:
