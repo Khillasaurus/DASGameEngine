@@ -128,12 +128,17 @@ private:
 	DSGraphics::ModelAsset* mpModelAssetBgMesh;
 	DSGraphics::ModelAsset* mpModelAssetCube;
 
-	//  Instance Lists
-	std::list<DSGraphics::ModelInstance> mListModelInstancesBackground;
-	std::list<DSGraphics::ModelInstance> mListModelInstances;
+	// Instance Lists
+	std::vector<DSGraphics::ModelInstance> mModelInstancesBackgroundList;
+	std::vector<DSGraphics::ModelInstance> mModelInstancesList;
 
-	
-	GLuint mRectUniformModel;
+	// Individual Objects
+	//  Background Mesh
+	GLfloat mBgMeshLengthX;
+	GLfloat mBgMeshLengthY;
+	GLfloat mBgMeshLengthZ;
+	unsigned int mBgMeshInstanceCount;
+
 	//temp
 	GLfloat mRectDegreesRotated;
 };

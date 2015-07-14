@@ -15,10 +15,45 @@ in vec3 vsInPosition;
 
 out vec4 vsOutColor;
 
+vec4 colorLightBlue = vec4(0.44, 0.67, 1.0, 1.0);
+vec4 colorSilver = vec4(0.83, 0.72, 0.76, 1.0);
+vec4 colorWhite = vec4(1.0, 1.0, 1.0, 1.0);
+
+bool verticalToggle = false;
+
 void main()
 {
-	//if(vsInPosition.x
-	vsOutColor.xyzw = vec4(0.64, 0.87, 1.0, 1.0);
+	if(mod(model[3][2] + vsInPosition.z, 0.02) == 0)
+	{
+		verticalToggle = true;
+	}
+	else
+	{
+		verticalToggle = false;
+	}
 	
+	if(mod(model[3][0] + vsInPosition.x, 0.02) == 0)
+	{
+		if(verticalToggle == true)
+		{
+			vsOutColor.xyzw = colorLightBlue;
+		}
+		else
+		{
+			vsOutColor.xyzw = colorSilver;
+		}
+	}
+	else
+	{
+		if(verticalToggle == true)
+		{
+			vsOutColor.xyzw = colorSilver;
+		}
+		else
+		{
+			vsOutColor.xyzw = colorLightBlue;
+		}
+	}
+
 	gl_Position = camera * model * vec4(vsInPosition, 1);
 }

@@ -38,33 +38,36 @@ void OnError(int errorCode, const char* msg);
 //-----------------------------------------------------------------------------
 
 Application::Application()
-	//General
+//General
 :	mQuit(false)
-	//Window
+//Window
 ,	mpWindow(nullptr)
 ,	mWindowSize(1280, 720)
 ,	mWindowTitle("Daniel Schenker's Application")
-	//Time
+//Time
 ,	mLastTime(0.0)
 ,	mThisTime(0.0)
 ,	mElapsedTime(0.0)
-	//Camera
+//Camera
 ,	mpCamera(nullptr)
 ,	mUniformCamera(0)
-	//Shader Programs
+//Shader Programs
 ,	mpProgramBgMesh(nullptr)
 ,	mpProgramCube(nullptr)
-	//Textures
+//Textures
 ,	mpTextureCube(nullptr)
-	//Data
-	//  Models
+//Models
 ,	mpModelAssetBgMesh(nullptr)
 ,	mpModelAssetCube(nullptr)
-	//  Instance Lists
-//,	mListModelInstancesBackground()
-//,	mListModelInstances()//not sure how to initialize this yet
+//Instance Lists
+	//,	mListModelInstancesBackground()
+	//,	mListModelInstances()//not sure how to initialize this yet
+//Individual Objects
+,	mBgMeshLengthX(0.1f)
+,	mBgMeshLengthY(0.0f)
+,	mBgMeshLengthZ(0.1f)
+,	mBgMeshInstanceCount(0)
 
-,	mRectUniformModel(0)
 	//temp
 ,	mRectDegreesRotated(0.0f)
 {
@@ -252,7 +255,8 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera();
-		mpCamera->SetPosition(glm::vec3(0.0f, 4.0f, 4.0f));
+		mpCamera->SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
+		mpCamera->OffsetOrientation(0.0f, 60.0f);//temp
 		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
 	else
@@ -348,9 +352,10 @@ void Application::LoadModelAssetBgMesh()
 		//	0---1 +x
 
 		//Position
-		 0.0f,	 0.0f,	 0.0f,	//0
-		 0.01f,	 0.0f,	 0.0f,	//1
-		 0.0f,	 0.0f,	-0.01f	//2
+	//	x				y				z
+		 0.0f,			 0.0f,			 0.0f,				//0
+		 mBgMeshLengthX, 0.0f,			 0.0f,				//1
+		 0.0f,			 0.0f,			(-mBgMeshLengthZ)	//2
 	};
 
 	//A line segment is made up from 2 vertices. A triangle has the same number of sides (line segments) as vertices (3).
@@ -501,22 +506,43 @@ void Application::CreateInitialInstances()
 {
 	//Background
 	// Mesh
-	DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
-	mListModelInstancesBackground.push_back(bgMesh);
+	mBgMeshInstanceCount = 256;
+
+	//Create first bgMesh outside loop so that it can be referenced for positional tiling inside creation loop
+	DSGraphics::ModelInstance bgMeshFirst(mpModelAssetBgMesh, mpCamera);
+	mModelInstancesBackgroundList.push_back(bgMeshFirst);
+	glm::vec3 bgMeshFirstPos = bgMeshFirst.GetPosition();
+
+	//Create bgMesh'es starting with the 2nd one onwards
+	for(unsigned int i = 1; i < mBgMeshInstanceCount; ++i)
+	{
+		DSGraphics::ModelInstance bgMesh(mpModelAssetBgMesh, mpCamera);
+		//TODO: Set position based off of fill algorithm instead (not coded yet)
+		int horizontalOffset = i % 16;
+		int verticalOffset = i / 16;
+		bgMesh.SetPosition(glm::vec3
+		(
+			bgMeshFirstPos.x + (horizontalOffset * mBgMeshLengthX),
+			0.0f,//in this case this is the same as: bgMeshFirstPos.y + (i * mBgMeshLengthY)
+			bgMeshFirstPos.z - (verticalOffset * mBgMeshLengthZ)
+		));
+		bgMesh.UpdateTransform();
+		mModelInstancesBackgroundList.push_back(bgMesh);
+	}
 
 
 	//Cube
 	DSGraphics::ModelInstance cube0001(mpModelAssetCube, mpCamera);
-	mListModelInstances.push_back(cube0001);
+	mModelInstancesList.push_back(cube0001);
 
 	DSGraphics::ModelInstance cube0002(mpModelAssetCube, mpCamera);
 	cube0002.SetSize(glm::vec3(0.5f));
 	cube0002.SetPosition(glm::vec3(2.0f, -1.5f, -2.5f));
 	cube0002.UpdateTransform();
-	mListModelInstances.push_back(cube0002);
+	mModelInstancesList.push_back(cube0002);
 
 	//Set initial rotation axis for cube00001
-	mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 //-----------------------------------------------------------------------------
@@ -612,15 +638,15 @@ void Application::Input()
 	// Rect
 	if(glfwGetKey(mpWindow, 'X'))
 	{
-		mListModelInstances.front().SetOrientationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
+		mModelInstancesList.front().SetOrientationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Y'))
 	{
-		mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+		mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	else if(glfwGetKey(mpWindow, 'Z'))
 	{
-		mListModelInstances.front().SetOrientationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
+		mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 
@@ -651,9 +677,10 @@ void Application::Physics()
 	}
 	//  Update model based on changes that may have occured during the input stage
 	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
-	mListModelInstances.front().SetOrientationAngle(glm::radians(mRectDegreesRotated));
+	mModelInstancesList[0].SetOrientationAngle(glm::radians(mRectDegreesRotated));//this is the same as the next line, just written differently
+	//mModelInstancesList.front().SetOrientationAngle(glm::radians(mRectDegreesRotated));
 	//mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
-	mListModelInstances.front().UpdateTransform();
+	mModelInstancesList.front().UpdateTransform();
 }
 
 //-----------------------------------------------------------------------------
@@ -672,8 +699,8 @@ void Application::Render()
 	//Instance Lists
 	
 	// Background
-	std::list<DSGraphics::ModelInstance>::iterator it;
-	for(it = mListModelInstancesBackground.begin(); it != mListModelInstancesBackground.end(); ++it)
+	std::vector<DSGraphics::ModelInstance>::iterator it;
+	for(it = mModelInstancesBackgroundList.begin(); it != mModelInstancesBackgroundList.end(); ++it)
 	{
 		it->Render();
 	}
@@ -681,7 +708,7 @@ void Application::Render()
 	// Cube
 	//TODO: learn what kind of iterator I need here
 	//std::list<DSGraphics::ModelInstance>::iterator it;
-	for(it = mListModelInstances.begin(); it != mListModelInstances.end(); ++it)
+	for(it = mModelInstancesList.begin(); it != mModelInstancesList.end(); ++it)
 	{
 		it->Render();
 	}
@@ -746,8 +773,8 @@ void Application::CleanUpAssets()
 
 void Application::CleanUpInstances()
 {
-	mListModelInstancesBackground.clear();
-	mListModelInstances.clear();
+	mModelInstancesBackgroundList.clear();
+	mModelInstancesList.clear();
 }
 
 //-----------------------------------------------------------------------------
