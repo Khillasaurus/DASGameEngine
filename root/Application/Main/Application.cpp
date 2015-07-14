@@ -43,23 +43,25 @@ Application::Application()
 	//General
 :	mQuit(false)
 ,	mpWindow(nullptr)
-,	mWindowSize(800, 600)
+,	mWindowSize(1280, 720)
 ,	mWindowTitle("Daniel Schenker's Application")
 	//Data
 	// Shaders
 ,	mpProgram001(nullptr)
+	// Camera
+,	mView(1.0f)
+,	mUniformView(0)
+,	mProj(1.0f)
+,	mUniformProj(0)
 	// Rectangle
 ,	mRectVao(0)
 ,	mpRectVertices(nullptr)
-,	mRectMvp(1.0f)
 ,	mRectModel(1.0f)
+,	mRectUniformModel(0)
 ,	mRectScale(1.0f)
 ,	mRectRotate(1.0f)
 ,	mRectRotationAxis(0.0f, 0.0f, 0.0f)
 ,	mRectTranslate(1.0f)
-,	mRectView(1.0f)
-,	mRectProj(1.0f)
-,	mRectUniMvp(0)
 ,	mRectVbo(0)
 ,	mRectEbo(0)
 ,	mpRectElements(nullptr)
@@ -103,6 +105,12 @@ void Application::Initialize()
 			std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
 			std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
+			//OpenGL Settings
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			//Shaders
 			LoadShaders();
 
@@ -123,17 +131,10 @@ void Application::Run()
 	while(mQuit == false)//while(glfwWindowShouldClose(mpWindow) == false)
 	{
 		//Input
-		
-		// Retrieve
-		glfwPollEvents();
-		
-		// Handle
-		//  If key pressed: escape
-		if(glfwGetKey(mpWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		{
-			mQuit = true;
-		}
+		Input();
 
+		//Physics
+		Physics();
 
 		//Render
 		Render();
@@ -276,56 +277,70 @@ void Application::LoadRectangle()
 	//Data
 
 	// Vertices in Object Coordinates
-	mpRectVertices = new GLfloat[28]
+	mpRectVertices = new GLfloat[8 * 8]
 	{
-	//	Position							Color							TexCoords
-		-0.5f,  0.5f, /* left	top */		1.0f,  0.0f,  0.0f, /* RGB */	0.0f, 1.0f,
-		 0.5f,  0.5f, /* right	top */		0.0f,  1.0f,  0.0f, /* RGB */	1.0f, 1.0f,
-		 0.5f, -0.5f, /* right	bottom */	0.0f,  0.0f,  1.0f, /* RGB */	1.0f, 0.0f,
-		-0.5f, -0.5f, /* left	bottom */	1.0f,  1.0f,  1.0f, /* RGB */	0.0f, 0.0f
+		//	  2---3
+		//	 /|  /|
+		//	0---1 |
+		//	| 6-|-7
+		//	|/  |/
+		//	4---5
+
+	//	Position				TexCoords		Color
+		
+		//Top
+		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,		1.0f,  0.0f,  0.0f,	//0
+		 0.5f,  0.5f,  0.5f,	0.0f, 0.0f,		1.0f,  0.5f,  0.0f,	//1
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f,	//2
+		 0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		1.0f,  1.0f,  0.0f,	//3
+
+		//Bottom
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f,	//4
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f,	//5
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f,	//6
+		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f	//7
 	};
 
-	mpRectElements = new GLuint[6]
+	mpRectElements = new GLuint[3 * 2 * 6]
 	{
-		0, 1, 2,	//LT, RT, RB
-		2, 3, 0		//RB, LB, LT
+		//Top
+		0, 1, 2,
+		3, 2, 1,
+
+		//Front
+		4, 5, 0,
+		1, 0, 5,
+
+		//Right
+		5, 7, 1,
+		3, 1, 7,
+
+		//Back
+		7, 6, 3,
+		2, 3, 6,
+
+		//Left
+		6, 4, 2,
+		0, 2, 4,
+
+		//Bot
+		6, 7, 4,
+		5, 4, 7
 	};
 
-	// Calculate model-view-projection (mvp) matrix
-	//Random Notes: model = glm::rotate(model, glm::radians(0.f), rotationAxis) * glm::scale(model, glm::vec3(5.0f, 5.0f, 1.0f));
-	//  Model
-
+	// Model
 	//   Scale
 	mRectScale = glm::mat4(1.0f);//not doing any scaling at the moment
 	
 	//   Rotate
 	mRectRotate = glm::mat4(1.0f);//not doing any rotating at the moment
-	mRectRotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+	mRectRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 	
 	//   Translate
 	mRectTranslate  = glm::mat4(1.0f);//not doing any translating at the moment
 
 	//Combine SRT into Model
 	mRectModel = mRectTranslate * mRectRotate * mRectScale;
-
-	//  View
-	mRectView = glm::lookAt
-	(
-		glm::vec3(1.0f, 1.0f, 1.0f),	//camera position
-		glm::vec3(0.0f, 0.0f, 0.0f),	//focal point
-		glm::vec3(0.0f, 1.0f, 0.0f)		//up axis
-	);
-
-	//  Projection
-	mRectProj = glm::perspective
-	(
-		45.0f,				//Field of View (FoV) in degrees
-		800.0f / 600.0f,	//aspect ratio
-		1.0f,				//near plane
-		10.0f				//far plane
-	);
-
-	mRectMvp = mRectProj * mRectView * mRectModel;
 
 
 	//Vertex Array Object (VAO)
@@ -354,7 +369,7 @@ void Application::LoadRectangle()
 	glBufferData
 	(
 		GL_ARRAY_BUFFER,					//currently active array buffer
-		sizeof(mpRectVertices[0]) * 4 * 7,	//size of vertices data in bytes
+		sizeof(mpRectVertices[0]) * 8 * 8,	//size of vertices data in bytes
 		mpRectVertices,						//actual vertices data
 		GL_STATIC_DRAW						//usage of vertex data
 	);
@@ -367,15 +382,13 @@ void Application::LoadRectangle()
 	}
 	glGenBuffers(1, &mRectEbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRectEbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mpRectElements[0]) * 2 * 3, mpRectElements, GL_STATIC_DRAW);
-
-
-	//Get a handle for our mvp uniform
-	if(mRectUniMvp != 0)
-	{
-		fprintf(stderr, "WARNING: mRectUniMvp is being used due to it not having a default value of GLuint == 0. Attempting to continue regardless.\n");
-	}
-	mRectUniMvp = glGetUniformLocation(mpProgram001->GetProgramID(), "mvp");
+	glBufferData
+	(
+		GL_ELEMENT_ARRAY_BUFFER,
+		sizeof(mpRectElements[0]) * 3 * 2 * 6,
+		mpRectElements,
+		GL_STATIC_DRAW
+	);
 
 
 	//Specify the layout of the vertex data
@@ -386,11 +399,24 @@ void Application::LoadRectangle()
 	glVertexAttribPointer
 	(
 		posAttrib,				//which attribute? in this case, referencing vsInPosition.
-		2,						//number of values (size) for attribute (input)? in this case, 2 for x, y
+		3,						//number of values (size) for attribute (vsInPosition). in this case, 3 for x, y, z
 		GL_FLOAT,				//type of each component
 		GL_FALSE,				//should attribute (input) values be normalized?
-		7 * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
+		8 * sizeof(GLfloat),	//stride (how many bytes between each position attribute in the array)
 		0						//array buffer offset
+	);
+
+	//  Texture
+	GLint texAttrib = glGetAttribLocation(mpProgram001->GetProgramID(), "vsInTexCoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer
+	(
+		texAttrib,						//which attribute? in this case, referencing vsInTexCoord.
+		2,								//number of values (size) for attribute (vsInTexCoord). in this case, 2 for u, v
+		GL_FLOAT,						//type of each component
+		GL_FALSE,						//should attribute (input) values be normalized?
+		8 * sizeof(GLfloat),			//stride (how many bytes between each position attribute in the array)
+		(void*)(3 * sizeof(GLfloat))	//array buffer offset
 	);
 
 	// Color
@@ -398,18 +424,13 @@ void Application::LoadRectangle()
 	glEnableVertexAttribArray(colAttrib);
 	glVertexAttribPointer
 	(
-		colAttrib,
-		3,
-		GL_FLOAT,
-		GL_FALSE,
-		7 * sizeof(float),
-		(void*)(2 * sizeof(GLfloat))
+		colAttrib,						//which attribute? in this case, referencing vsInColor.
+		3,								//number of values (size) for attribute (vsInColor). in this case, 3 for r, g, b
+		GL_FLOAT,						//type of each component
+		GL_FALSE,						//should attribute (input) values be normalized?
+		8 * sizeof(float),				//stride (how many bytes between each position attribute in the array)
+		(void*)(5 * sizeof(GLfloat))	//array buffer offset
 	);
-
-	//  Texture
-	GLint texAttrib = glGetAttribLocation(mpProgram001->GetProgramID(), "vsInTexCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 	
 	//   Load
 	if(mpTex != nullptr)
@@ -422,12 +443,6 @@ void Application::LoadRectangle()
 	{
 		fprintf(stderr, "WARNING: mpTex texture not loaded. Attempting to continue regardless.\n");
 	}
-
-	//int texWidth = 0;
-	//int texHeight = 0;
-
-	//GLuint texture = LoadTexture("../../Resources/Textures/test.png", texWidth, texHeight);
-	//GLuint texture2 = LoadTexture("../../Resources/Textures/pngexample.png", texWidth, texHeight);//I shouldn't reuse texWidth and texHeight, but this is just for testing's sake
 
 	//Unbind the VBO and VAO
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -442,10 +457,100 @@ void Application::LoadShaders()
 	shaders.push_back(Shader::CreateShaderFromFile("Shaders/vertexShader.txt", GL_VERTEX_SHADER));
 	shaders.push_back(Shader::CreateShaderFromFile("Shaders/fragmentShader.txt", GL_FRAGMENT_SHADER));
 	mpProgram001 = new Program(shaders);
+
+	glUseProgram(mpProgram001->GetProgramID());
+
+	//MVP (Model View Projection)
+	//Note: model matrices are calculated individually for each instance, but the view and projection matrices are the same for all instances.
+
+	// View
+	mView = glm::lookAt
+	(
+		glm::vec3(1.0f, 1.5f, 2.0f),	//camera position
+		glm::vec3(0.0f, 0.0f, 0.0f),	//focal point
+		glm::vec3(0.0f, 1.0f, 0.0f)		//up axis
+	);
+	mUniformView = glGetUniformLocation(mpProgram001->GetProgramID(), "view");
+	glUniformMatrix4fv(mUniformView, 1, GL_FALSE, glm::value_ptr(mView));
+
+	// Projection
+	mProj = glm::perspective
+	(
+		glm::radians(90.0f),			//Vertical Field of View (FoV) in degrees
+		mWindowSize.x / mWindowSize.y,	//aspect ratio
+		0.1f,							//near plane
+		100.0f							//far plane
+	);
+	mUniformProj = glGetUniformLocation(mpProgram001->GetProgramID(), "proj");
+	glUniformMatrix4fv(mUniformProj, 1, GL_FALSE, glm::value_ptr(mProj));
+
+	glUseProgram(0);
 }
 
 //-----------------------------------------------------------------------------
 // Run Sub-Functions
+//-----------------------------------------------------------------------------
+
+void Application::Input()
+{
+	// Retrieve
+	glfwPollEvents();
+		
+	// Handle
+	//  If key pressed: escape
+	if(glfwGetKey(mpWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		mQuit = true;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::Physics()
+{
+	//TEMP testing
+	// Handle
+	//  If key pressed: space
+	if(glfwGetKey(mpWindow, GLFW_KEY_X) == GLFW_PRESS)
+	{
+		mRectRotate = glm::rotate
+		(
+			glm::mat4(1.0f),
+			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f)
+		);
+	}
+	else if(glfwGetKey(mpWindow, GLFW_KEY_Y) == GLFW_PRESS)
+	{
+		mRectRotate = glm::rotate
+		(
+			glm::mat4(1.0f),
+			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+	}
+	else if(glfwGetKey(mpWindow, GLFW_KEY_Z) == GLFW_PRESS)
+	{
+		mRectRotate = glm::rotate
+		(
+			glm::mat4(1.0f),
+			((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		);
+	}
+
+	//Transforms
+	/*
+	mRectRotate = glm::rotate
+	(
+		glm::mat4(1.0f),
+		((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	);
+	*/
+	mRectModel = mRectTranslate * mRectRotate * mRectScale;
+}
+
 //-----------------------------------------------------------------------------
 
 void Application::Render()
@@ -453,13 +558,18 @@ void Application::Render()
 	// Background
 	// Clear the screen to black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(mpProgram001->GetProgramID());
 
 	// Individual Objects
-		
+
 	//  Rectangle
+
+	//   Model
+	mRectUniformModel = glGetUniformLocation(mpProgram001->GetProgramID(), "model");
+	glUniformMatrix4fv(mRectUniformModel, 1, GL_FALSE, glm::value_ptr(mRectModel));
+
 	//   Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mpTex->GetObjectID());
@@ -468,19 +578,8 @@ void Application::Render()
 	//   VAO
 	glBindVertexArray(mRectVao);
 
-	//   Transforms (should be in physics I believe (after input))
-	mRectRotate = glm::rotate
-	(
-		glm::mat4(1.0f),
-		((GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC) * glm::radians(180.0f),
-		glm::vec3(0.0f, 0.0f, 1.0f)
-	);
-	mRectModel = mRectTranslate * mRectRotate * mRectScale;
-	mRectMvp = mRectProj * mRectView * mRectModel;
-	glUniformMatrix4fv(mRectUniMvp, 1, GL_FALSE, glm::value_ptr(mRectMvp));
-
 	//   Draw Elements
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 3 * 2 * 6, GL_UNSIGNED_INT, 0);
 
 	//  Unbind
 	glBindVertexArray(0);

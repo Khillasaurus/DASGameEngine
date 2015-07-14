@@ -1,18 +1,21 @@
-#version 150 core
+#version 150
 
-in vec2 vsInPosition;
-in vec3 vsInColor;
+uniform mat4 proj;
+uniform mat4 view;
+uniform mat4 model;
+
+in vec3 vsInPosition;
 in vec2 vsInTexCoord;
+in vec3 vsInColor;
 
-out vec3 vsOutColor;
 out vec2 vsOutTexCoord;
-
-uniform mat4 mvp;
+out vec3 vsOutColor;
 
 void main()
 {
-	vsOutColor = vsInColor;
+	// Pass the tex coord straight through to the fragment shader
 	vsOutTexCoord = vsInTexCoord;
+	vsOutColor = vsInColor;
 	
-	gl_Position = mvp * vec4(vsInPosition, 0.0, 1.0);
+	gl_Position = proj * view * model * vec4(vsInPosition, 1.0);
 }

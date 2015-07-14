@@ -73,6 +73,8 @@ private:
 	void LoadShaders();
 
 	// Run Sub-Functions
+	void Input();
+	void Physics();
 	void Render();
 
 	//Member Variables
@@ -90,28 +92,26 @@ private:
 	// Data
 	//  Programs
 	Program* mpProgram001;
+	//  Camera
+	glm::mat4 mView;
+	GLuint mUniformView;
+	glm::mat4 mProj;
+	GLuint mUniformProj;
 	//  Rectangle
 	//   VAO
 	GLuint mRectVao;
-	//   Model Vertices
+	//   Vertices
 	GLfloat* mpRectVertices;//TODO: change this to be a vector or something that knows the length of the array
-	//   Model-View-Projection (mvp) Matrix
-	glm::mat4 mRectMvp;
-	//    Model Matrix
+	//   Model
 	glm::mat4 mRectModel;
-	//     Scale
+	GLuint mRectUniformModel;
+	//    Scale
 	glm::mat4 mRectScale;
-	//     Rotate
+	//    Rotate
 	glm::mat4 mRectRotate;
 	glm::vec3 mRectRotationAxis;
-	//     Translate
+	//    Translate
 	glm::mat4 mRectTranslate;
-	//    View Matrix
-	glm::mat4 mRectView;
-	//    Projection Matrix
-	glm::mat4 mRectProj;
-	//   MVP Uniform Handle
-	GLuint mRectUniMvp;
 	//   VBO
 	GLuint mRectVbo;
 	//   EBO
