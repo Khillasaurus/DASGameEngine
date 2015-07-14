@@ -1,15 +1,14 @@
 //=============================================================================
-// File:		fragmentShader.txt
-// Created:		2015/01/29
-// Last Edited:	2015/02/16
+// File:		TexAndColor.FragmentShader
+// Created:		2015/02/19
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
-// Description:	Fragment Shader
+// Description:	Fragment Shader that outputs texture using the graphics card.
 //=============================================================================
 
 #version 400
 
 in vec2 passTexCoord;
-in vec4 passColor;
 
 out vec4 outColor;
 
@@ -17,12 +16,7 @@ uniform sampler2D tex;
 
 void main()
 {
-	//fsOutColor = texture(tex, vsOutTexCoord);
-	//fsOutColor = texture(tex, vsOutTexCoord) * vec4(vsOutColor);
-	//fsOutColor = vec4(vsOutColor);
-
 	vec4 texel = texture(tex, passTexCoord);
-	//vec4 texel = vec4(passColor);
 	if(texel.a < 0.5)
 	{
 		discard;

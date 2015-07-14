@@ -1,0 +1,25 @@
+//=============================================================================
+// File:		TexOnly.VertexShader
+// Created:		2015/02/19
+// Last Edited:	2015/02/19
+// Copyright:	Daniel Schenker
+// Description:	Vertex Shader that sets the position of vertices using the graphics card, and passes on texture but not color.
+//=============================================================================
+
+#version 400
+
+uniform mat4 camera;
+uniform mat4 model;
+
+in vec3 inPosition;
+in vec2 inTexCoord;
+
+out vec2 passTexCoord;
+
+void main()
+{
+	//Pass the tex coord to the fragment shader
+	passTexCoord = inTexCoord;
+	
+	gl_Position = camera * model * vec4(inPosition, 1);
+}

@@ -50,12 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\fragmentShader.txt">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\vertexShader.txt">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\BackgroundMesh\bgmesh.fragmentshader">
       <Filter>Shaders\BackgroundMesh</Filter>
     </None>
@@ -72,6 +66,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\ColorOnly.FragmentShader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\TexAndColor.VertexShader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\TexAndColor.FragmentShader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\TexOnly.FragmentShader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\TexOnly.VertexShader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

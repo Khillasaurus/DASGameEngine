@@ -36,9 +36,9 @@
 DSGraphics::ModelInstance::ModelInstance(DSGraphics::ModelAsset* pAsset, DSGraphics::Camera* pCamera)
 //Externally Accessible (not encapsulated)
 :	mpAsset(pAsset)
-,	mSize(0.0f)
+,	mSize(1.0f)
 ,	mOrientationAngle(0.0f)
-,	mOrientationAxis(0.0f)
+,	mOrientationAxis(0.0f, 1.0f, 0.0f)
 //,	mOrientation(0.0f)
 ,	mPosition(0.0f)
 ,	mpCamera(pCamera)
@@ -144,6 +144,22 @@ void DSGraphics::ModelInstance::Render()
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	glUseProgram(0);
+}
+
+//-----------------------------------------------------------------------------
+
+void DSGraphics::ModelInstance::Move(glm::vec3 displacement, float deviceCoordinatesPerMeter)
+{
+	mPosition += displacement * deviceCoordinatesPerMeter;
+	mPositionUpdated = true;
+}
+
+//-----------------------------------------------------------------------------
+
+void DSGraphics::ModelInstance::Spin(float radians)
+{
+	mRotate = glm::rotate(mRotate, radians, mOrientationAxis);
+	
 }
 
 //-----------------------------------------------------------------------------

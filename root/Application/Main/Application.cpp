@@ -256,7 +256,7 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera();
-		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 		mpCamera->OffsetOrientation(0.0f, 0.0f);//temp
 		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
@@ -275,7 +275,7 @@ void Application::LoadShaders()
 	// Cube
 	if(mpProgramCube == nullptr)
 	{
-		mpProgramCube = CreateProgram("Shaders/vertexShader.txt", "Shaders/fragmentShader.txt");
+		mpProgramCube = CreateProgram("Shaders/TexAndColor.VertexShader", "Shaders/TexAndColor.FragmentShader");
 	}
 	else
 	{
@@ -310,7 +310,7 @@ void Application::LoadTextures()
 	//Textures
 	if(mpTextureCube == nullptr)
 	{
-		mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes2.png");
+		mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes.png");
 	}
 	else
 	{
@@ -415,7 +415,7 @@ void Application::LoadModelAssetCube()
 			true,			//Has Elements?
 			kElementCount,	//Element Count
 			pElements,		//Elements,
-			GL_TRIANGLES,		//Draw Type
+			GL_TRIANGLES,	//Draw Type
 			0
 		);
 	}
@@ -443,7 +443,7 @@ void Application::LoadModelAssetWall()
 {
 	//Vertices
 
-	const unsigned int kVertexCount = 8;
+	const unsigned int kVertexCount = 4;
 	const unsigned int kPositionDimensions = 3;
 	const unsigned int kColorDimensions = 4;
 	const unsigned int kDataBitsPerVertex = kPositionDimensions + kColorDimensions;
@@ -451,52 +451,31 @@ void Application::LoadModelAssetWall()
 	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
 	{
 		/*
-			2--------3
-			|6------7|
-			||      ||		1m^2 wall
-			|4------5|
-			0--------1
+			2---3
+			|   |		1m^2 wall
+			0---1
 		*/
 
-		//Position																Color
-		//x							y							z				r		g		b		a
+		//Position								Color
+		//x			y			z				r		g		b		a
 
 		//Outside
-		 0.0f,						 0.0f,						 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//0
-		 kDCPerM,					 0.0f,						 0.0f,			0.0f,	1.0f,	0.0f,	1.0f,	//1
-		 0.0f,						 kDCPerM,					 0.0f,			0.0f,	0.0f,	1.0f,	1.0f,	//2
-		 kDCPerM,					 kDCPerM,					 0.0f,			1.0f,	1.0f,	1.0f,	1.0f,	//3
-
-		//Inside
-		 mWallThickness,				 mWallThickness,				 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//4
-		 kDCPerM - mWallThickness,	 mWallThickness,				 0.0f,			0.0f,	1.0f,	0.0f,	1.0f,	//5
-		 mWallThickness,				 kDCPerM - mWallThickness,	 0.0f,			0.0f,	0.0f,	1.0f,	1.0f,	//6
-		 kDCPerM - mWallThickness,	 kDCPerM - mWallThickness,	 0.0f,			1.0f,	1.0f,	1.0f,	1.0f	//7
+		 0.0f,		 0.0f,		 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//0
+		 kDCPerM,	 0.0f,		 0.0f,			1.0f,	1.0f,	0.0f,	1.0f,	//1
+		 0.0f,		 kDCPerM,	 0.0f,			1.0f,	0.0f,	1.0f,	1.0f,	//2
+		 kDCPerM,	 kDCPerM,	 0.0f,			0.0f,	0.0f,	1.0f,	1.0f	//3
 	};
 
 	//Elements
 
 	const unsigned int kElementsPerDrawType = 3;//Triangle
-	const unsigned int kDrawTypeElements = 8;
+	const unsigned int kDrawTypeElements = 2;//2 triangles per square
 	const unsigned int kElementCount = kElementsPerDrawType * kDrawTypeElements;
 
 	GLuint* pElements = new GLuint[kElementCount]
 	{
-		//Bottom
-		0, 1, 4,
-		5, 4, 1,
-
-		//Right
-		1, 3, 5,
-		7, 5, 3,
-
-		//Top
-		3, 2, 7,
-		6, 7, 2,
-
-		//Left
-		2, 0, 6,
-		4, 6, 0
+		0, 1, 2,
+		3, 2, 1
 	};
 
 	//ModelAsset Creation
@@ -549,10 +528,26 @@ void Application::CreateInitialInstances()
 
 	
 	//Walls
+	DSGraphics::ModelInstance wall00000(mpModelAssetWall, mpCamera);
+	wall00000.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
+	wall00000.UpdateTransform();
+	mModelInstancesListWalls.push_back(wall00000);
+
 	DSGraphics::ModelInstance wall00001(mpModelAssetWall, mpCamera);
 	wall00001.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
+	wall00001.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	wall00001.SetOrientationAngle(glm::radians(180.0f));
+	wall00001.SetPosition(glm::vec3(wall00000.GetPosition().x, wall00000.GetPosition().y, wall00000.GetPosition().z));
 	wall00001.UpdateTransform();
 	mModelInstancesListWalls.push_back(wall00001);
+
+	DSGraphics::ModelInstance wall00002(mpModelAssetWall, mpCamera);
+	wall00002.SetSize(glm::vec3(200.0f, 16.0f, 1.0f));
+	wall00002.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	wall00002.SetOrientationAngle(glm::radians(180.0f));
+	wall00002.SetPosition(glm::vec3((200 * kDCPerM) + (wall00000.GetPosition().x * kDCPerM) + (wall00000.GetSize().x * kDCPerM), wall00000.GetPosition().y, wall00000.GetPosition().z));
+	wall00002.UpdateTransform();
+	mModelInstancesListWalls.push_back(wall00002);
 
 
 	//Cube
@@ -705,6 +700,11 @@ void Application::Physics()
 	//mModelInstancesList.front().SetOrientationAngle(glm::radians(mRectDegreesRotated));
 	//mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
 	mModelInstancesList.front().UpdateTransform();
+
+	//test
+	mModelInstancesListWalls.front().Move(glm::vec3(0.0f, 1.0f * static_cast<float>(mElapsedTime), 0.0f), kDCPerM);
+	mModelInstancesListWalls.front().Spin(static_cast<float>(mElapsedTime) * glm::radians(kDegreesPerSecond));
+	mModelInstancesListWalls.front().UpdateTransform();
 }
 
 //-----------------------------------------------------------------------------
@@ -805,6 +805,7 @@ void Application::CleanUpAssets()
 
 void Application::CleanUpInstances()
 {
+	mModelInstancesListWalls.clear();
 	mModelInstancesList.clear();
 }
 

@@ -92,10 +92,12 @@
     <None Include="Shaders\BackgroundMesh\bgmesh.vertexshader" />
     <None Include="Shaders\BackgroundMesh\geotest.fragmentshader" />
     <None Include="Shaders\BackgroundMesh\geotest.vertexshader" />
-    <None Include="Shaders\fragmentShader.txt" />
+    <None Include="Shaders\TexAndColor.FragmentShader" />
     <None Include="Shaders\ColorOnly.FragmentShader" />
     <None Include="Shaders\ColorOnly.VertexShader" />
-    <None Include="Shaders\vertexShader.txt" />
+    <None Include="Shaders\TexAndColor.VertexShader" />
+    <None Include="Shaders\TexOnly.FragmentShader" />
+    <None Include="Shaders\TexOnly.VertexShader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />

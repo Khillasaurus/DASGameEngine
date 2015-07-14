@@ -53,7 +53,10 @@ namespace DSGraphics
 		//General
 		void UpdateTransform();
 		void Render();
-		//TODO: Move, Turn, etc
+
+		//Locomotion
+		void Move(glm::vec3 displacement, float deviceCoordinatesPerMeter = 1);
+		void Spin(float radians);//Not called turning because this is more like turning on the spot, rather than a proper turn that usually invovles some displacement.
 	private:
 		//UpdateTransform Sub-Functions
 		void UpdateScale();
