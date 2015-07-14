@@ -79,8 +79,8 @@ private:
 		void LoadTextures();
 		void LoadAssets();
 			void LoadModelAssets();
-				void LoadModelAssetCube();
 				void LoadModelAssetWall();
+				void LoadModelAssetSpaceship();
 	void CreateInitialInstances();
 
 	// Run Sub-Functions
@@ -117,16 +117,16 @@ private:
 	GLuint mUniformCamera;
 
 	// Shader Programs
-	DSGraphics::Program* mpProgramCube;
 	DSGraphics::Program* mpProgramColorOnly;
+	DSGraphics::Program* mpProgramTexAndColor;
 
 	// Textures
-	DSGraphics::Texture* mpTextureCube;
+	DSGraphics::Texture* mpTextureSpaceship;
 
 	// Assets
 	//  Models
-	DSGraphics::ModelAsset* mpModelAssetCube;
 	DSGraphics::ModelAsset* mpModelAssetWall;
+	DSGraphics::ModelAsset* mpModelAssetSpaceship;
 
 	// Instance Lists
 	std::vector<DSGraphics::ModelInstance> mModelInstancesListWalls;
@@ -134,12 +134,8 @@ private:
 
 	// Individual Objects
 	float kDCPerM;//Device Coordinates / meter
-
-	//  Walls
-	float mWallThickness;
-
-	//temp
-	GLfloat mRectDegreesRotated;
+	//  Spaceship
+	float mDegreesRotated;
 };
 
 #endif //#ifndef APPLICATION_H

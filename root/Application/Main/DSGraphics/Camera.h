@@ -70,6 +70,7 @@ namespace DSGraphics
 		glm::mat4 GetProj() const;
 		// Setters
 		void SetPosition(const glm::vec3& position);
+		void SetOrientation(const glm::vec3& orientation);
 		void SetFoV(float fov);
 		void SetNearPlane(float nearPlane);
 		void SetFarPlane(float farPlane);

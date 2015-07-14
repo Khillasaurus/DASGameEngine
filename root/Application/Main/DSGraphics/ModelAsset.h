@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/18
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -107,7 +107,7 @@ namespace DSGraphics
 		const bool mkHasElements;
 		GLuint mEbo;
 		const unsigned int mkElementCountTotal;
-		GLuint* mpElements;//TODO: make same change as with mpRectVertices
+		GLuint* mpElements;//TODO: make same change as with mpVertices
 		// Draw Info
 		GLenum mDrawType;
 		unsigned int mElementCountPerDrawType;//CHECK: is this safe for all type? eg, I doubt it's safe for line segments created from rectangles that are not square

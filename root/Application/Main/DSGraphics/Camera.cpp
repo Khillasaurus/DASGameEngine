@@ -97,9 +97,47 @@ void DSGraphics::Camera::NormalizeAngles()
 	mYaw = fmodf(mYaw, 360.0f);
 	
 	//fmodf can return negative values, but this will make them all positive
-	while(mYaw < 0.0f)
+	if(mPitch < 0.0f)
 	{
-		mYaw += 360.0f;
+		while(mPitch < 0.0f)
+		{
+			mPitch += 360.0f;
+		}
+	}
+	else
+	{
+		while(mPitch > 360.0f)
+		{
+			mPitch -= 360.0f;
+		}
+	}
+	if(mYaw < 0.0f)
+	{
+		while(mYaw < 0.0f)
+		{
+			mYaw += 360.0f;
+		}
+	}
+	else
+	{
+		while(mYaw > 360.0f)
+		{
+			mYaw -= 360.0f;
+		}
+	}
+	if(mRoll < 0.0f)
+	{
+		while(mRoll < 0.0f)
+		{
+			mRoll += 360.0f;
+		}
+	}
+	else
+	{
+		while(mRoll > 360.0f)
+		{
+			mRoll -= 360.0f;
+		}
 	}
 
 	if(mIsFirstPersonStyle == true)
@@ -163,7 +201,9 @@ glm::mat4 DSGraphics::Camera::GetOrientation() const
 	glm::mat4 orientation(1.0f);
 
 	orientation = glm::rotate(orientation, glm::radians(mPitch), glm::vec3(1, 0, 0));
-	orientation = glm::rotate(orientation, glm::radians(mYaw), glm::vec3(0, 1, 0));
+	//TODO: Fix this from rotating clockwise (should always be counterclockwise)
+	orientation = glm::rotate(orientation, glm::radians(-mYaw), glm::vec3(0, 1, 0));
+	orientation = glm::rotate(orientation, glm::radians(mRoll), glm::vec3(0, 0, 1));
 
 	return orientation;
 }
@@ -206,17 +246,16 @@ glm::mat4 DSGraphics::Camera::GetMatrix() const
 
 glm::mat4 DSGraphics::Camera::GetView() const
 {
+	return GetOrientation() * glm::translate(glm::mat4(), -mPosition);
+
 	/*
-	glm::mat4 test(1.0f);
-	test = glm::lookAt
+	return glm::lookAt
 	(
-		glm::vec3(1.0f, 1.5f, 2.0f),	//camera position
+		mPosition,						//camera position
 		glm::vec3(0.0f, 0.0f, 0.0f),	//focal point
 		glm::vec3(0.0f, 1.0f, 0.0f)		//up axis
 	);
-	return test;
 	*/
-	return GetOrientation() * glm::translate(glm::mat4(), -mPosition);
 }
 
 //-----------------------------------------------------------------------------
@@ -240,6 +279,16 @@ glm::mat4 DSGraphics::Camera::GetProj() const
 void DSGraphics::Camera::SetPosition(const glm::vec3& position)
 {
 	mPosition = position;
+}
+
+//-----------------------------------------------------------------------------
+
+void DSGraphics::Camera::SetOrientation(const glm::vec3& orientation)
+{
+	mPitch	= orientation.x;
+	mYaw	= orientation.y;
+	mRoll	= orientation.z;
+	NormalizeAngles();
 }
 
 //-----------------------------------------------------------------------------

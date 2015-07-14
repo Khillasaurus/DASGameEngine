@@ -52,21 +52,16 @@ Application::Application()
 ,	mpCamera(nullptr)
 ,	mUniformCamera(0)
 //Shader Programs
-,	mpProgramCube(nullptr)
 ,	mpProgramColorOnly(nullptr)
+,	mpProgramTexAndColor(nullptr)
 //Textures
-,	mpTextureCube(nullptr)
+,	mpTextureSpaceship(nullptr)
 //Models
-,	mpModelAssetCube(nullptr)
 ,	mpModelAssetWall(nullptr)
-//Instance Lists
-	//,	mListModelInstancesBackground()
-	//,	mListModelInstances()//not sure how to initialize this yet
+,	mpModelAssetSpaceship(nullptr)
 //Individual Objects
-,	kDCPerM(0.01f)
-,	mWallThickness(0.0f)
-//temp
-,	mRectDegreesRotated(0.0f)
+,	kDCPerM(0.01f)//REMEMBER: Change back to 0.01f
+,	mDegreesRotated(0.0f)
 {
 	Initialize();
 	Run();
@@ -98,10 +93,6 @@ void Application::Initialize()
 	{
 		if(InitializeGLEW() == true)
 		{
-			//General
-			// Walls
-			mWallThickness = 0.1f * kDCPerM;
-
 			Load();
 			CreateInitialInstances();
 		}
@@ -256,8 +247,9 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera();
-		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
-		mpCamera->OffsetOrientation(0.0f, 0.0f);//temp
+		mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
+		mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
+		//mpCamera->OffsetOrientation(0.0f, 45.0f);//temp
 		mpCamera->SetViewportAspectRatio(mWindowSize.x / mWindowSize.y);
 	}
 	else
@@ -270,18 +262,6 @@ void Application::LoadCamera()
 
 void Application::LoadShaders()
 {
-	//Shaders
-
-	// Cube
-	if(mpProgramCube == nullptr)
-	{
-		mpProgramCube = CreateProgram("Shaders/TexAndColor.VertexShader", "Shaders/TexAndColor.FragmentShader");
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpProgramCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
-	}
-
 	// Wall
 	if(mpProgramColorOnly == nullptr)
 	{
@@ -290,6 +270,16 @@ void Application::LoadShaders()
 	else
 	{
 		fprintf(stderr, "WARNING: mpProgramColorOnly is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
+	}
+
+	//Tex and Color
+	if(mpProgramTexAndColor == nullptr)
+	{
+		mpProgramTexAndColor = CreateProgram("Shaders/TexAndColor.VertexShader", "Shaders/TexAndColor.FragmentShader");
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpProgramTexAndColor is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect rendering may occur unless this is intentional.\n");
 	}
 }
 
@@ -308,13 +298,13 @@ DSGraphics::Program* Application::CreateProgram(const char* vertexShaderFile, co
 void Application::LoadTextures()
 {
 	//Textures
-	if(mpTextureCube == nullptr)
+	if(mpTextureSpaceship == nullptr)
 	{
-		mpTextureCube = new DSGraphics::Texture("../../Resources/Textures/stripes.png");
+		mpTextureSpaceship = new DSGraphics::Texture("../../Resources/Textures/stripes.png");
 	}
 	else
 	{
-		fprintf(stderr, "WARNING: mpTextureCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect texture may appear unless this is intentional.\n");
+		fprintf(stderr, "WARNING: mpTextureSpaceship is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect texture may appear unless this is intentional.\n");
 	}
 }
 
@@ -333,108 +323,8 @@ void Application::LoadModelAssets()
 	//Wall
 	LoadModelAssetWall();
 
-	//Cube
-	LoadModelAssetCube();
-}
-
-//-----------------------------------------------------------------------------
-
-void Application::LoadModelAssetCube()
-{
-	//  Cube
-	const unsigned int kVertexCount = 8;
-	const unsigned int kDataBitsPerVertex = 9;
-
-	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
-	{
-		//	  2---3
-		//	 /|  /|
-		//	0---1 |
-		//	| 6-|-7
-		//	|/  |/
-		//	4---5
-
-		//Position				TexCoords		Color: RGBA
-		
-		//Top
-		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  0.0f, 1.0f,	//0 0.0f,	
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,		1.0f,  0.5f,  0.0f, 1.0f,	//1 1.0f,	
-		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  0.0f, 1.0f,	//2 0.0f,	
-		 0.5f,  0.5f, -0.5f,	1.0f, 0.0f,		1.0f,  1.0f,  0.0f, 1.0f,	//3 0.7f,	
-
-		//Bottom
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,		0.0f,  1.0f,  1.0f, 1.0f,	//4 1.0f,	
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,		0.0f,  0.0f,  1.0f, 1.0f,	//5 0.0f,	
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,		1.0f,  0.0f,  1.0f, 1.0f,	//6 0.5f,	
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,		0.5f,  0.0f,  1.0f, 1.0f	//7 0.5f	
-	};
-
-	const unsigned int kElementCount = 3 * 2 * 6;
-	GLuint* pElements = new GLuint[kElementCount]
-	{
-		//Top
-		0, 1, 2,
-		3, 2, 1,
-
-		//Front
-		4, 5, 0,
-		1, 0, 5,
-
-		//Right
-		5, 7, 1,
-		3, 1, 7,
-
-		//Back
-		7, 6, 3,
-		2, 3, 6,
-
-		//Left
-		6, 4, 2,
-		0, 2, 4,
-
-		//Bot
-		6, 7, 4,
-		5, 4, 7
-	};
-
-	if(mpModelAssetCube == nullptr)
-	{
-		mpModelAssetCube = new DSGraphics::ModelAsset
-		(
-			mpProgramCube,	//Program
-			true,			//Has Texture?
-			mpTextureCube,	//Texture
-			3,				//Texture Coords Offset
-			true,			//Has Colors?
-			5,				//rgba Offset
-			kVertexCount,	//Vertex Count
-			3,				//Position Dimensions
-			2,				//Texture Dimensions
-			4,				//Color Dimensions
-			pVertices,		//Vertices
-			true,			//Has Elements?
-			kElementCount,	//Element Count
-			pElements,		//Elements,
-			GL_TRIANGLES,	//Draw Type
-			0
-		);
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpModelAssetCube is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
-	}
-
-	// Clean up temp variables
-	if(pVertices != nullptr)
-	{
-		delete[] pVertices;
-		pVertices = nullptr;
-	}
-	if(pElements != nullptr)
-	{
-		delete[] pElements;
-		pElements = nullptr;
-	}
+	//Spaceship
+	LoadModelAssetSpaceship();
 }
 
 //-----------------------------------------------------------------------------
@@ -522,46 +412,125 @@ void Application::LoadModelAssetWall()
 
 //-----------------------------------------------------------------------------
 
+void Application::LoadModelAssetSpaceship()
+{
+	//Vertices
+
+	const unsigned int kVertexCount = 10;
+	const unsigned int kPositionDimensions = 3;
+	const unsigned int kTextureDimensions = 2;
+	const unsigned int kColorDimensions = 4;
+	const unsigned int kDataBitsPerVertex = kPositionDimensions + kTextureDimensions + kColorDimensions;
+
+	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
+	{
+		/*
+											_														//complicated version for later
+		      .				      1			|							      .						|      .
+		     / \			     / \		|		Length:	10m			     /|\					|     / \
+		    / . \			    8 0 2		|	}	Width:	8m			    /_|_\					|   _/   \_
+		  /_     _\			  7_6 9 4_3		|		Height:	2.5m		  /__\|/__\					|  / _   _ \
+		     \./			     \5/		|							     \./					|  \/ \./ \/
+											-
+		*/
+
+		//Position																								Texture						Color
+		//x					y					z																							r		g		b		a
+
+		 0.0f,				 2.5f * kDCPerM,	 0.0f,															1.0f,	1.0f,				0.4f,	0.9f,	1.0f,	1.0f,	//0:	Cockpit
+		 0.0f,				 0.0f,				-5.0f * kDCPerM,												1.0f,	1.0f,				0.8f,	0.2f,	1.0f,	1.0f,	//1:	Bow (Nose)
+		 2.0f * kDCPerM,	 0.0f,				 0.0f,															1.0f,	1.0f,				0.4f,	1.0f,	0.55f,	1.0f,	//2:	Starboard (Right)
+		 4.0f * kDCPerM,	 0.0f,				 2.5f * kDCPerM,												1.0f,	1.0f,				0.9f,	0.9f,	0.1f,	1.0f,	//3:	Right Wing Tip
+		 2.0f * kDCPerM,	 0.0f,				 2.5f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.5f,	0.5f,	1.0f,	//4:
+		 0.0f,				 0.0f,				 5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.35f,	0.1f,	1.0f,	//5:	Stern (Tail)
+		-2.0f * kDCPerM,	 0.0f,				 2.5f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.5f,	0.5f,	1.0f,	//6:
+		-4.0f * kDCPerM,	 0.0f,				 2.5f * kDCPerM,												1.0f,	1.0f,				0.9f,	0.9f,	0.1f,	1.0f,	//7:	Left Wing Tip
+		-2.0f * kDCPerM,	 0.0f,				 0.0f,															1.0f,	1.0f,				0.4f,	1.0f,	0.55f,	1.0f,	//8:	Port (Left)
+		 0.0f,				 0.0f,				 2.5f * kDCPerM,												1.0f,	1.0f,				0.4f,	0.35f,	0.45f,	1.0f	//9:	Amidships
+	};
+
+	//Elements
+
+	const unsigned int kElementsPerDrawType = 3;//Triangle
+	const unsigned int kDrawTypeElements = 7;
+	const unsigned int kElementCount = kElementsPerDrawType * kDrawTypeElements;
+
+	GLuint* pElements = new GLuint[kElementCount]
+	{
+		0, 2, 1,
+		0, 8, 1,
+		0, 9, 2,
+		0, 9, 8,
+		9, 3, 2,
+		9, 7, 8,
+		4, 6, 5
+	};
+
+	//ModelAsset Creation
+
+	if(mpModelAssetSpaceship == nullptr)
+	{
+		mpModelAssetSpaceship = new DSGraphics::ModelAsset
+		(
+			mpProgramTexAndColor,						//Program
+			true,										//Has Texture?
+			mpTextureSpaceship,							//Texture
+			kPositionDimensions,						//Texture Coords Offset
+			true,										//Has Colors?
+			kPositionDimensions + kTextureDimensions,	//rgba Offset
+			kVertexCount,								//Vertex Count
+			kPositionDimensions,						//Position Dimensions
+			kTextureDimensions,							//Texture Dimensions
+			kColorDimensions,							//Color Dimensions
+			pVertices,									//Vertices
+			true,										//Has Elements?
+			kElementCount,								//Element Count
+			pElements,									//Elements,
+			GL_TRIANGLES,								//Draw Type
+			0
+		);
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mpModelAssetSpaceship is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
+	}
+
+	// Clean up temp variables
+	if(pVertices != nullptr)
+	{
+		delete[] pVertices;
+		pVertices = nullptr;
+	}
+	if(pElements != nullptr)
+	{
+		delete[] pElements;
+		pElements = nullptr;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
 void Application::CreateInitialInstances()
 {
-	//Background
-
-	
 	//Walls
-	DSGraphics::ModelInstance wall00000(mpModelAssetWall, mpCamera);
-	wall00000.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
-	wall00000.UpdateTransform();
-	mModelInstancesListWalls.push_back(wall00000);
+	DSGraphics::ModelInstance wallLeft(mpModelAssetWall, mpCamera);
+	wallLeft.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by kDCPerM, since the ModelAsset is already constructed using the kDCPerM scale.
+	wallLeft.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	wallLeft.SetOrientationAngle(glm::radians(270.0f));
+	wallLeft.Move(glm::vec3(-15.0f, 0.0f, -15.0f), kDCPerM);
+	wallLeft.UpdateTransform();
+	mModelInstancesListWalls.push_back(wallLeft);
 
-	DSGraphics::ModelInstance wall00001(mpModelAssetWall, mpCamera);
-	wall00001.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
-	wall00001.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-	wall00001.SetOrientationAngle(glm::radians(180.0f));
-	wall00001.SetPosition(glm::vec3(wall00000.GetPosition().x, wall00000.GetPosition().y, wall00000.GetPosition().z));
-	wall00001.UpdateTransform();
-	mModelInstancesListWalls.push_back(wall00001);
+	DSGraphics::ModelInstance wallTop(mpModelAssetWall, mpCamera);
+	wallTop.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
+	wallTop.Move(glm::vec3(-15.0f, 0.0f, -15.0f), kDCPerM);
+	wallTop.UpdateTransform();
+	mModelInstancesListWalls.push_back(wallTop);
 
-	DSGraphics::ModelInstance wall00002(mpModelAssetWall, mpCamera);
-	wall00002.SetSize(glm::vec3(200.0f, 16.0f, 1.0f));
-	wall00002.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-	wall00002.SetOrientationAngle(glm::radians(180.0f));
-	wall00002.SetPosition(glm::vec3((200 * kDCPerM) + (wall00000.GetPosition().x * kDCPerM) + (wall00000.GetSize().x * kDCPerM), wall00000.GetPosition().y, wall00000.GetPosition().z));
-	wall00002.UpdateTransform();
-	mModelInstancesListWalls.push_back(wall00002);
-
-
-	//Cube
-	DSGraphics::ModelInstance cube0001(mpModelAssetCube, mpCamera);
-	mModelInstancesList.push_back(cube0001);
-
-	DSGraphics::ModelInstance cube0002(mpModelAssetCube, mpCamera);
-	cube0002.SetSize(glm::vec3(0.5f));
-	cube0002.SetPosition(glm::vec3(2.0f, -1.5f, -2.5f));
-	cube0002.UpdateTransform();
-	mModelInstancesList.push_back(cube0002);
-
-	//Set initial rotation axis for cube00001
-	mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	//General
+	// Spaceship
+	DSGraphics::ModelInstance spaceshipPlayer(mpModelAssetSpaceship, mpCamera);
+	mModelInstancesList.push_back(spaceshipPlayer);
 }
 
 //-----------------------------------------------------------------------------
@@ -654,19 +623,6 @@ void Application::Input()
 
 
 	//Individual Objects
-	// Rect
-	if(glfwGetKey(mpWindow, 'X'))
-	{
-		mModelInstancesList.front().SetOrientationAxis(glm::vec3(1.0f, 0.0f, 0.0f));
-	}
-	else if(glfwGetKey(mpWindow, 'Y'))
-	{
-		mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-	}
-	else if(glfwGetKey(mpWindow, 'Z'))
-	{
-		mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 0.0f, 1.0f));
-	}
 
 
 	//If key pressed: escape
@@ -687,24 +643,19 @@ void Application::AI()
 void Application::Physics()
 {
 	//Individual Objects
-	// Rect
-	const GLfloat kDegreesPerSecond = 90.0f;
-	mRectDegreesRotated += static_cast<float>(mElapsedTime) * kDegreesPerSecond;
-	while(mRectDegreesRotated > 360.0f)
+	// Spaceship
+	const float kDegreesPerSecond = -20.0f;
+	mDegreesRotated += static_cast<float>(mElapsedTime) * kDegreesPerSecond;
+	while(mDegreesRotated > 360.0f)
 	{
-		mRectDegreesRotated -= 360.0f;
+		mDegreesRotated -= 360.0f;
 	}
-	//  Update model based on changes that may have occured during the input stage
-	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
-	mModelInstancesList[0].SetOrientationAngle(glm::radians(mRectDegreesRotated));//this is the same as the next line, just written differently
-	//mModelInstancesList.front().SetOrientationAngle(glm::radians(mRectDegreesRotated));
-	//mListModelInstances.front().SetRotate(glm::rotate(glm::mat4(1.0f), glm::radians(mRectDegreesRotated), mListModelInstances.front().GetRotationAxis()));
+	mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	mModelInstancesList.front().SetOrientationAngle(glm::radians(mDegreesRotated));
 	mModelInstancesList.front().UpdateTransform();
 
-	//test
-	mModelInstancesListWalls.front().Move(glm::vec3(0.0f, 1.0f * static_cast<float>(mElapsedTime), 0.0f), kDCPerM);
-	mModelInstancesListWalls.front().Spin(static_cast<float>(mElapsedTime) * glm::radians(kDegreesPerSecond));
-	mModelInstancesListWalls.front().UpdateTransform();
+	
+	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
 }
 
 //-----------------------------------------------------------------------------
@@ -719,6 +670,7 @@ void Application::Render()
 	//Camera
 	//glm::vec4 posToLookAt = mListModelInstancesBackground.begin()->GetTranslate() * glm::vec4(1.0f);
 	//mpCamera->LookAt(glm::vec3(posToLookAt));
+	//mpCamera->LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 
 	//Instance Lists
 	std::vector<DSGraphics::ModelInstance>::iterator it;
@@ -731,9 +683,7 @@ void Application::Render()
 		it->Render();
 	}
 
-	// Cube
-	//TODO: learn what kind of iterator I need here
-	//std::list<DSGraphics::ModelInstance>::iterator it;
+	// General
 	for(it = mModelInstancesList.begin(); it != mModelInstancesList.end(); ++it)
 	{
 		it->Render();
@@ -757,22 +707,23 @@ void Application::CleanUp()
 	}
 
 	//Shaders
-	if(mpProgramCube != nullptr)
-	{
-		delete mpProgramCube;
-		mpProgramCube = nullptr;
-	}
 	if(mpProgramColorOnly != nullptr)
 	{
 		delete mpProgramColorOnly;
 		mpProgramColorOnly = nullptr;
 	}
+	// Tex and Color
+	if(mpProgramTexAndColor != nullptr)
+	{
+		delete mpProgramTexAndColor;
+		mpProgramTexAndColor = nullptr;
+	}
 
 	//Textures
-	if(mpTextureCube != nullptr)
+	if(mpTextureSpaceship != nullptr)
 	{
-		delete mpTextureCube;
-		mpTextureCube = nullptr;
+		delete mpTextureSpaceship;
+		mpTextureSpaceship = nullptr;
 	}
 
 	//Assets
@@ -786,18 +737,18 @@ void Application::CleanUp()
 
 void Application::CleanUpAssets()
 {
-	//Cube
-	if(mpModelAssetCube != nullptr)
-	{
-		delete mpModelAssetCube;
-		mpModelAssetCube = nullptr;
-	}
-
 	//Wall
 	if(mpModelAssetWall != nullptr)
 	{
 		delete mpModelAssetWall;
 		mpModelAssetWall = nullptr;
+	}
+
+	//Spaceship
+	if(mpModelAssetSpaceship != nullptr)
+	{
+		delete mpModelAssetSpaceship;
+		mpModelAssetSpaceship = nullptr;
 	}
 }
 

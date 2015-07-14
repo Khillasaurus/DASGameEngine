@@ -88,10 +88,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\BackgroundMesh\bgmesh.fragmentshader" />
-    <None Include="Shaders\BackgroundMesh\bgmesh.vertexshader" />
-    <None Include="Shaders\BackgroundMesh\geotest.fragmentshader" />
-    <None Include="Shaders\BackgroundMesh\geotest.vertexshader" />
     <None Include="Shaders\TexAndColor.FragmentShader" />
     <None Include="Shaders\ColorOnly.FragmentShader" />
     <None Include="Shaders\ColorOnly.VertexShader" />
