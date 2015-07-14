@@ -90,6 +90,8 @@
     <ClCompile Include="Object\Environmental\Environmental.cpp" />
     <ClCompile Include="Object\Environmental\Individual\Wall.cpp" />
     <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Player\Individual\SpaceshipStarter.cpp" />
+    <ClCompile Include="Object\Player\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\TexAndColor.FragmentShader" />
@@ -111,6 +113,8 @@
     <ClInclude Include="Object\Environmental\Environmental.h" />
     <ClInclude Include="Object\Environmental\Individual\Wall.h" />
     <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Player\Individual\SpaceshipStarter.h" />
+    <ClInclude Include="Object\Player\Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

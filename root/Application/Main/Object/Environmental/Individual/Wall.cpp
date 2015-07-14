@@ -41,7 +41,7 @@ Wall::~Wall()
 // Public Member Functions
 //-----------------------------------------------------------------------------
 
-void Wall::LoadAsset(DSGraphics::Program* pProgram)
+void Wall::LoadAsset(DSGraphics::Program* pProgram, DSGraphics::Texture* pTexture)
 {
 	//Vertices
 

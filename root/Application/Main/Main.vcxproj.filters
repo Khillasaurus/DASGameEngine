@@ -31,6 +31,12 @@
     <Filter Include="Source Files\Object\Environmental\Individual">
       <UniqueIdentifier>{3d92676f-185e-4821-8e11-cbdba868024a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Object\Player">
+      <UniqueIdentifier>{38e011a1-fb1b-46cc-92fd-947bf4280f59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object\Player\Individual">
+      <UniqueIdentifier>{25d76286-2e46-46e0-b8cd-f4e3f0f6e61a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -68,6 +74,12 @@
     </ClCompile>
     <ClCompile Include="Object\Environmental\Individual\Wall.cpp">
       <Filter>Source Files\Object\Environmental\Individual</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Player\Player.cpp">
+      <Filter>Source Files\Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Player\Individual\SpaceshipStarter.cpp">
+      <Filter>Source Files\Object\Player\Individual</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +135,12 @@
     </ClInclude>
     <ClInclude Include="Object\Environmental\Individual\Wall.h">
       <Filter>Source Files\Object\Environmental\Individual</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Player\Player.h">
+      <Filter>Source Files\Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Player\Individual\SpaceshipStarter.h">
+      <Filter>Source Files\Object\Player\Individual</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

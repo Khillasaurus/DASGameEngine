@@ -41,7 +41,7 @@ protected:
 
 	//Member Functions
 protected:
-	virtual void LoadAsset(DSGraphics::Program* pProgram) = 0;
+	virtual void LoadAsset(DSGraphics::Program* pProgram, DSGraphics::Texture* pTexture = nullptr) = 0;
 public:
 	// Getters
 	DSGraphics::ModelAsset* GetModelAsset();

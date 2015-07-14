@@ -37,7 +37,13 @@
 #include "DSGraphics/Program.h"
 #include "DSGraphics/Texture.h"
 //  Object
+//   Abstracts
+//   Aesthetics
+//   Environmentals
 #include "Object/Environmental/Individual/Wall.h"
+//   Player
+#include "Object/Player/Individual/SpaceshipStarter.h"
+//   Units
 
 //=============================================================================
 // Forward Declarations
@@ -66,12 +72,14 @@ private:
 	void Run();
 	void Terminate();
 
+
 	// GLFW
 	bool InitializeGLFW();
 	void TerminateGLFW();
 
 	// GLEW
 	bool InitializeGLEW();
+
 
 	// Initialize Sub-Functions
 	void Load();
@@ -80,11 +88,18 @@ private:
 			DSGraphics::Program* CreateProgram(const char* vertexShaderFile, const char* fragmentShaderFile);
 		void LoadTextures();
 		void LoadObjects();
-		void LoadAssets();
-			void LoadModelAssets();
-				void LoadModelAssetWall();
-				void LoadModelAssetSpaceship();
+			void LoadObjectsAbstracts();
+			void LoadObjectsAesthetics();
+			void LoadObjectsEnvironmentals();
+			void LoadObjectsPlayers();
+			void LoadObjectsUnits();
 	void CreateInitialInstances();
+		void CreateInitialInstancesAbstracts();
+		void CreateInitialInstancesAesthetics();
+		void CreateInitialInstancesEnvironmentals();
+		void CreateInitialInstancesPlayers();
+		void CreateInitialInstancesUnits();
+
 
 	// Run Sub-Functions
 	void Input();
@@ -95,8 +110,9 @@ private:
 
 	// Terminate Sub-Functions
 	void CleanUp();
-		void CleanUpAssets();
+		void CleanUpObjects();
 		void CleanUpInstances();
+
 
 	//Member Variables
 private:
@@ -127,20 +143,22 @@ private:
 	DSGraphics::Texture* mpTextureSpaceship;
 
 	// Objects
+	//  Abstracts
+	//  Aesthetics
+	//  Environmentals
 	Wall* mpWall;
-
-	// Assets
-	//  Models
-	DSGraphics::ModelAsset* mpModelAssetWall;
-	DSGraphics::ModelAsset* mpModelAssetSpaceship;
-
+	//  Player
+	SpaceshipStarter* mpSpaceshipStarter;
+	//  Units
+	
 	// Instance Lists
-	std::vector<DSGraphics::ModelInstance> mModelInstancesListWalls;
-	std::vector<DSGraphics::ModelInstance> mModelInstancesList;
-	std::vector<DSGraphics::ModelInstance> mModelInstanceList;//new one
+	std::vector<DSGraphics::ModelInstance> mAbstractsInstanceList;
+	std::vector<DSGraphics::ModelInstance> mAestheticsInstanceList;
+	std::vector<DSGraphics::ModelInstance> mEnvironmentalsInstanceList;
+	std::vector<DSGraphics::ModelInstance> mPlayersInstanceList;
+	std::vector<DSGraphics::ModelInstance> mUnitsInstanceList;
 
 	// Individual Objects
-	float kDCPerM;//Device Coordinates / meter
 	//  Spaceship
 	float mDegreesRotated;
 };

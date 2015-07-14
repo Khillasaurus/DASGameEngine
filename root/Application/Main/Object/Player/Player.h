@@ -1,19 +1,19 @@
 //=============================================================================
-// File:		Wall.h
+// File:		Player.h
 // Created:		2015/02/27
 // Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
-// Description:	Object > Environmental > Wall.
+// Description:	Object > Player. Environmental is an abstract class which inherits from Object.
 //=============================================================================
 
-#ifndef WALL_H
-#define WALL_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
 //=============================================================================
 //Includes
 //=============================================================================
 
-#include "../Environmental.h"
+#include "../Object.h"
 
 //=============================================================================
 //Forward Declarations
@@ -31,17 +31,16 @@
 //Class Declarations
 //=============================================================================
 
-class Wall : public Environmental
+class Player : public Object
 {
 public:
 	//Constructors
-	Wall();
+	Player();
 	//Destructor
-	virtual ~Wall();
+	virtual ~Player();
 
 	//Member Functions
 public:
-	virtual void LoadAsset(DSGraphics::Program* pProgram, DSGraphics::Texture* pTexture = nullptr);
 private:
 public:
 	// Getters
@@ -51,4 +50,4 @@ public:
 private:
 };
 
-#endif //#ifndef WALL_H
+#endif //#ifndef PLAYER_H

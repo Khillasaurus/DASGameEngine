@@ -1,19 +1,19 @@
 //=============================================================================
-// File:		Wall.h
+// File:		SpaceshipStarter.h
 // Created:		2015/02/27
 // Last Edited:	2015/02/27
 // Copyright:	Daniel Schenker
-// Description:	Object > Environmental > Wall.
+// Description:	Object > Player > SpaceshipStarter.
 //=============================================================================
 
-#ifndef WALL_H
-#define WALL_H
+#ifndef SPACESHIPSTARTER_H
+#define SPACESHIPSTARTER_H
 
 //=============================================================================
 //Includes
 //=============================================================================
 
-#include "../Environmental.h"
+#include "../Player.h"
 
 //=============================================================================
 //Forward Declarations
@@ -31,13 +31,13 @@
 //Class Declarations
 //=============================================================================
 
-class Wall : public Environmental
+class SpaceshipStarter : public Player
 {
 public:
 	//Constructors
-	Wall();
+	SpaceshipStarter();
 	//Destructor
-	virtual ~Wall();
+	virtual ~SpaceshipStarter();
 
 	//Member Functions
 public:
@@ -51,4 +51,4 @@ public:
 private:
 };
 
-#endif //#ifndef WALL_H
+#endif //#ifndef SPACESHIPSTARTER_H

@@ -58,12 +58,14 @@ Application::Application()
 //Textures
 ,	mpTextureSpaceship(nullptr)
 //Objects
+// Abstracts
+// Aesthetics
+// Environmentals
 ,	mpWall(nullptr)
-//Models
-,	mpModelAssetWall(nullptr)
-,	mpModelAssetSpaceship(nullptr)
+// Player
+,	mpSpaceshipStarter(nullptr)
+// Units
 //Individual Objects
-,	kDCPerM(0.01f)//REMEMBER: Change back to 0.01f
 ,	mDegreesRotated(0.0f)
 {
 	Initialize();
@@ -239,7 +241,6 @@ void Application::Load()
 		LoadShaders();
 		LoadTextures();
 		LoadObjects();
-		LoadAssets();
 }
 
 //-----------------------------------------------------------------------------
@@ -249,7 +250,7 @@ void Application::LoadCamera()
 	//Camera
 	if(mpCamera == nullptr)
 	{
-		mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM), DSMathematics::Quaternion(), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
+		mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM), DSMathematics::Quaternion(), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
 		//mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
 		//mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
 		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -317,339 +318,126 @@ void Application::LoadTextures()
 
 void Application::LoadObjects()
 {
+	LoadObjectsAbstracts();
+	LoadObjectsAesthetics();
+	LoadObjectsEnvironmentals();
+	LoadObjectsPlayers();
+	LoadObjectsUnits();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadObjectsAbstracts()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadObjectsAesthetics()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::LoadObjectsEnvironmentals()
+{
 	//Wall
 	if(mpWall == nullptr)
 	{
 		mpWall = new Wall();
-		mpWall->LoadAsset(mpProgramColorOnly);
+		mpWall->LoadAsset(mpProgramColorOnly, nullptr);
 	}
 }
 
 //-----------------------------------------------------------------------------
 
-void Application::LoadAssets()
+void Application::LoadObjectsPlayers()
 {
-	//Models
-	LoadModelAssets();
-}
-
-//-----------------------------------------------------------------------------
-
-void Application::LoadModelAssets()
-{
-	//Wall
-	LoadModelAssetWall();
-
-	//Spaceship
-	LoadModelAssetSpaceship();
-}
-
-//-----------------------------------------------------------------------------
-
-void Application::LoadModelAssetWall()
-{
-	//Vertices
-
-	const unsigned int kVertexCount = 4;
-	const unsigned int kPositionDimensions = 3;
-	const unsigned int kColorDimensions = 4;
-	const unsigned int kDataBitsPerVertex = kPositionDimensions + kColorDimensions;
-
-	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
+	//SpaceshipStarter
+	if(mpSpaceshipStarter == nullptr)
 	{
-		/*
-			2---3
-			|   |		1m^2 wall
-			0---1
-		*/
-
-		//Position								Color
-		//x			y			z				r		g		b		a
-
-		//Outside
-		 0.0f,		 0.0f,		 0.0f,			1.0f,	0.0f,	0.0f,	1.0f,	//0
-		 kDCPerM,	 0.0f,		 0.0f,			1.0f,	1.0f,	0.0f,	1.0f,	//1
-		 0.0f,		 kDCPerM,	 0.0f,			1.0f,	0.0f,	1.0f,	1.0f,	//2
-		 kDCPerM,	 kDCPerM,	 0.0f,			0.0f,	0.0f,	1.0f,	1.0f	//3
-	};
-
-	//Elements
-
-	const unsigned int kElementsPerDrawType = 3;//Triangle
-	const unsigned int kDrawTypeElements = 2;//2 triangles per square
-	const unsigned int kElementCount = kElementsPerDrawType * kDrawTypeElements;
-
-	GLuint* pElements = new GLuint[kElementCount]
-	{
-		0, 1, 2,
-		3, 2, 1
-	};
-
-	//ModelAsset Creation
-
-	if(mpModelAssetWall == nullptr)
-	{
-		mpModelAssetWall = new DSGraphics::ModelAsset
-		(
-			mpProgramColorOnly,	//Program
-			false,				//Has Texture?
-			nullptr,			//Texture
-			0,					//Texture Coords Offset
-			true,				//Has Colors?
-			3,					//rgba Offset
-			kVertexCount,		//Vertex Count
-			kPositionDimensions,//Position Dimensions
-			0,					//Texture Dimensions
-			kColorDimensions,	//Color Dimensions
-			pVertices,			//Vertices
-			true,				//Has Elements?
-			kElementCount,		//Element Count
-			pElements,			//Elements,
-			GL_TRIANGLES,		//Draw Type
-			0
-		);
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpModelAssetWall is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
-	}
-
-	// Clean up temp variables
-	if(pVertices != nullptr)
-	{
-		delete[] pVertices;
-		pVertices = nullptr;
-	}
-	if(pElements != nullptr)
-	{
-		delete[] pElements;
-		pElements = nullptr;
+		mpSpaceshipStarter = new SpaceshipStarter();
+		mpSpaceshipStarter->LoadAsset(mpProgramTexAndColor, mpTextureSpaceship);
 	}
 }
 
 //-----------------------------------------------------------------------------
 
-void Application::LoadModelAssetSpaceship()
+void Application::LoadObjectsUnits()
 {
-	//Vertices
-
-	const unsigned int kVertexCount = 23;
-	const unsigned int kPositionDimensions = 3;
-	const unsigned int kTextureDimensions = 2;
-	const unsigned int kColorDimensions = 4;
-	const unsigned int kDataBitsPerVertex = kPositionDimensions + kTextureDimensions + kColorDimensions;
-
-	GLfloat* pVertices = new GLfloat[kVertexCount * kDataBitsPerVertex]
-	{
-		/*
-		OVERALL
-		//TODO: Draw the overall ship design using ascii art.
-
-		FLOOR
-						2		_
-		   /\		   /\		|		Length:	 8m
-		  /  \		  /  \		|	}	Width:	 4m
-		 /____\		0/____\1	|		Height:	-1m
-								-
-
-
-		MAIN LEVEL
-											_
-						6					|
-					  /   \					|
-					 /  5  \				|
-					/ 3   4 \				|		Length:	10m	
-				   / 1     2 \				|	}	Width:	8m	
-				 9/           \0			|		Height:	2.5m
-			    /   7       8   \			|						//Note: Vertices 7 and 8 are slightly elevated.
-			 3/______4_____5______\6		|
-											-
-
-
-		UPPER ACCENTS
-
-						x
-					  /   \
-					 /  x  \
-					/ x1 2x \
-				   / x 9 0 x \
-				 x/           \x
-			    / 7 x       x 8 \
-			 x/______x_____x______\x
-
-		*/
-
-		//Position																								Texture						Color
-		//x					y					z																							r		g		b		a
-
-		//FLOOR
-		-2.0f * kDCPerM,	-1.0f * kDCPerM,	 4.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	0.0f,	1.0f,	//0
-		 2.0f * kDCPerM,	-1.0f * kDCPerM,	 4.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	0.0f,	1.0f,	//1
-		 0.0f,				-1.0f * kDCPerM,	-4.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	0.0f,	1.0f,	//2
-
-		//MAIN LEVEL
-		-4.0f * kDCPerM,	 0.0f,				 5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//3
-		-1.0f * kDCPerM,	 0.0f,				 5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//4
-		 1.0f * kDCPerM,	 0.0f,				 5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//5
-		 4.0f * kDCPerM,	 0.0f,				 5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//6
-		-1.5f * kDCPerM,	 0.5f * kDCPerM,	 3.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//7
-		 1.5f * kDCPerM,	 0.5f * kDCPerM,	 3.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//8
-		-2.0f * kDCPerM,	 0.0f,				 1.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//9
-		 2.0f * kDCPerM,	 0.0f,				 1.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//10
-		-0.8f * kDCPerM,	 0.0f,				 0.5f * kDCPerM,												1.0f,	1.0f,				0.0f,	0.0f,	1.0f,	1.0f,	//11
-		 0.8f * kDCPerM,	 0.0f,				 0.5f * kDCPerM,												1.0f,	1.0f,				0.0f,	0.0f,	1.0f,	1.0f,	//12
-		-1.0f * kDCPerM,	 0.0f,				-0.75f * kDCPerM,												1.0f,	1.0f,				0.0f,	0.0f,	1.0f,	1.0f,	//13
-		 1.0f * kDCPerM,	 0.0f,				-0.75f * kDCPerM,												1.0f,	1.0f,				0.0f,	0.0f,	1.0f,	1.0f,	//14
-		 0.0f,				 0.0f,				-2.0f * kDCPerM,												1.0f,	1.0f,				0.0f,	0.0f,	1.0f,	1.0f,	//15
-		 0.0f,				 0.0f,				-5.0f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	1.0f,	1.0f,	//16
-
-		//UPPER ACCENTS
-		-2.5f * kDCPerM,	 1.5f * kDCPerM,	 3.67f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	0.0f,	1.0f,	//17
-		 2.5f * kDCPerM,	 1.5f * kDCPerM,	 3.67f * kDCPerM,												1.0f,	1.0f,				1.0f,	0.0f,	0.0f,	1.0f,	//18
-		-0.5f * kDCPerM,	 1.0f * kDCPerM,	 0.0f,															1.0f,	1.0f,				0.0f,	1.0f,	1.0f,	1.0f,	//19
-		 0.5f * kDCPerM,	 1.0f * kDCPerM,	 0.0f,															1.0f,	1.0f,				0.0f,	1.0f,	1.0f,	1.0f,	//20
-		-0.5f * kDCPerM,	 1.0f * kDCPerM,	-0.67f * kDCPerM,												1.0f,	1.0f,				0.0f,	1.0f,	1.0f,	1.0f,	//21
-		 0.5f * kDCPerM,	 1.0f * kDCPerM,	-0.67f * kDCPerM,												1.0f,	1.0f,				0.0f,	1.0f,	1.0f,	1.0f	//22
-	};
-
-	//Elements
-
-	const unsigned int kElementsPerDrawType = 3;//Triangle
-	const unsigned int kDrawTypeElements = 42;
-	const unsigned int kElementCount = kElementsPerDrawType * kDrawTypeElements;
-
-	GLuint* pElements = new GLuint[kElementCount]
-	{
-		//FLOOR (Count: 1)
-		0, 1, 2,
-
-		//FLOOR - MAIN LEVEL (Count: 10)
-		0, 3, 4,
-		0, 3, 9,
-		0, 2, 9,
-		0, 4, 5,
-		1, 5, 0,
-		1, 5, 6,
-		1, 10, 6,
-		1, 10, 2,
-		2, 16, 9,
-		2, 16, 10,
-
-		//ROOF (Count: 31)
-		// Left Wing (Count: 4)
-		17, 3, 4,
-		17, 7, 4,
-		17, 7, 9,
-		17, 3, 9,
-		// Right Wing (Count: 4)
-		18, 6, 5,
-		18, 8, 5,
-		18, 8, 10,
-		18, 6, 10,
-		// Rear Flat Middle (Count: 2)
-		4, 5, 7,
-		8, 5, 7,
-		// Center (Count: 4)
-		8, 11, 7,
-		8, 11, 12,
-		8, 10, 12,
-		9, 11, 7,
-		// Front Body (Count: 6)
-		11, 13, 9,
-		16, 13, 9,
-		16, 13, 15,
-		16, 14, 15,
-		16, 14, 10,
-		12, 14, 10,
-		// Captain's Windows (Count: 11)
-		19, 11, 12,	//Back (part 1)
-		19, 11, 13,	//Left (part 1)
-		19, 21, 13,	//Left (part 2)
-		21, 15, 13,	//Front Left
-		21, 15, 22,	//Front Center
-		14, 15, 22,	//Front Right
-		14, 12, 22,	//Right (part 1)
-		20, 12, 22,	//Right (part 2)
-		20, 12, 19,	//Back (part 2)
-		20, 21, 19,	//Roof (part 1)
-		20, 21, 22	//Roof (part 2)
-	};
-
-	//ModelAsset Creation
-
-	if(mpModelAssetSpaceship == nullptr)
-	{
-		mpModelAssetSpaceship = new DSGraphics::ModelAsset
-		(
-			mpProgramTexAndColor,						//Program
-			true,										//Has Texture?
-			mpTextureSpaceship,							//Texture
-			kPositionDimensions,						//Texture Coords Offset
-			true,										//Has Colors?
-			kPositionDimensions + kTextureDimensions,	//rgba Offset
-			kVertexCount,								//Vertex Count
-			kPositionDimensions,						//Position Dimensions
-			kTextureDimensions,							//Texture Dimensions
-			kColorDimensions,							//Color Dimensions
-			pVertices,									//Vertices
-			true,										//Has Elements?
-			kElementCount,								//Element Count
-			pElements,									//Elements,
-			GL_TRIANGLES,								//Draw Type
-			0
-		);
-	}
-	else
-	{
-		fprintf(stderr, "WARNING: mpModelAssetSpaceship is being used due to it not having a default value of nullptr. Attempting to continue regardless. Incorrect assets may appear unless this is intentional.\n");
-	}
-
-	// Clean up temp variables
-	if(pVertices != nullptr)
-	{
-		delete[] pVertices;
-		pVertices = nullptr;
-	}
-	if(pElements != nullptr)
-	{
-		delete[] pElements;
-		pElements = nullptr;
-	}
 }
 
 //-----------------------------------------------------------------------------
 
 void Application::CreateInitialInstances()
 {
-	//Object
-	// Wall
-	if(mpWall->GetIsModelAssetLoaded() == true)
+	CreateInitialInstancesAbstracts();
+	CreateInitialInstancesAesthetics();
+	CreateInitialInstancesEnvironmentals();
+	CreateInitialInstancesPlayers();
+	CreateInitialInstancesUnits();
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::CreateInitialInstancesAbstracts()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::CreateInitialInstancesAesthetics()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+void Application::CreateInitialInstancesEnvironmentals()
+{
+	//Wall
+	if(mpWall != nullptr)
 	{
-		DSGraphics::ModelInstance wallNew(mpWall->GetModelAsset(), mpCamera);
-		wallNew.SetSize(glm::vec3(50.0f, 50.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by kDCPerM, since the ModelAsset is already constructed using the kDCPerM scale.
-		wallNew.UpdateTransform();
-		mModelInstanceList.push_back(wallNew);
+		if(mpWall->GetIsModelAssetLoaded() == true)
+		{
+			//Left
+			DSGraphics::ModelInstance wallLeft(mpWall->GetModelAsset(), mpCamera);
+			wallLeft.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by the scale ratio (device coordinates per meter), since the ModelAsset is already constructed using the scale.
+			wallLeft.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));//TODO: Change this to new DSGraphics::Quaternion based rotation.
+			wallLeft.SetOrientationAngle(glm::radians(270.0f));
+			wallLeft.Move(glm::vec3(-15.0f, 0.0f, -15.0f), Object::sDCPerM);
+			wallLeft.UpdateTransform();
+			mEnvironmentalsInstanceList.push_back(wallLeft);
+
+			//Top
+			DSGraphics::ModelInstance wallTop(mpWall->GetModelAsset(), mpCamera);
+			wallTop.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by the scale ratio (device coordinates per meter), since the ModelAsset is already constructed using the scale.
+			wallTop.Move(glm::vec3(-15.0f, 0.0f, -15.0f), Object::sDCPerM);
+			wallTop.UpdateTransform();
+			mEnvironmentalsInstanceList.push_back(wallTop);
+		}
 	}
+}
 
-	//Walls
-	DSGraphics::ModelInstance wallLeft(mpModelAssetWall, mpCamera);
-	wallLeft.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));//multiplies size by scaling, hence no need for multiplying by kDCPerM, since the ModelAsset is already constructed using the kDCPerM scale.
-	wallLeft.SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-	wallLeft.SetOrientationAngle(glm::radians(270.0f));
-	wallLeft.Move(glm::vec3(-15.0f, 0.0f, -15.0f), kDCPerM);
-	wallLeft.UpdateTransform();
-	mModelInstancesListWalls.push_back(wallLeft);
+//-----------------------------------------------------------------------------
 
-	DSGraphics::ModelInstance wallTop(mpModelAssetWall, mpCamera);
-	wallTop.SetSize(glm::vec3(100.0f, 6.0f, 1.0f));
-	wallTop.Move(glm::vec3(-15.0f, 0.0f, -15.0f), kDCPerM);
-	wallTop.UpdateTransform();
-	mModelInstancesListWalls.push_back(wallTop);
+void Application::CreateInitialInstancesPlayers()
+{
+	//SpaceshipStarter
+	if(mpSpaceshipStarter != nullptr)
+	{
+		if(mpSpaceshipStarter->GetIsModelAssetLoaded() == true)
+		{
+			//Player1
+			DSGraphics::ModelInstance player1(mpSpaceshipStarter->GetModelAsset(), mpCamera);
+			mPlayersInstanceList.push_back(player1);
+		}
+	}
+}
 
-	//General
-	// Spaceship
-	DSGraphics::ModelInstance spaceshipPlayer(mpModelAssetSpaceship, mpCamera);
-	mModelInstancesList.push_back(spaceshipPlayer);
+//-----------------------------------------------------------------------------
+
+void Application::CreateInitialInstancesUnits()
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -668,7 +456,7 @@ void Application::Input()
 	// Reset
 	if(glfwGetKey(mpWindow, '`'))
 	{
-		mpCamera->SetPosition(glm::vec3(100.0f * kDCPerM, 100.0f * kDCPerM, 100.0f * kDCPerM));
+		mpCamera->SetPosition(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM));
 		//mpCamera->SetOrientation(glm::vec3(60.0f, 0.0f, 0.0f));
 		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
@@ -802,12 +590,10 @@ void Application::Physics()
 	{
 		mDegreesRotated -= 360.0f;
 	}
-	mModelInstancesList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
-	mModelInstancesList.front().SetOrientationAngle(glm::radians(mDegreesRotated));
-	mModelInstancesList.front().UpdateTransform();
-
-	
 	//TODO: Add static ID to instances in order to keep track of which is which, so that I don't do the following risky business
+	mPlayersInstanceList.front().SetOrientationAxis(glm::vec3(0.0f, 1.0f, 0.0f));
+	mPlayersInstanceList.front().SetOrientationAngle(glm::radians(mDegreesRotated));
+	mPlayersInstanceList.front().UpdateTransform();
 }
 
 //-----------------------------------------------------------------------------
@@ -826,26 +612,32 @@ void Application::Render()
 
 	//Instance Lists
 	std::vector<DSGraphics::ModelInstance>::iterator it;
-
-	//Objects
-	for(it = mModelInstanceList.begin(); it != mModelInstanceList.end(); ++it)
+	// Abstracts
+	for(it = mAbstractsInstanceList.begin(); it != mAbstractsInstanceList.end(); ++it)
+	{
+		it->Render();
+	}
+	// Aesthetics
+	for(it = mAestheticsInstanceList.begin(); it != mAestheticsInstanceList.end(); ++it)
+	{
+		it->Render();
+	}
+	// Environmentals
+	for(it = mEnvironmentalsInstanceList.begin(); it != mEnvironmentalsInstanceList.end(); ++it)
+	{
+		it->Render();
+	}
+	// Player
+	for(it = mPlayersInstanceList.begin(); it != mPlayersInstanceList.end(); ++it)
+	{
+		it->Render();
+	}
+	// Units
+	for(it = mUnitsInstanceList.begin(); it != mUnitsInstanceList.end(); ++it)
 	{
 		it->Render();
 	}
 	
-	// Background
-
-	// Walls
-	for(it = mModelInstancesListWalls.begin(); it != mModelInstancesListWalls.end(); ++it)
-	{
-		it->Render();
-	}
-
-	// General
-	for(it = mModelInstancesList.begin(); it != mModelInstancesList.end(); ++it)
-	{
-		it->Render();
-	}
 
 	//Swap the back buffer and the front buffer
 	glfwSwapBuffers(mpWindow);
@@ -865,6 +657,7 @@ void Application::CleanUp()
 	}
 
 	//Shaders
+	// Color Only
 	if(mpProgramColorOnly != nullptr)
 	{
 		delete mpProgramColorOnly;
@@ -884,8 +677,8 @@ void Application::CleanUp()
 		mpTextureSpaceship = nullptr;
 	}
 
-	//Assets
-	CleanUpAssets();
+	//Objects
+	CleanUpObjects();
 
 	//Instances
 	CleanUpInstances();
@@ -893,37 +686,46 @@ void Application::CleanUp()
 
 //-----------------------------------------------------------------------------
 
-void Application::CleanUpAssets()
+void Application::CleanUpObjects()
 {
-	//Object
+	//Abstracts
+	
+	
+	//Aesthetics
+	
+
+	//Environmentals
+	
+	// Wall
 	if(mpWall != nullptr)
 	{
 		delete mpWall;
 		mpWall = nullptr;
 	}
+	
 
-	//Wall
-	if(mpModelAssetWall != nullptr)
+	//Player
+	
+	// SpaceshipStarter
+	if(mpSpaceshipStarter != nullptr)
 	{
-		delete mpModelAssetWall;
-		mpModelAssetWall = nullptr;
+		delete mpSpaceshipStarter;
+		mpSpaceshipStarter = nullptr;
 	}
 
-	//Spaceship
-	if(mpModelAssetSpaceship != nullptr)
-	{
-		delete mpModelAssetSpaceship;
-		mpModelAssetSpaceship = nullptr;
-	}
+
+	//Units
 }
 
 //-----------------------------------------------------------------------------
 
 void Application::CleanUpInstances()
 {
-	mModelInstanceList.clear();
-	mModelInstancesListWalls.clear();
-	mModelInstancesList.clear();
+	mAbstractsInstanceList.clear();
+	mAestheticsInstanceList.clear();
+	mEnvironmentalsInstanceList.clear();
+	mPlayersInstanceList.clear();
+	mUnitsInstanceList.clear();
 }
 
 //-----------------------------------------------------------------------------
