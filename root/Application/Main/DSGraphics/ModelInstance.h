@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/23
+// Last Edited:	2015/02/19
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -48,22 +48,20 @@ namespace DSGraphics
 		//Destructor
 		~ModelInstance();
 
-	public:
 		//Member Functions
-		// General
+	public:
+		//General
 		void UpdateTransform();
 		void Render();
 
-		// Locomotion
+		//Locomotion
 		void Move(glm::vec3 displacement, float deviceCoordinatesPerMeter = 1);
 		void Spin(float radians);//Not called turning because this is more like turning on the spot, rather than a proper turn that usually invovles some displacement.
-
 	private:
-		// UpdateTransform Sub-Functions
+		//UpdateTransform Sub-Functions
 		void UpdateScale();
 		void UpdateRotate();
 		void UpdateTranslate();
-	
 	public:
 		// Getters
 		glm::vec3 GetSize() const;
@@ -71,7 +69,6 @@ namespace DSGraphics
 		GLfloat GetOrientationAngleInRadians() const;
 		glm::vec3 GetOrientationAxis() const;
 		glm::vec3 GetPosition() const;
-
 		// Setters
 		void SetSize(const glm::vec3& size);
 		//void SetOrientation(const glm::vec3& orientation);
