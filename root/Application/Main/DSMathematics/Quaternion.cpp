@@ -45,8 +45,9 @@ DSMathematics::Quaternion::Quaternion(float w, float x, float y, float z)
 //-----------------------------------------------------------------------------
 
 /*
-a = angle in radians
-n = axis of rotation
+Variables:
+	a = angle in radians
+	n = axis of rotation
 */
 DSMathematics::Quaternion::Quaternion(float a, const glm::vec3& n)
 {
@@ -127,6 +128,39 @@ DSMathematics::Quaternion DSMathematics::Quaternion::Invert() const
 
 /*
 Description:
+	Returns the multiplication of this quaternion with another quaternion.
+	Does not modify original quaternion, rather returns a new one.
+	Operator overloading style, done through a function instead
+*/
+DSMathematics::Quaternion DSMathematics::Quaternion::Multiply(const DSMathematics::Quaternion& q) const
+{
+	DSMathematics::Quaternion m;
+
+	//Non-Optimized Version:
+	m.mW = (mW * q.mW) - glm::dot(mV, q.mV);
+	m.mV = (mV * q.mW) + (q.mV * mW) + glm::cross(q.mV, mV);
+
+	//Optimized Version: (incomplete, requires minor left to right hand fixes, but the concept is correct)
+	/*
+	w = w1w2 - x1x2 - y1y2 - z1z2
+	x = w1x2 + x1w2 + y1z2 - z1y2
+	y = w1y2 + y1w2 + z1x2 - x1z2
+	z = w1z2 + z1w2 + x1y2 - y1x2
+	*/
+	/*
+	m.mW = (mW * q.mW) - (mV.x * q.mV.x) - (mV.y * q.mV.y) - (mV.z * q.mV.z);
+	m.mV.x = (mW * q.mV.x) + (mV.x * q.mW) + (mV.y * q.mV.z) - (mV.z * q.mV.y);
+	m.mV.y = (mW * q.mV.y) + (mV.y * q.mW) + (mV.z * q.mV.x) - (mV.x * q.mV.z);
+	m.mV.z = (mW * q.mV.z) + (mV.z * q.mW) + (mV.x * q.mV.y) - (mV.y * q.mV.x);
+	*/
+
+	return m;
+}
+
+//-----------------------------------------------------------------------------
+
+/*
+Description:
 	Rotates a vector using this quaternion.
 	This is equivalent to the multiplication of this quaternion with a vector.
 	Does not modify original vector, rather returns a new one.
@@ -160,36 +194,87 @@ glm::vec3 DSMathematics::Quaternion::Rotate(const glm::vec3& v) const
 }
 
 //-----------------------------------------------------------------------------
-//  Operator Overloading Style, Done Through Functions Instead
 
 /*
 Description:
-	Returns the multiplication of this quaternion with another quaternion.
-	Does not modify original quaternion, rather returns a new one.
+	SLERP (Spherical Linear Interpolation)
+	Start at current quaternion, end at quaternion r, over t time.
+Variables:
+	r = final rotation
+	t = how far along the rotation we are
 */
-DSMathematics::Quaternion DSMathematics::Quaternion::Multiply(const DSMathematics::Quaternion& q) const
+DSMathematics::Quaternion DSMathematics::Quaternion::Slerp(const Quaternion& r, float t) const
 {
-	DSMathematics::Quaternion m;
-
-	//Non-Optimized Version:
-	m.mW = (mW * q.mW) - glm::dot(mV, q.mV);
-	m.mV = (mV * q.mW) + (q.mV * mW) + glm::cross(q.mV, mV);
-
-	//Optimized Version: (incomplete, requires minor left to right hand fixes, but the concept is correct)
+	//Basic Version
 	/*
-	w = w1w2 - x1x2 - y1y2 - z1z2
-	x = w1x2 + x1w2 + y1z2 - z1y2
-	y = w1y2 + y1w2 + z1x2 - x1z2
-	z = w1z2 + z1w2 + x1y2 - y1x2
-	*/
-	/*
-	m.mW = (mW * q.mW) - (mV.x * q.mV.x) - (mV.y * q.mV.y) - (mV.z * q.mV.z);
-	m.mV.x = (mW * q.mV.x) + (mV.x * q.mW) + (mV.y * q.mV.z) - (mV.z * q.mV.y);
-	m.mV.y = (mW * q.mV.y) + (mV.y * q.mW) + (mV.z * q.mV.x) - (mV.x * q.mV.z);
-	m.mV.z = (mW * q.mV.z) + (mV.z * q.mW) + (mV.x * q.mV.y) - (mV.y * q.mV.x);
+	p = (r * q^-1)^t * q
+
+		inside		= (r * q^-1)
+					=r.Multiply(q.Invert())
+
+		power		= inside.Power(t)
+
+		multiplied	= q.Multiply(power)
+
+	Note: q isn't referred to since q refers to *this quaternion, and thus all quaternion functions not scoped refer to *this, aka q.
 	*/
 
-	return m;
+	Quaternion inside = r.Multiply(Invert());
+	Quaternion power = inside.Power(t);
+	Quaternion multiplied = Multiply(power);
+
+	return multiplied;
+
+	//Optimized Version (TODO)
+}
+
+//-----------------------------------------------------------------------------
+
+/*
+Description:
+	Raises this quaternion to the power of t.
+	This gives the fraction of t of the rotation of this quaternion.
+	Operator overloading style, done through a function instead.
+	Does not modify original vector, rather returns a new one.
+*/
+DSMathematics::Quaternion DSMathematics::Quaternion::Power(float t) const
+{
+	//Convert the quaternion to axis/angle
+	float a;
+	glm::vec3 n;
+	ToAxisAngle(n, a);
+
+	//Create a quaternion out of the new angle scaled by t
+	return Quaternion(a * t, n);
+}
+
+//-----------------------------------------------------------------------------
+//  Conversions
+
+/*
+Variables:
+	a = angle in radians
+*/
+void DSMathematics::Quaternion::ToAxisAngle(glm::vec3& axis, float& a) const
+{
+	/*
+	The LengthSquared function in glm (length2()) only exists in glx (experimental version of glm)
+	This is extremely wasteful, and will be corrected when I implement my own vectors instead of relying on glm's.
+	*/
+	float vLen = mV.length();
+
+	if((vLen * vLen) < 0.0001f)
+	{
+		axis = glm::vec3(1.0f, 0.0f, 0.0f);
+	}
+	else
+	{
+		axis = glm::normalize(mV);
+	}
+
+	//TAssert(fabs(vecAxis.LengthSqr() - 1) < 0.000001f);
+
+	a = acos(mW) * 2;
 }
 
 //-----------------------------------------------------------------------------

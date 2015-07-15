@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Application.cpp
 // Created:		2015/02/10
-// Last Edited:	2015/03/02
+// Last Edited:	2015/04/10
 // Copyright:	Daniel Schenker
 // Description:	Application
 //=============================================================================
@@ -251,7 +251,17 @@ void Application::LoadCamera()
 	if(mpCamera == nullptr)
 	{
 		mpCamera = new DSGraphics::Camera(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM), DSMathematics::Quaternion(), 90.0f, 0.01f, 1000.0f, mWindowSize.x / mWindowSize.y);
-		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		/*
+		Note: TOCHECK
+			Since OpenGL defaults the camera to face (0, 0, -1) (or possibly I have set this myself and am unaware), future rotations must keep this in mind.
+			Therefore tilting the camera down 60 degrees means rotating 60 degrees around the x-axis, which is unintuitive.
+			This is as if the camera uses eyes on the back of its head instead.
+			In theory, since the camera is rotated 180 degrees around the y-axis by default, any rotation that isn't around the y-axis must be applied oppositely (namely, times negative one), but instead applying ALL rotations oppositely works instead for some bizarre reason.
+
+			Currently implemented quick fix to be able to ignore the above non-sense:
+				Internal to the camera class, all orientation related functions are inverted. This way logical vectors can be used in outside implementation.
+		*/
+		mpCamera->SetOrientation(DSMathematics::Quaternion(glm::radians(-60.0f), glm::vec3(1.0f, 0.0f, 0.0f)), false);
 	}
 	else
 	{
@@ -449,79 +459,152 @@ void Application::Input()
 	const float kMoveSpeed = 2.0f;//units per second
 
 	// Reset
+	//	Puts the camera at the world's origin and faces it in the negative z direction (0, 0, -1).
 	if(glfwGetKey(mpWindow, '`'))
 	{
-		mpCamera->SetPosition(glm::vec3(100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM, 100.0f * Object::sDCPerM));
-		mpCamera->SetOrientation(glm::radians(60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
+		mpCamera->SetOrientation(DSMathematics::Quaternion(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), false);
 	}
-	//Look at origin
+	//Look at origin (TOFIX)
 	else if(glfwGetKey(mpWindow, 'O'))
 	{
+		//q = [cos(theta/2), sin(theta/2)n^]
+		//	where n^ is our axis of rotation
+
+		//	rotation of degrees between direction vector and initial model vector (in this case camera starts at 0, 0, -1) around new up vector
+
+		/*
+		//Calculate the direction we want to face the camera (new forward direction, negative-z-axis)
+		glm::vec3 lookFrom(mpCamera->GetPosition());
+		glm::vec3 lookTo(0.0f, 0.0f, 0.0f);
+		glm::vec3 lookDirection = lookTo - lookFrom;
+		lookDirection = glm::normalize(lookDirection);
+
+		//Using the same up direction (y-axis), and the newly calculated forward direction, calculate the new right direction (new x-axis)
+		//	Optimization: I'm using the negative-y-axis instead in order to skip straight to calculating the positive-x-axis, as crossing the the negative-z-axis with the positive-y-axis results in the negative-x-axis.
+		glm::vec3 newRight(glm::cross(lookDirection, -mpCamera->GetDirectionUp()));
+
+		//Set the camera's new orientation
+		DSMathematics::Quaternion q(0.1f, newRight);
+		q.Multiply(DSMathematics::Quaternion(0.1f, mpCamera->GetDirectionUp()));
+		q.Multiply(DSMathematics::Quaternion(0.1f, -lookDirection));
+
+		mpCamera->SetOrientation(q, false);
+
 		//mpCamera->LookAt(glm::vec3(0.0f));
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(0, mpCamera->GetPosition()), false);
+		*/
 	}
+	
 	//Tilt Up
 	else if(glfwGetKey(mpWindow, 'R'))
 	{
-		DSMathematics::Quaternion tempQ(glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
-		mpCamera->Rotate(tempQ);
+		//Roll around global x-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f)), true);
+
+		//Roll around local x-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), mpCamera->GetDirectionRight()), true);
 	}
 	//Tilt Down
 	else if(glfwGetKey(mpWindow, 'F'))
 	{
-		DSMathematics::Quaternion tempQ(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
-		mpCamera->Rotate(tempQ);
+		//Roll around global x-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), glm::vec3(1.0f, 0.0f, 0.0f)), true);
+
+		//Roll around local x-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), mpCamera->GetDirectionRight()), true);
 	}
+	//Turn Left
+	else if(glfwGetKey(mpWindow, 'T'))
+	{
+		//Roll around global y-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), glm::vec3(0.0f, 1.0f, 0.0f)), true);
+
+		//Roll around local y-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), mpCamera->GetDirectionUp()), true);
+	}
+	//Turn Right
+	else if(glfwGetKey(mpWindow, 'Y'))
+	{
+		//Roll around global y-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), glm::vec3(0.0f, 1.0f, 0.0f)), true);
+
+		//Roll around local y-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), mpCamera->GetDirectionUp()), true);
+	}
+	//Roll Left
+	else if(glfwGetKey(mpWindow, 'G'))
+	{
+		//Roll around global z-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f)), true);
+
+		//Roll around local z-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(0.01f), mpCamera->GetDirectionBackward()), true);
+	}
+	//Roll Right
+	else if(glfwGetKey(mpWindow, 'H'))
+	{
+		//Roll around global z-axis
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), glm::vec3(0.0f, 0.0f, 1.0f)), true);
+
+		//Roll around local z-axis
+		mpCamera->SetOrientation(DSMathematics::Quaternion(/*static_cast<float>(mElapsedTime) * */glm::radians(-0.01f), mpCamera->GetDirectionBackward()), true);
+	}
+
+
 
 	//Poll in counter clockwise direction, starting at 0 radians/degrees (right)
 	// East
 	else if(glfwGetKey(mpWindow, 'D'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f), true);
 	}
 	// North
 	else if(glfwGetKey(mpWindow, 'W'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f), true);
 	}
 	// West
 	else if(glfwGetKey(mpWindow, 'A'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f), true);
 	}
 	// South
 	else if(glfwGetKey(mpWindow, 'S'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f), true);
 	}
+
 	// Up
 	else if(glfwGetKey(mpWindow, 'E'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 1.0f, 0.0f), true);
 	}
 	// Down
 	else if(glfwGetKey(mpWindow, 'Q'))
 	{
-		mpCamera->MoveWorld(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+		mpCamera->SetPosition(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, -1.0f, 0.0f), true);
 	}
+
 	// Local Right
 	else if(glfwGetKey(mpWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
+		mpCamera->Move(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	// Local Forward
 	else if(glfwGetKey(mpWindow, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
+		mpCamera->Move(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 	// Local Left
 	else if(glfwGetKey(mpWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
+		mpCamera->Move(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(-1.0f, 0.0f, 0.0f));
 	}
 	// Local Backward
 	else if(glfwGetKey(mpWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		mpCamera->MoveLocal(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
+		mpCamera->Move(static_cast<float>(mElapsedTime) * kMoveSpeed * glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 

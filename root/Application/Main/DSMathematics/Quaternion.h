@@ -53,9 +53,12 @@ namespace DSMathematics
 		//Member Functions
 		// General
 		Quaternion Invert() const;
-		glm::vec3 Rotate(const glm::vec3& v) const;
-		// Operator Overloading Style, Done Through Functions Instead
 		Quaternion Multiply(const Quaternion& q) const;
+		glm::vec3 Rotate(const glm::vec3& v) const;
+		Quaternion Slerp(const Quaternion& r, float t) const;
+		Quaternion Power(float t) const;
+		// Conversions
+		void ToAxisAngle(glm::vec3& axis, float& a) const;
 	
 
 		//Member Variables
