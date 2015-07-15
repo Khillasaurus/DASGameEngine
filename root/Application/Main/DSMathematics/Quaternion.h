@@ -1,7 +1,7 @@
 //=============================================================================
-// File:		Environmental.h
+// File:		Quaternion.h
 // Created:		2015/02/25
-// Last Edited:	2015/02/25
+// Last Edited:	2015/04/10
 // Copyright:	Daniel Schenker
 // Description:	Quaternion
 //=============================================================================
@@ -42,10 +42,6 @@ namespace DSMathematics
 		//Constructors
 		Quaternion();
 		Quaternion(float w, float x, float y, float z);
-		/*
-		a = angle in radians
-		n = axis of rotation
-		*/
 		Quaternion(float a, const glm::vec3& n);
 		//Destructor
 		virtual ~Quaternion();

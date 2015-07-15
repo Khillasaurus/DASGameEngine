@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		Quaternion.cpp
 // Created:		2015/02/25
-// Last Edited:	2015/02/26
+// Last Edited:	2015/04/10
 // Copyright:	Daniel Schenker
 // Description:	Quaternion
 //=============================================================================
@@ -44,6 +44,10 @@ DSMathematics::Quaternion::Quaternion(float w, float x, float y, float z)
 
 //-----------------------------------------------------------------------------
 
+/*
+a = angle in radians
+n = axis of rotation
+*/
 DSMathematics::Quaternion::Quaternion(float a, const glm::vec3& n)
 {
 	mW = cos(a / 2);
@@ -136,16 +140,9 @@ glm::vec3 DSMathematics::Quaternion::Rotate(const glm::vec3& v) const
 	Can also be described as:
 		qpq^i where ^i means inverse
 	A simplified version of the basic equation is used instead for optimization.
-	*/
 
-	//Above mentioned optimized form:
-	//glm::vec3 mVCrossv = glm::cross(mV, v);//original
-	glm::vec3 vCrossmV = glm::cross(v, mV);//testing, seems to work correctly
-	return v + ((2.0f * mW) * vCrossmV) + (2.0f * glm::cross(mV, vCrossmV));
+	Above mentioned basic equation form:
 
-	
-	//Above mentioned basic equation form:
-	/*
 	DSMathematics::Quaternion p;
 	p.mW = 0;
 	p.mV = v;
@@ -156,6 +153,10 @@ glm::vec3 DSMathematics::Quaternion::Rotate(const glm::vec3& v) const
 	res = q.Multiply(res);
 	return res.mV;
 	*/
+
+	//Above mentioned optimized form:
+	glm::vec3 mVCrossv = glm::cross(mV, v);
+	return v + ((2.0f * mW) * mVCrossv) + (2.0f * glm::cross(mV, mVCrossv));
 }
 
 //-----------------------------------------------------------------------------
@@ -170,20 +171,22 @@ DSMathematics::Quaternion DSMathematics::Quaternion::Multiply(const DSMathematic
 {
 	DSMathematics::Quaternion m;
 
+	//Non-Optimized Version:
 	m.mW = (mW * q.mW) - glm::dot(mV, q.mV);
-	m.mV = (mV * q.mW) + (q.mV * mW) + glm::cross(mV, q.mV);
+	m.mV = (mV * q.mW) + (q.mV * mW) + glm::cross(q.mV, mV);
+
+	//Optimized Version: (incomplete, requires minor left to right hand fixes, but the concept is correct)
 	/*
-	//same as above for m.mV, just in case vector times scalar is not supported.
-	glm::vec3 p1 = mV;
-	p1.x *= q.mW;
-	p1.y *= q.mW;
-	p1.z *= q.mW;
-	glm::vec3 p2 = q.mV;
-	p2.x *= mW;
-	p2.y *= mW;
-	p2.z *= mW;
-	glm::vec3 p3 = glm::cross(mV, q.mV);
-	m.mV = p1 + p2 + p3;
+	w = w1w2 - x1x2 - y1y2 - z1z2
+	x = w1x2 + x1w2 + y1z2 - z1y2
+	y = w1y2 + y1w2 + z1x2 - x1z2
+	z = w1z2 + z1w2 + x1y2 - y1x2
+	*/
+	/*
+	m.mW = (mW * q.mW) - (mV.x * q.mV.x) - (mV.y * q.mV.y) - (mV.z * q.mV.z);
+	m.mV.x = (mW * q.mV.x) + (mV.x * q.mW) + (mV.y * q.mV.z) - (mV.z * q.mV.y);
+	m.mV.y = (mW * q.mV.y) + (mV.y * q.mW) + (mV.z * q.mV.x) - (mV.x * q.mV.z);
+	m.mV.z = (mW * q.mV.z) + (mV.z * q.mW) + (mV.x * q.mV.y) - (mV.y * q.mV.x);
 	*/
 
 	return m;

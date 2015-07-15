@@ -19,6 +19,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+//debugging
+#include <stdio.h>
+
 // Daniel Schenker
 #include "Camera.h"
 
@@ -81,6 +84,10 @@ void DSGraphics::Camera::MoveLocal(const glm::vec3& offset)
 	glm::vec3 right = glm::normalize(GetDirectionRight());
 	glm::vec3 up = glm::normalize(GetDirectionUp());
 	glm::vec3 backward = -glm::normalize(GetDirectionForward());
+
+	printf("right   : x: %f, y: %f, z: %f\n", right.x, right.y, right.z);
+	printf("up      : x: %f, y: %f, z: %f\n", up.x, up.y, up.z);
+	printf("backward: x: %f, y: %f, z: %f\n\n", backward.x, backward.y, backward.z);
 
 	right.x *= offset.x;
 	right.y *= offset.x;
