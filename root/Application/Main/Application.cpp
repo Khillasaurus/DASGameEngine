@@ -465,11 +465,35 @@ void Application::Input()
 		mpCamera->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
 		mpCamera->SetOrientation(DSMathematics::Quaternion(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), false);
 	}
-	//Look at origin
+	//Look at origin (TOFIX)
 	else if(glfwGetKey(mpWindow, 'O'))
 	{
-		//TODO:
+		q = [cos(theta/2), sin(theta/2)n^]
+			where n^ is our axis of rotation
+
+			rotation of degrees between direction vector and initial model vector (in this case camera starts at 0, 0, -1) around new up vector
+
+		/*
+		//Calculate the direction we want to face the camera (new forward direction, negative-z-axis)
+		glm::vec3 lookFrom(mpCamera->GetPosition());
+		glm::vec3 lookTo(0.0f, 0.0f, 0.0f);
+		glm::vec3 lookDirection = lookTo - lookFrom;
+		lookDirection = glm::normalize(lookDirection);
+
+		//Using the same up direction (y-axis), and the newly calculated forward direction, calculate the new right direction (new x-axis)
+		//	Optimization: I'm using the negative-y-axis instead in order to skip straight to calculating the positive-x-axis, as crossing the the negative-z-axis with the positive-y-axis results in the negative-x-axis.
+		glm::vec3 newRight(glm::cross(lookDirection, -mpCamera->GetDirectionUp()));
+
+		//Set the camera's new orientation
+		DSMathematics::Quaternion q(0.1f, newRight);
+		q.Multiply(DSMathematics::Quaternion(0.1f, mpCamera->GetDirectionUp()));
+		q.Multiply(DSMathematics::Quaternion(0.1f, -lookDirection));
+
+		mpCamera->SetOrientation(q, false);
+
 		//mpCamera->LookAt(glm::vec3(0.0f));
+		//mpCamera->SetOrientation(DSMathematics::Quaternion(0, mpCamera->GetPosition()), false);
+		*/
 	}
 	
 	//Tilt Up

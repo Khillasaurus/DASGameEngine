@@ -92,8 +92,15 @@ void DSGraphics::Camera::SetPosition(glm::vec3 pos, bool moveLocally)
 //-----------------------------------------------------------------------------
 
 /*
-	"Move = x:5 means move 5 along the x-axis based on the current orientation."
-	"If for some bizarre reason we want to do this in wc, save current position, calculate new position, subtract the two to get the vector that represents the change in position, and then use SetPosition"
+Description:
+	Moves the camera based on the orientation of the camera.
+	i.e. Moves the camera by the specified vector rotated to match the local axis.
+
+	Always moves with relation to local space.
+	If this transformation is desired using world coordinates:
+		1. Save current position.
+		2. Calculate new position.
+		3. Subtract the two to get the vector that represents the change in position, and then use SetPosition.
 */
 void DSGraphics::Camera::Move(glm::vec3 pos)
 {
