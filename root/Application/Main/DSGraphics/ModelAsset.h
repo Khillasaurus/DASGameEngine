@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.h
 // Created:		2015/02/15
-// Last Edited:	2015/02/19
+// Last Edited:	2015/05/07
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -48,7 +48,7 @@ namespace DSGraphics
 		(
 			//TODO: Change const correctness for Program and Texture
 			DSGraphics::Program* pProgram,
-			bool hasTexture,
+			unsigned int textureCount,
 			DSGraphics::Texture* pTexture,
 			unsigned int textureCoordsOffset,
 			bool hasColors,

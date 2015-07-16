@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelAsset.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/27
+// Last Edited:	2015/05/07
 // Copyright:	Daniel Schenker
 // Description:	ModelAsset
 //=============================================================================
@@ -28,7 +28,7 @@
 DSGraphics::ModelAsset::ModelAsset
 (
 	DSGraphics::Program* pProgram,
-	bool hasTexture,
+	unsigned int textureCount,
 	DSGraphics::Texture* pTexture,
 	unsigned int textureCoordsOffset,
 	bool hasColors,
@@ -45,7 +45,7 @@ DSGraphics::ModelAsset::ModelAsset
 	unsigned int elementCountPerDrawType
 )
 :	mpProgram(pProgram)
-,	mkHasTexture(hasTexture)
+,	mkTextureCount(textureCount)
 ,	mpTexture(pTexture)
 ,	mkTextureCoordsOffset(textureCoordsOffset)
 ,	mkHasColors(hasColors)
