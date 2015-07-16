@@ -41,7 +41,7 @@ protected:
 
 	//Member Functions
 protected:
-	virtual void LoadAsset(DSGraphics::Program* pProgram, DSGraphics::Texture* pTexture = nullptr) = 0;
+	virtual void LoadAsset(DSGraphics::Program* pProgram, DSGraphics::Texture* pTexture = nullptr) = 0;//TODO: Change pTexture to a STL container that knows how many textures are being passed in
 public:
 	// Getters
 	DSGraphics::ModelAsset* GetModelAsset();

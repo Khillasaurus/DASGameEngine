@@ -86,7 +86,7 @@ namespace DSGraphics
 		// Program
 		DSGraphics::Program* mpProgram;
 		// Texture
-		const bool mkHasTexture;
+		const unsigned int mkTextureCount;
 		DSGraphics::Texture* mpTexture;
 		const unsigned int mkTextureCoordsOffset;
 		// Colors

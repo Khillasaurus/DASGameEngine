@@ -1,0 +1,21 @@
+$1	A	name on object in game world (eg. asteroid "first name, last name", discovered "date donated via kickstarter")
+$5	B	A + when you find your object in game world, you unlock an aesthetic for your ship
+$12	C	Digital Game download (DRM free)
+$15	D	B + C (savings of $2)
+$25	E	D + The Making Of video
+$50	F	E + 50% refund from next kickstarter project by me up to a maximum of $30
+$100	G	E + 50% refund from next kickstarter project by me up to a maximum of $90 + Be an NPC in the game world
+$250	H	G + Help design a ship in the game, and be the displayed manufacturer of the ship
+$360	I	G + Help design a key area in the game such as a hangar, and be the displayed architect of the area
+$450	J	H + Help design a key area in the game such as a hangar, and be the displayed architect of the area
+$500	K	J + Go out for a meal with me at PAX Prime + Get my signature on an item of your choice!
+
+
+
+//Duo Packs
+$20	F	2C (savings of $4)
+$26	G	2D (savings of $4), also can be written 2B + 2C (savings of $8)
+
+
+//Possible additions based on development
+soundtrack

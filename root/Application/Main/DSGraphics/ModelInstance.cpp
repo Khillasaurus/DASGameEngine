@@ -104,6 +104,22 @@ void DSGraphics::ModelInstance::Render()
 		// Texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, mpAsset->GetTextureObjectID());
+		//TODO:	The above line is where I specify which texture to use when drawing.
+		//		Currently mpAsset only holds one texture, so the GetTexture function chooses the only one.
+		//		Instead the GetTexture function should ask the instance which texture to use based on the state of the instance.
+		//		This means that the mpAsset holds a list of textures for every possible state of the instance, and can choose whichever one is necessary based on the passed in texture number.
+		//		This also means that animation is done by swapping out which texture is used. This means that all textures must use the same texture coordinates, which causes problems in two ways:
+		//			1.	Texture sheets with multiple textures crammed into one sheet for efficiency (eg. numbers 0-9 all squeezed into one image for scoreboard usage) can not be used
+		//				since that requires being able to specify texture coordinates on the fly.
+		//			2.	If the instance's shape changes (eg. a crumpled car fender), the texture map may no longer matches the shape of the object, and display incorrectly stretched or squeezed textures.
+		//		There are two losses that occur by not remedying this:
+		//			1.	Efficiency. Texture swapping is usually less efficient than specifying new texture coordinates.
+		//			2.	Changing a model's shape requires changing texture coordinates as well, so this cannot be done.
+		//		Thankfully, loss #2 is the only loss that mandates fixing this problem, and loss #2 only occurs in soft body physics systems, which aren't implemented at all yet.
+		//		In order to convert the current system into a soft body complient system:
+		//		Make the assets "masters" that represent initial state of an object, and make the instances not instances, but rather individual assets themselves.
+		//		This way the individual assets can each have their own vertex coordinates, allowing for crumpling (soft body physics), as well as their own texture and colour coordinates to go along with the vertex coordinates, for on the fly updating.
+		//		This is because every "instance" in a soft body physics system is its own asset, since no two instances are alike, compared to rigid body physics where two objects (eg. a coffee mug) are identical, with the exception of SRT (scale, rotation and translation), because their model and texture/colour are the same.
 	}
 	// VAO
 	glBindVertexArray(mpAsset->GetVao());

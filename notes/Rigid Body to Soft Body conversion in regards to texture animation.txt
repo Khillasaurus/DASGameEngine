@@ -1,0 +1,10 @@
+every asset loads all the textures used upon initialization
+every asset holds a textureCount variable
+every instance has a currentTexture variable which must be <= textureCount
+the reason I use the term currentTexture instead of state is because the state of an object does not necessarily equte to the animation frame necessary.
+	(eg. falling state, but a separate "texture" (kinda-ish) for left side and right side in a 2D system. (bad example, I know, but you get the point)).
+
+it is ok to keep ModelAsset and ModelInstance, because those are the correct solution for rigid body physics
+"Class Name" will be made later on by me in order to account for soft body physics.
+A "Class Name" will effectively be a ModelAsset and a Model Instance combined, before any changes are applied.
+Possible class name: Entity
