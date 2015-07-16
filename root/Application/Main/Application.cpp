@@ -468,10 +468,10 @@ void Application::Input()
 	//Look at origin (TOFIX)
 	else if(glfwGetKey(mpWindow, 'O'))
 	{
-		q = [cos(theta/2), sin(theta/2)n^]
-			where n^ is our axis of rotation
+		//q = [cos(theta/2), sin(theta/2)n^]
+		//	where n^ is our axis of rotation
 
-			rotation of degrees between direction vector and initial model vector (in this case camera starts at 0, 0, -1) around new up vector
+		//	rotation of degrees between direction vector and initial model vector (in this case camera starts at 0, 0, -1) around new up vector
 
 		/*
 		//Calculate the direction we want to face the camera (new forward direction, negative-z-axis)

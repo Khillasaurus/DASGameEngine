@@ -1,7 +1,7 @@
 //=============================================================================
 // File:		ModelInstance.cpp
 // Created:		2015/02/15
-// Last Edited:	2015/02/19
+// Last Edited:	2015/02/23
 // Copyright:	Daniel Schenker
 // Description:	ModelInstance
 //=============================================================================
@@ -68,8 +68,6 @@ DSGraphics::ModelInstance::~ModelInstance()
 // Public Member Functions
 //-----------------------------------------------------------------------------
 //  General
-
-//-----------------------------------------------------------------------------
 
 void DSGraphics::ModelInstance::UpdateTransform()
 {
@@ -147,6 +145,7 @@ void DSGraphics::ModelInstance::Render()
 }
 
 //-----------------------------------------------------------------------------
+//  Locomotion
 
 void DSGraphics::ModelInstance::Move(glm::vec3 displacement, float deviceCoordinatesPerMeter)
 {
@@ -165,6 +164,7 @@ void DSGraphics::ModelInstance::Spin(float radians)
 //-----------------------------------------------------------------------------
 // Private Member Functions
 //-----------------------------------------------------------------------------
+//  UpdateTransform Sub-Functions
 
 void DSGraphics::ModelInstance::UpdateScale()
 {
